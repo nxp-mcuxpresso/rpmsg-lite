@@ -1,0 +1,22 @@
+/*!
+@defgroup rpmsg_lite RPMsg-Lite Core Component
+@brief This section describes the RPMsg-Lite core component that allows:
+- Callback based reception.
+- Blocking send functionality.
+- Zero-copy send functionality.
+*/
+
+/*!
+@defgroup rpmsg_queue RPMsg Queue Component
+@brief This section describes the RPMsg Queue component that allows:
+- Blocking reception.
+- Zero-copy blocking reception.
+*/
+
+/*!
+@defgroup rpmsg_ns RPMsg Name Service Component
+@brief This section describes the RPMsg Name Service component that allows:
+- Transmission of named endpoint creation and deletion announcement.
+- Reception of the announcements.
+*/
+
