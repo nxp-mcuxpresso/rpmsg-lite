@@ -30,85 +30,88 @@
 #define _MACHINE_SYSTEM_H
 
 /* RPMSG MU channel index */
-#define RPMSG_MU_CHANNEL (1)
+#define RPMSG_MU_CHANNEL            (1)
 
 /*
  * Linux requires the ALIGN to 0x1000(4KB) instead of 0x80
  */
 #ifndef VRING_ALIGN
-#define VRING_ALIGN 0x1000
+#define VRING_ALIGN                       0x1000
+#endif
+
+/* contains pool of descriptos and two circular buffers */
+#ifndef VRING_SIZE
+#define VRING_SIZE (0x8000)
 #endif
 
 /*
  * Linux has a different alignment requirement, and its have 512 buffers instead of 32 buffers for the 2 ring
  */
-#ifndef VRING0_BASE
-#define VRING0_BASE 0xBFFF0000
-#endif
+//#ifndef VRING0_BASE
+//#define VRING0_BASE                       0xBFFF0000
+//#endif
 
-#ifndef VRING1_BASE
-#define VRING1_BASE 0xBFFF8000
-#endif
+//#ifndef VRING1_BASE
+//#define VRING1_BASE                       0xBFFF8000
+//#endif
+
+
+/* size of shared memory + 2*VRING size */
+#define RL_VRING_OVERHEAD (2*VRING_SIZE)
+
+#define RL_GET_VQ_ID(core_id, queue_id) (((queue_id) & 0x1) | (((core_id) << 2) & 0xFFFFFFFE))
+#define RL_GET_CORE_ID(id) (((id) & 0xFFFFFFFE) >> 2)
+#define RL_GET_Q_ID(id) ((id) & 0x1)
+
+#define RL_PLATFORM_IMX6SX_M4_LINK_ID (0)
+#define RL_PLATFORM_HIGHEST_CORE_ID (0)
 
 /* IPI_VECT here defines VRING index in MU */
-#define VRING0_IPI_VECT 0
-#define VRING1_IPI_VECT 1
+//#define VRING0_IPI_VECT                   0
+//#define VRING1_IPI_VECT                   1
 
-#define MASTER_CPU_ID 0
-#define REMOTE_CPU_ID 1
+//#define MASTER_CPU_ID                     0
+//#define REMOTE_CPU_ID                     1
 
 /*
  * 32 MSG (16 rx, 16 tx), 512 bytes each, it is only used when RPMSG driver is working in master mode, otherwise
  * the share memory is managed by the other side.
  * When working with Linux, SHM_ADDR and SHM_SIZE is not used
  */
-#define SHM_ADDR (0)
-#define SHM_SIZE (0)
+//#define SHM_ADDR                    (0)
+//#define SHM_SIZE                    (0)
+
 
 /* Memory barrier */
 #if (defined(__CC_ARM))
 #define MEM_BARRIER() __schedule_barrier()
-#elif(defined(__GNUC__))
+#elif (defined(__GNUC__))
 #define MEM_BARRIER() asm volatile("dsb" : : : "memory")
 #else
 #define MEM_BARRIER()
 #endif
 
-static inline unsigned int xchg(void *plock, unsigned int lockVal)
-{
-    volatile unsigned int tmpVal = 0;
-    volatile unsigned int tmpVal1 = 0;
-
-#if defined(__GNUC__) && !defined(__CC_ARM)
-
-    asm(
-        "1:                                \n\t"
-        "LDREX  %[tmpVal], [%[plock]]      \n\t"
-        "STREX  %[tmpVal1], %[lockVal], [%[plock]] \n\t"
-        "CMP    %[tmpVal1], #0                     \n\t"
-        "BNE    1b                         \n\t"
-        "DMB                               \n\t"
-        : [tmpVal] "=&r"(tmpVal)
-        : [tmpVal1] "r"(tmpVal1), [lockVal] "r"(lockVal), [plock] "r"(plock)
-        : "cc", "memory");
-
-#endif
-
-    return tmpVal;
-}
-
-void platform_time_delay(int num_msec);
-int platform_in_isr(void);
-int platform_interrupt_enable(unsigned int vector_id, unsigned int trigger_type, unsigned int priority);
+/* platform interrupt related functions */
+int platform_init_interrupt(int vector_id, void* isr_data);
+int platform_deinit_interrupt(int vector_id);
+int platform_interrupt_enable(unsigned int vector_id);
 int platform_interrupt_disable(unsigned int vector_id);
 void platform_interrupt_enable_all(void);
 void platform_interrupt_disable_all(void);
+int platform_in_isr(void);
+void platform_notify(int vector_id);
+
+/* platform low-level time-delay (busy loop) */
+void platform_time_delay(int num_msec);
+
+/* platform memory functions */
 void platform_map_mem_region(unsigned int va, unsigned int pa, unsigned int size, unsigned int flags);
 void platform_cache_all_flush_invalidate(void);
 void platform_cache_disable(void);
 unsigned long platform_vatopa(void *addr);
 void *platform_patova(unsigned long addr);
-void platform_isr(int vect_id, void *data);
+
+/* platform init/deinit */
 int platform_init(void);
 int platform_deinit(void);
 void rpmsg_handler(void);
