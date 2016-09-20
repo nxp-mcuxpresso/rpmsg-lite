@@ -112,7 +112,7 @@ int rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
 //! @}
 
 #if defined(__cplusplus)
-extern "C" {
+}
 #endif
 
 #endif /* _RPMSG_NS_H */
