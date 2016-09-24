@@ -1,15 +1,15 @@
-RPMsg Component                         {#mainpage}
+RPMsg Component
 ===============
 
 This documentation describes the RPMsg-Lite component which is a lightweight implementation of the Remote Processor Messaging (RPMsg) protocol. The RPMsg protocol defines a standardized binary interface used to communicate between multiple cores in a heterogeneous multicore system.
 
 Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (OpenAMP) framework (https://github.com/OpenAMP/open-amp), the RPMsg-Lite offers a code size reduction, API simplification and improved modularity. On smaller Cortex-M0+ based systems, it is recommended to use RPMsg-Lite.
 
-The RPMsg-Lite is an open-source component developed by NXP Semiconductor and released under the BSD compatible licence.
+The RPMsg-Lite is an open-source component developed by NXP Semiconductor and released under the BSD compatible license.
 
 For Further documentation, please look at doxygen documentation at: https://nxpmicro.github.io/rpmsg-lite/
 
-# Motivation to create RPMsg-Lite {#motivation}
+# Motivation to create RPMsg-Lite
 
 There are multiple reasons why RPMsg-Lite was developed. One of them is the need for small footprint RPMsg protocol compatible communication component, another is a simplification of extensive API of OpenAMP RPMsg implementation.
 
@@ -17,7 +17,7 @@ Until recently, RPMsg protocol was not documented and its only definition was gi
 
 Small MCU-based systems often do not implement dynamic memory allocation. The creation of static API in RPMsg-Lite enables another reduction of resource usage. Not only the dynamic allocation adds another 5kB of code size, but also the communication is slower and less deterministic, which is a property introduced by dynamic memory. Following table shows some rough comparison data between the OpenAMP RPMsg implementation and new RPMsg-Lite implementation:
 
-|Component / Configugration                   | Flash [B] |RAM [B]        |
+|Component / Configuration                   | Flash [B] |RAM [B]        |
 |---------------------------------------------|-----------|---------------|
 |OpenAMP RPMSG / Release (reference)          | 5547      | 456 + dynamic |
 |RPMSG-Lite / Dynamic API, Release            | 3462      | 56 + dynamic  |
@@ -25,7 +25,7 @@ Small MCU-based systems often do not implement dynamic memory allocation. The cr
 |RPMSG-Lite / Static API (no malloc), Release | 2926      | 352           |
 |Relative Difference [%]                      | ~52.7%    | ~77.2%        |
 
-# Implementation {#implementation}
+# Implementation
 
 The implementation of RPMsg-Lite can be divided into three sub-components, from which two are optional. The core component is situated in <i>rpmsg_lite.c</i>. Two optional components are used to implement a blocking receive API (in <i>rpmsg_queue.c</i>) and dynamic "named" endpoint creation and deletion announcement service (in <i>rpmsg_ns.c</i>).
 
@@ -35,21 +35,21 @@ The porting layer is split into two sub-layers: the environment layer and the pl
 
 ![RPMsg-Lite Architecture](./doxygen/images/rpmsg_lite_arch.png)
 
-## RPMsg-Lite core sub-component {#rpmsg_lite_core}
+## RPMsg-Lite core sub-component
 
 This sub-component implements a blocking send API and callback-based receive API. RPMsg protocol is part of the transport layer. This is realized by using so-called endpoints. Each endpoint can be assigned a different receive callback function. It is however important to notice, that the callback is executed in an interrupt environment in current design. Certain actions like memory allocation is therefore discouraged to execute in the callback. Following figure shows the role of RPMsg in an ISO/OSI-like layered model:
 
 ![RPMsg ISO/OSI Layered Model](./doxygen/images/rpmsg_isoosi.png)
 
-## Queue sub-component (optional) {#rpmsg_queue}
+## Queue sub-component (optional)
 
-This sub-component is optional and it requires to implement env_*_queue() functions in the environment porting layer. It brings a blocking receive API which is common in RTOS-environments. It supports both copy and nocopy blocking receive functions.
+This sub-component is optional and it requires to implement env_*_queue() functions in the environment porting layer. It brings a blocking receive API which is common in RTOS-environments. It supports both copy and no-copy blocking receive functions.
 
-## Name Service sub-component (optional) {#rpmsg_nameservice}
+## Name Service sub-component (optional)
 
 This sub-component is a minimum implementation of the name service which is present in the Linux Kernel implementation of RPMsg. It allows the communicating node both to send announcements about "named" endpoint (a.k.a channel) creation or deletion and to receive these announcement taking any user-defined action in an application callback. The endpoint address used to receive name service announcements is arbitrarily fixed to be 53 (0x35).
 
-# Usage {#usage}
+# Usage
 
 Your application should put the /rpmsg_lite/lib/include directory to the include path and then, in the application include either just rpmsg_lite.h header file, or optionally also rpmsg_queue.h and/or rpmsg_ns.h. Both porting sub-layers should be provided for you by NXP, but if you plan to use your own RTOS, all you need to do is to implement your own environment layer (i.e. env_myrtos.c) and to include it in the project build.
 
@@ -77,14 +77,8 @@ The user is responsible for destroying any RPMsg-Lite objects he has created in 
 ![RPMsg Lite copy and no-copy interface, multiple scenarios](./doxygen/images/rpmsg_lite_send_receive.png)
 
 
-# References {#references}
+# References
 [1] M. Novak, M. Cingel, Lockless Shared Memory Based Multicore Communication Protocol
 
-# Revision History {#revision_history}
-
-This table summarizes revisions of this document.
-
-|Revision number| Date    |Substantive changes                       |
-|---------------|---------|------------------------------------------|
-|1.0            | 09/2016 | Initial release                          |
-
+---
+Copyright © 2016 Freescale Semiconductor, Inc.
