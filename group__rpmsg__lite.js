@@ -1,13 +1,5 @@
 var group__rpmsg__lite =
 [
-    [ "rpmsg_std_hdr", "group__rpmsg__lite.html#structrpmsg__std__hdr", [
-      [ "src", "group__rpmsg__lite.html#a2d411d16525f2a5e0e92af4b26a8e47d", null ],
-      [ "dst", "group__rpmsg__lite.html#ae10f03cc90deff8edd8101d3994c4a3f", null ],
-      [ "reserved", "group__rpmsg__lite.html#aa32197701dd663009dfe318f17add441", null ],
-      [ "len", "group__rpmsg__lite.html#a17b2a148630cf2742783ade908caaa49", null ],
-      [ "flags", "group__rpmsg__lite.html#afc69f212769f23308c995845f45fa57c", null ],
-      [ "data", "group__rpmsg__lite.html#ad1bc4059745ef721bdc0b1ec6ad49c44", null ]
-    ] ],
     [ "rpmsg_ns_handle", "group__rpmsg__lite.html#structrpmsg__lite__endpoint", [
       [ "addr", "group__rpmsg__lite.html#a46dae43ac5b6658a933b13d5a121ccb4", null ],
       [ "rx_cb", "group__rpmsg__lite.html#ad679d3da51d5e6dcda6201c7e4a5291f", null ],
@@ -31,8 +23,8 @@ var group__rpmsg__lite =
     ] ],
     [ "RL_VERSION", "group__rpmsg__lite.html#ga96a544c91ab6dd353867256e1deb9917", null ],
     [ "rl_ept_rx_cb_t", "group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a", null ],
-    [ "rpmsg_lite_master_init", "group__rpmsg__lite.html#gacc82c4747d7602dad76a69bb28e7bb1f", null ],
-    [ "rpmsg_lite_remote_init", "group__rpmsg__lite.html#ga7752ba814240a62194302b6409d0bdf5", null ],
+    [ "rpmsg_lite_master_init", "group__rpmsg__lite.html#ga6ceae6c968214f8aa26be31ff1f4fc58", null ],
+    [ "rpmsg_lite_remote_init", "group__rpmsg__lite.html#gaf6d18dec47cdd58d56505e39cf010991", null ],
     [ "rpmsg_lite_deinit", "group__rpmsg__lite.html#gaf206cb6dd21a08b56495e02045afd364", null ],
     [ "rpmsg_lite_create_ept", "group__rpmsg__lite.html#gaf9bf28acdd0143208f6e160dbb879fd3", null ],
     [ "rpmsg_lite_destroy_ept", "group__rpmsg__lite.html#gae48a5cce278d2b4dd73415ba3e1fb74e", null ],

@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['sh_5fmem_5fbase',['sh_mem_base',['../group__rpmsg__lite.html#a79ea96087bf1897ccfd3eb2bccf2d78b',1,'rpmsg_lite_instance']]],
-  ['sh_5fmem_5fremaining',['sh_mem_remaining',['../group__rpmsg__lite.html#ab2ce5bdfa263cdffc6563997e25acd50',1,'rpmsg_lite_instance']]],
-  ['sh_5fmem_5ftotal',['sh_mem_total',['../group__rpmsg__lite.html#a17ae507517bfe8f585893b5f61b953f6',1,'rpmsg_lite_instance']]],
-  ['src',['src',['../group__rpmsg__lite.html#a2d411d16525f2a5e0e92af4b26a8e47d',1,'rpmsg_std_hdr']]]
+  ['vq_5fops',['vq_ops',['../group__rpmsg__lite.html#a0004491e023ed2e999182ba302fa32e5',1,'rpmsg_lite_instance']]]
 ];

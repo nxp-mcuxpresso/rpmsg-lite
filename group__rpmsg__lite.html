@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 1.0</span>
+   &#160;<span id="projectnumber">Rev. 1.1</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -121,8 +121,6 @@ $(document).ready(function(){initNavTree('group__rpmsg__lite.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:structrpmsg__std__hdr"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__std__hdr">rpmsg_std_hdr</a></td></tr>
-<tr class="separator:structrpmsg__std__hdr"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:structrpmsg__lite__endpoint"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_ns_handle</a></td></tr>
 <tr class="separator:structrpmsg__lite__endpoint"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:structrpmsg__lite__ept__static__context"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__ept__static__context">rpmsg_ns_static_context</a></td></tr>
@@ -216,12 +214,12 @@ typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" h
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gacc82c4747d7602dad76a69bb28e7bb1f"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gacc82c4747d7602dad76a69bb28e7bb1f">rpmsg_lite_master_init</a> (void *shmem_addr, size_t shmem_length, int remote_core_id, uint32_t init_flags)</td></tr>
-<tr class="memdesc:gacc82c4747d7602dad76a69bb28e7bb1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API. To be called by the master side.  <a href="#gacc82c4747d7602dad76a69bb28e7bb1f">More...</a><br /></td></tr>
-<tr class="separator:gacc82c4747d7602dad76a69bb28e7bb1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7752ba814240a62194302b6409d0bdf5"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga7752ba814240a62194302b6409d0bdf5">rpmsg_lite_remote_init</a> (void *shmem_addr, int master_core_id, uint32_t init_flags)</td></tr>
-<tr class="memdesc:ga7752ba814240a62194302b6409d0bdf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API. To be called by the remote side.  <a href="#ga7752ba814240a62194302b6409d0bdf5">More...</a><br /></td></tr>
-<tr class="separator:ga7752ba814240a62194302b6409d0bdf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga6ceae6c968214f8aa26be31ff1f4fc58">rpmsg_lite_master_init</a> (void *shmem_addr, size_t shmem_length, int link_id, uint32_t init_flags)</td></tr>
+<tr class="memdesc:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API. To be called by the master side.  <a href="#ga6ceae6c968214f8aa26be31ff1f4fc58">More...</a><br /></td></tr>
+<tr class="separator:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf6d18dec47cdd58d56505e39cf010991"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaf6d18dec47cdd58d56505e39cf010991">rpmsg_lite_remote_init</a> (void *shmem_addr, int link_id, uint32_t init_flags)</td></tr>
+<tr class="memdesc:gaf6d18dec47cdd58d56505e39cf010991"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API. To be called by the remote side.  <a href="#gaf6d18dec47cdd58d56505e39cf010991">More...</a><br /></td></tr>
+<tr class="separator:gaf6d18dec47cdd58d56505e39cf010991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf206cb6dd21a08b56495e02045afd364"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaf206cb6dd21a08b56495e02045afd364">rpmsg_lite_deinit</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
 <tr class="memdesc:gaf206cb6dd21a08b56495e02045afd364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinitialized the RPMsg-Lite communication stack This function always succeeds. rpmsg_lite_init() can be called again after this function has been called.  <a href="#gaf206cb6dd21a08b56495e02045afd364">More...</a><br /></td></tr>
 <tr class="separator:gaf206cb6dd21a08b56495e02045afd364"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -248,64 +246,6 @@ Functions</h2></td></tr>
 <tr class="separator:ga0b73b2e4fea12db016eba6b9ffa80861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
-<a name="structrpmsg__std__hdr" id="structrpmsg__std__hdr"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct rpmsg_std_hdr</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<div class="textblock"><p>Common header for all rpmsg messages. Every message sent/received on the rpmsg bus begins with this header. </p>
-</div><table class="fieldtable">
-<tr><th colspan="3">Class Members</th></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="a2d411d16525f2a5e0e92af4b26a8e47d"></a>unsigned long</td>
-<td class="fieldname">
-src</td>
-<td class="fielddoc">
-<p>source endpoint address </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="ae10f03cc90deff8edd8101d3994c4a3f"></a>unsigned long</td>
-<td class="fieldname">
-dst</td>
-<td class="fielddoc">
-<p>destination endpoint address </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="aa32197701dd663009dfe318f17add441"></a>unsigned long</td>
-<td class="fieldname">
-reserved</td>
-<td class="fielddoc">
-<p>reserved for future use </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="a17b2a148630cf2742783ade908caaa49"></a>unsigned short</td>
-<td class="fieldname">
-len</td>
-<td class="fielddoc">
-<p>length of payload (in bytes) </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="afc69f212769f23308c995845f45fa57c"></a>unsigned short</td>
-<td class="fieldname">
-flags</td>
-<td class="fielddoc">
-<p>message flags </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a class="anchor" id="ad1bc4059745ef721bdc0b1ec6ad49c44"></a>unsigned char</td>
-<td class="fieldname">
-data[1]</td>
-<td class="fielddoc">
-<p>bytes of message payload data </p>
-</td></tr>
-</table>
-
-</div>
-</div>
 <a name="structrpmsg__lite__endpoint" id="structrpmsg__lite__endpoint"></a>
 <div class="memitem">
 <div class="memproto">
@@ -482,7 +422,7 @@ vq_ops</td>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="gacc82c4747d7602dad76a69bb28e7bb1f"></a>
+<a class="anchor" id="ga6ceae6c968214f8aa26be31ff1f4fc58"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -502,7 +442,7 @@ vq_ops</td>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>remote_core_id</em>, </td>
+          <td class="paramname"><em>link_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -523,8 +463,9 @@ vq_ops</td>
   <table class="params">
     <tr><td class="paramname">shmem_addr</td><td>Shared memory base used for this instance of RPMsg-Lite </td></tr>
     <tr><td class="paramname">shmem_length</td><td>Length of memory area given by previous parameter </td></tr>
-    <tr><td class="paramname">remote_core_id</td><td>Remote core ID, see platform.h </td></tr>
-    <tr><td class="paramname">init_flags</td><td>Initialization flags</td></tr>
+    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see platform.h </td></tr>
+    <tr><td class="paramname">init_flags</td><td>Initialization flags </td></tr>
+    <tr><td class="paramname">static_context</td><td>RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)</td></tr>
   </table>
   </dd>
 </dl>
@@ -532,7 +473,7 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="ga7752ba814240a62194302b6409d0bdf5"></a>
+<a class="anchor" id="gaf6d18dec47cdd58d56505e39cf010991"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -546,7 +487,7 @@ vq_ops</td>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>master_core_id</em>, </td>
+          <td class="paramname"><em>link_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -566,7 +507,7 @@ vq_ops</td>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">shmem_addr</td><td>Shared memory base used for this instance of RPMsg-Lite </td></tr>
-    <tr><td class="paramname">remote_core_id</td><td>Remote core ID, see platform.h </td></tr>
+    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see platform.h </td></tr>
     <tr><td class="paramname">init_flags</td><td>Initialization flags</td></tr>
   </table>
   </dd>
@@ -643,7 +584,7 @@ vq_ops</td>
     <tr><td class="paramname">addr</td><td>Desired address, RL_ADDR_ANY for automatic selection </td></tr>
     <tr><td class="paramname">rx_cb</td><td>Callback function called on receive </td></tr>
     <tr><td class="paramname">rx_cb_data</td><td>Callback data pointer, passed to rx_cb </td></tr>
-    <tr><td class="paramname">ept_context</td><td>Endpoint preallocated context, used in case of static api</td></tr>
+    <tr><td class="paramname">ept_context</td><td>Endpoint preallocated context pointer, used in case of static api (RL_USE_STATIC_API)</td></tr>
   </table>
   </dd>
 </dl>
@@ -927,7 +868,7 @@ vq_ops</td>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul class="foot">
-    <li class="footer">Copyright &copy; 2016 Freescale Semiconductor, Inc.
+    <li class="footer">&copy; 2016 NXP Semiconductors. All rights reserved.
     </li>
   </ul>
 </div>

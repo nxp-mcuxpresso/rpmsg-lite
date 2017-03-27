@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['flags',['flags',['../group__rpmsg__lite.html#afc69f212769f23308c995845f45fa57c',1,'rpmsg_std_hdr']]]
+  ['node',['node',['../group__rpmsg__lite.html#ae0c5512d3f5585158b15b0071e59b939',1,'rpmsg_lite_ept_static_context']]]
 ];
