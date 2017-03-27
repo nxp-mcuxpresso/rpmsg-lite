@@ -38,7 +38,7 @@ PROJECT_NAME           = "RPMsg-Lite User's Guide"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "Rev. 1.0"
+PROJECT_NUMBER         = "Rev. 1.1"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -785,7 +785,7 @@ INPUT                  = ../lib/include/rpmsg_lite.h \
                          ../lib/include/rpmsg_queue.h \
                          ../lib/include/rpmsg_ns.h \
                          component_groups.dox \
-                         ../README.md
+                         mainpage_rpmsg_lite.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

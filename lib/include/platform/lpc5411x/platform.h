@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -9,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of the <ORGANIZATION> nor the names of its contributors
+ * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -45,30 +47,18 @@
 /* size of shared memory + 2*VRING size */
 #define RL_VRING_OVERHEAD (2 * VRING_SIZE)
 
-#define RL_GET_VQ_ID(core_id, queue_id) (((queue_id)&0x1) | (((core_id) << 2) & 0xFFFFFFFE))
-#define RL_GET_CORE_ID(id) (((id)&0xFFFFFFFE) >> 2)
+#define RL_GET_VQ_ID(core_id, queue_id) (((queue_id)&0x1) | (((core_id) << 1) & 0xFFFFFFFE))
+#define RL_GET_LINK_ID(id) (((id)&0xFFFFFFFE) >> 1)
 #define RL_GET_Q_ID(id) ((id)&0x1)
 
-#define RL_PLATFORM_LPC5411x_M4_CORE_ID (0)
-#define RL_PLATFORM_LPC5411x_M0_CORE_ID (0)
-#define RL_PLATFORM_HIGHEST_CORE_ID (0)
-
-/* Memory barrier */
-#if (defined(__CC_ARM))
-#define MEM_BARRIER() __schedule_barrier()
-#elif(defined(__GNUC__))
-#define MEM_BARRIER() asm volatile("dsb" : : : "memory")
-#else
-#define MEM_BARRIER()
-#endif
+#define RL_PLATFORM_LPC5411x_M4_M0_LINK_ID (0)
+#define RL_PLATFORM_HIGHEST_LINK_ID (0)
 
 /* platform interrupt related functions */
 int platform_init_interrupt(int vector_id, void *isr_data);
 int platform_deinit_interrupt(int vector_id);
 int platform_interrupt_enable(unsigned int vector_id);
 int platform_interrupt_disable(unsigned int vector_id);
-void platform_interrupt_enable_all(void);
-void platform_interrupt_disable_all(void);
 int platform_in_isr(void);
 void platform_notify(int vector_id);
 

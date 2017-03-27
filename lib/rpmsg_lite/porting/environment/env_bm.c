@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright (c) 2015 Xilinx, Inc.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
- * Copyright (c) 2015 Xilinx, Inc. All rights reserved.
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -12,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of Mentor Graphics Corporation nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
@@ -45,6 +46,7 @@
 #include "env.h"
 #include "platform.h"
 #include "virtqueue.h"
+#include "compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +55,7 @@
 static int env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (2) /* Change for multiple remote cores */
+#define ISR_COUNT (10) /* Change for multiple remote cores */
                       /*!
                        * Structure to keep track of registered ISR's.
                        */
@@ -261,8 +263,7 @@ int env_create_mutex(void **lock, int count)
 {
     /* make the mutex pointer point to itself
      * this marks the mutex handle as initialized.
-     * In BM, interrupt turning on and off is used
-     * instead of mutex. */
+     */
     *lock = lock;
     return 0;
 }
@@ -285,7 +286,8 @@ void env_delete_mutex(void *lock)
  */
 void env_lock_mutex(void *lock)
 {
-    platform_interrupt_disable_all();
+    /* No mutex needed for RPMsg-Lite in BM environment,
+     * since the API is not shared with ISR context. */
 }
 
 /*!
@@ -295,7 +297,8 @@ void env_lock_mutex(void *lock)
  */
 void env_unlock_mutex(void *lock)
 {
-    platform_interrupt_enable_all();
+    /* No mutex needed for RPMsg-Lite in BM environment,
+     * since the API is not shared with ISR context. */
 }
 
 /*!
@@ -309,31 +312,9 @@ void env_sleep_msec(int num_msec)
 }
 
 /*!
- * env_disable_interrupts
- *
- * Disables system interrupts
- *
- */
-void env_disable_interrupts()
-{
-    platform_interrupt_disable_all();
-}
-
-/*!
- * env_restore_interrupts
- *
- * Enables system interrupts
- *
- */
-void env_restore_interrupts()
-{
-    platform_interrupt_enable_all();
-}
-
-/*!
  * env_register_isr
  *
- * Registers interrupt handler for the given interrupt vector.
+ * Registers interrupt handler data for the given interrupt vector.
  *
  * @param vq_id Virtual interrupt vector number
  * @param data Interrupt handler data (virtqueue)
@@ -344,6 +325,22 @@ void env_register_isr(int vq_id, void *data)
     if (vq_id < ISR_COUNT)
     {
         isr_table[vq_id].data = data;
+    }
+}
+
+/*!
+ * env_unregister_isr
+ *
+ * Unregisters interrupt handler data for the given interrupt vector.
+ *
+ * @param vector_id - virtual interrupt vector number
+ */
+void env_unregister_isr(int vector_id)
+{
+    assert(vector_id < ISR_COUNT);
+    if (vector_id < ISR_COUNT)
+    {
+        isr_table[vector_id].data = NULL;
     }
 }
 

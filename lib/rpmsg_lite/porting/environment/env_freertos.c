@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright (c) 2015 Xilinx, Inc.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
- * Copyright (c) 2015 Xilinx, Inc. All rights reserved.
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -12,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of Mentor Graphics Corporation nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
@@ -48,15 +49,17 @@
 #include "semphr.h"
 #include "platform.h"
 #include "virtqueue.h"
+#include "compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
 static int env_init_counter = 0;
+SemaphoreHandle_t env_sema = NULL;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (2)
+#define ISR_COUNT (10)
 /*!
  * Structure to keep track of registered ISR's.
  */
@@ -85,17 +88,40 @@ int env_in_isr(void)
  */
 int env_init(void)
 {
+    int retval;
+    vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
     assert(env_init_counter >= 0);
     if (env_init_counter < 0)
+    {
+        xTaskResumeAll(); /* re-enable scheduler */
         return -1;
+    }
     env_init_counter++;
     // multiple call of 'env_init' - return ok
-    if (1 < env_init_counter)
+    if (env_init_counter <= 1)
+    {
+        // first call
+        env_sema = xSemaphoreCreateBinary();
+        memset(isr_table, 0, sizeof(isr_table));
+        xTaskResumeAll();
+        retval = platform_init();
+        xSemaphoreGive(env_sema);
+
+        return retval;
+    }
+    else
+    {
+        xTaskResumeAll();
+        /* Get the semaphore and then return it,
+         * this allows for platform_init() to block
+         * if needed and other tasks to wait for the
+         * blocking to be done.
+         * This is in ENV layer as this is ENV specific.*/
+        xSemaphoreTake(env_sema, portMAX_DELAY);
+        xSemaphoreGive(env_sema);
         return 0;
-    // first call
-    memset(isr_table, 0, sizeof(isr_table));
-    return platform_init();
+    }
 }
 
 /*!
@@ -107,18 +133,36 @@ int env_init(void)
  */
 int env_deinit(void)
 {
+    int retval;
+
+    vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
     assert(env_init_counter > 0);
     if (env_init_counter <= 0)
+    {
+        xTaskResumeAll(); /* re-enable scheduler */
         return -1;
+    }
+
     // counter on zero - call platform deinit
     env_init_counter--;
     // multiple call of 'env_deinit' - return ok
-    if (0 < env_init_counter)
+    if (env_init_counter <= 0)
+    {
+        // last call
+        memset(isr_table, 0, sizeof(isr_table));
+        retval = platform_deinit();
+        vSemaphoreDelete(env_sema);
+        env_sema = NULL;
+        xTaskResumeAll();
+
+        return retval;
+    }
+    else
+    {
+        xTaskResumeAll();
         return 0;
-    // last call
-    memset(isr_table, 0, sizeof(isr_table));
-    return platform_deinit();
+    }
 }
 
 /*!
@@ -294,7 +338,6 @@ void env_lock_mutex(void *lock)
     if (!env_in_isr())
     {
         xSemaphoreTake(xSemaphore, portMAX_DELAY);
-        platform_interrupt_disable_all();
     }
 }
 
@@ -308,7 +351,6 @@ void env_unlock_mutex(void *lock)
     SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
     if (!env_in_isr())
     {
-        platform_interrupt_enable_all();
         xSemaphoreGive(xSemaphore);
     }
 }
@@ -389,31 +431,9 @@ void env_sleep_msec(int num_msec)
 }
 
 /*!
- * env_disable_interrupts
- *
- * Disables system interrupts
- *
- */
-void env_disable_interrupts(void)
-{
-    platform_interrupt_disable_all();
-}
-
-/*!
- * env_restore_interrupts
- *
- * Enables system interrupts
- *
- */
-void env_restore_interrupts(void)
-{
-    platform_interrupt_enable_all();
-}
-
-/*!
  * env_register_isr
  *
- * Registers interrupt handler for the given interrupt vector.
+ * Registers interrupt handler data for the given interrupt vector.
  *
  * @param vector_id - virtual interrupt vector number
  * @param data      - interrupt handler data (virtqueue)
@@ -424,6 +444,22 @@ void env_register_isr(int vector_id, void *data)
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = data;
+    }
+}
+
+/*!
+ * env_unregister_isr
+ *
+ * Unregisters interrupt handler data for the given interrupt vector.
+ *
+ * @param vector_id - virtual interrupt vector number
+ */
+void env_unregister_isr(int vector_id)
+{
+    assert(vector_id < ISR_COUNT);
+    if (vector_id < ISR_COUNT)
+    {
+        isr_table[vector_id].data = NULL;
     }
 }
 
@@ -567,7 +603,7 @@ void env_delete_queue(void *queue)
 
 int env_put_queue(void *queue, void *msg, int timeout_ms)
 {
-    BaseType_t xHigherPriorityTaskWoken;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr())
     {
         if (xQueueSendFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
@@ -601,7 +637,7 @@ int env_put_queue(void *queue, void *msg, int timeout_ms)
 
 int env_get_queue(void *queue, void *msg, int timeout_ms)
 {
-    BaseType_t xHigherPriorityTaskWoken;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr())
     {
         if (xQueueReceiveFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)

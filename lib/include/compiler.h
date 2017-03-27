@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
- * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
  * All rights reserved.
@@ -30,48 +29,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _RPMSG_DEFAULT_CONFIG_H
-#define _RPMSG_DEFAULT_CONFIG_H
+/**************************************************************************
+ * FILE NAME
+ *
+ *       compiler.h
+ *
+ * DESCRIPTION
+ *
+ *       This file defines compiler-specific macros.
+ *
+ ***************************************************************************/
+#ifndef _COMPILER_H_
+#define _COMPILER_H_
 
-#define RL_USE_CUSTOM_CONFIG (1)
+/* IAR ARM build tools */
+#if defined(__ICCARM__)
 
-#if RL_USE_CUSTOM_CONFIG
-#include "rpmsg_config.h"
+#include <intrinsics.h>
+
+#define MEM_BARRIER() __DSB()
+
+#ifndef RL_PACKED_BEGIN
+#define RL_PACKED_BEGIN __packed
 #endif
 
-/* default values */
-/* START { */
-#ifndef RL_MS_PER_INTERVAL
-#define RL_MS_PER_INTERVAL (1)
+#ifndef RL_PACKED_END
+#define RL_PACKED_END
 #endif
 
-#ifndef RL_BUFFER_PAYLOAD_SIZE
-#define RL_BUFFER_PAYLOAD_SIZE (512)
+/* GNUC */
+#elif defined(__GNUC__)
+
+#define MEM_BARRIER() asm volatile("dsb" : : : "memory")
+
+#ifndef RL_PACKED_BEGIN
+#define RL_PACKED_BEGIN
 #endif
 
-#ifndef RL_BUFFER_COUNT
-#define RL_BUFFER_COUNT (2)
+#ifndef RL_PACKED_END
+#define RL_PACKED_END __attribute__((__packed__))
 #endif
 
-#ifndef RL_API_HAS_ZEROCOPY
-#define RL_API_HAS_ZEROCOPY (1)
+/* ARM GCC */
+#elif defined(__CC_ARM)
+
+#define MEM_BARRIER() __schedule_barrier()
+
+#ifndef RL_PACKED_BEGIN
+#define RL_PACKED_BEGIN _Pragma("pack(1U)")
 #endif
 
-#ifndef RL_USE_STATIC_API
-#define RL_USE_STATIC_API (0)
+#ifndef RL_PACKED_END
+#define RL_PACKED_END _Pragma("pack()")
 #endif
 
-#ifndef RL_ASSERT
-#define RL_ASSERT(x)  \
-    do                \
-    {                 \
-        if (!x)       \
-            while (1) \
-                ;     \
-    } while (0);
+#else
+/* There is no default definition here to avoid wrong structures packing in case of not supported compiler */
+#error Please implement the structure packing macros for your compiler here!
 #endif
-/* } END */
 
-#define RPMSG_BUFFER_COUNT (RL_BUFFER_COUNT)
-
-#endif /* _RPMSG_DEFAULT_CONFIG_H */
+#endif /* _COMPILER_H_ */

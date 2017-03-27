@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright (c) 2015 Xilinx, Inc.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
- * Copyright (c) 2015 Xilinx, Inc. All rights reserved.
- * Copyright 2016 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -12,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of Mentor Graphics Corporation nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
@@ -40,6 +41,7 @@ extern "C" {
 #include "virtqueue.h"
 #include "env.h"
 #include "llist.h"
+#include "compiler.h"
 
 //! @addtogroup rpmsg_lite
 //! @{
@@ -48,7 +50,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "1.0.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "1.1.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(unsigned long))
@@ -85,27 +87,6 @@ extern "C" {
 
 /* Init flags */
 #define RL_NO_FLAGS (0)
-
-#if defined(__IAR_SYSTEMS_ICC__)
-__packed
-#endif
-    /*!
-     * Common header for all rpmsg messages.
-     * Every message sent/received on the rpmsg bus begins with this header.
-     */
-    struct rpmsg_std_hdr
-{
-    unsigned long src;      /*!< source endpoint address */
-    unsigned long dst;      /*!< destination endpoint address */
-    unsigned long reserved; /*!< reserved for future use */
-    unsigned short len;     /*!< length of payload (in bytes) */
-    unsigned short flags;   /*!< message flags */
-    unsigned char data[1];  /*!< bytes of message payload data */
-#if defined(__IAR_SYSTEMS_ICC__)
-};
-#else
-} __attribute__((packed));
-#endif
 
 /*! \typedef rl_ept_rx_cb_t
     \brief Receive callback function type.
@@ -169,22 +150,23 @@ struct rpmsg_lite_instance
  *
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
  * @param shmem_length     Length of memory area given by previous parameter
- * @param remote_core_id   Remote core ID, see platform.h
+ * @param link_id          Link ID used to define the rpmsg-lite instance, see platform.h
  * @param init_flags       Initialization flags
- *
+ * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
+*
  * @return  New RPMsg-Lite instance pointer or NULL.
  *
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                                                    size_t shmem_length,
-                                                   int remote_core_id,
+                                                   int link_id,
                                                    uint32_t init_flags,
                                                    struct rpmsg_lite_instance *static_context);
 #else
 struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                                                    size_t shmem_length,
-                                                   int remote_core_id,
+                                                   int link_id,
                                                    uint32_t init_flags);
 #endif
 
@@ -194,7 +176,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
  * To be called by the remote side.
  *
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
- * @param remote_core_id   Remote core ID, see platform.h
+ * @param link_id          Link ID used to define the rpmsg-lite instance, see platform.h
  * @param init_flags       Initialization flags
  *
  * @return  New RPMsg-Lite instance pointer or NULL.
@@ -202,11 +184,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
-                                                   int master_core_id,
+                                                   int link_id,
                                                    uint32_t init_flags,
                                                    struct rpmsg_lite_instance *static_context);
 #else
-struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_core_id, uint32_t init_flags);
+struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags);
 #endif
 
 /*!
@@ -230,7 +212,7 @@ int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev);
  * @param addr              Desired address, RL_ADDR_ANY for automatic selection
  * @param rx_cb             Callback function called on receive
  * @param rx_cb_data        Callback data pointer, passed to rx_cb
- * @param ept_context       Endpoint preallocated context, used in case of static api
+ * @param ept_context       Endpoint preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
  *
  * @return RL_NULL on error, new endpoint pointer on success.
  *

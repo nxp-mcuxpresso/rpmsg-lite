@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright (c) 2015 Xilinx, Inc.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
- * Copyright (c) 2015 Xilinx, Inc. All rights reserved.
- * Copyright 2016 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -12,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of Mentor Graphics Corporation nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
@@ -31,6 +32,32 @@
 
 #include "rpmsg_lite.h"
 #include "platform.h"
+#include "env.h"
+
+RL_PACKED_BEGIN
+/*!
+ * Common header for all rpmsg messages.
+ * Every message sent/received on the rpmsg bus begins with this header.
+ */
+struct rpmsg_std_hdr
+{
+    unsigned long src;      /*!< source endpoint address */
+    unsigned long dst;      /*!< destination endpoint address */
+    unsigned long reserved; /*!< reserved for future use */
+    unsigned short len;     /*!< length of payload (in bytes) */
+    unsigned short flags;   /*!< message flags */
+} RL_PACKED_END;
+
+RL_PACKED_BEGIN
+/*!
+ * Common message structure.
+ * Contains the header and the payload.
+ */
+struct rpmsg_std_msg
+{
+    struct rpmsg_std_hdr hdr; /*!< RPMsg message header */
+    unsigned char data[1];    /*!< bytes of message payload data */
+} RL_PACKED_END;
 
 /* rpmsg_std_hdr contains a reserved field,
  * this implementation of RPMSG uses this reserved
@@ -41,8 +68,8 @@
  */
 struct rpmsg_hdr_reserved
 {
+    unsigned short rfu; /* reserved for future usage */
     unsigned short idx;
-    unsigned short totlen;
 };
 
 /* Interface which is used to interact with the virtqueue layer,
@@ -58,7 +85,9 @@ struct virtqueue_ops
 };
 
 /* Zero-Copy extension macros */
-#define RPMSG_STD_HDR_FROM_BUF(buf) (struct rpmsg_std_hdr *)((char *)buf - offsetof(struct rpmsg_std_hdr, data))
+#define RPMSG_STD_MSG_FROM_BUF(buf) (struct rpmsg_std_msg *)((char *)buf - offsetof(struct rpmsg_std_msg, data))
+
+#define RL_BUFFER_SIZE (RL_BUFFER_PAYLOAD_SIZE + sizeof(struct rpmsg_std_hdr))
 
 /*!
  * @brief
@@ -108,7 +137,7 @@ struct llist *rpmsg_lite_get_endpoint_from_addr(struct rpmsg_lite_instance *rpms
  */
 static void rpmsg_lite_rx_callback(struct virtqueue *vq)
 {
-    struct rpmsg_std_hdr *rpmsg_hdr;
+    struct rpmsg_std_msg *rpmsg_msg;
     unsigned long len;
     unsigned short idx;
     struct rpmsg_lite_endpoint *ept;
@@ -120,30 +149,29 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
     RL_ASSERT(rpmsg_lite_dev != NULL);
 
     /* Process the received data from remote node */
-    rpmsg_hdr = (struct rpmsg_std_hdr *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
+    rpmsg_msg = (struct rpmsg_std_msg *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
 
-    while (rpmsg_hdr)
+    while (rpmsg_msg)
     {
-        node = rpmsg_lite_get_endpoint_from_addr(rpmsg_lite_dev, rpmsg_hdr->dst);
+        node = rpmsg_lite_get_endpoint_from_addr(rpmsg_lite_dev, rpmsg_msg->hdr.dst);
 
         cb_ret = RL_RELEASE;
         if (node != RL_NULL)
         {
             ept = (struct rpmsg_lite_endpoint *)node->data;
-            cb_ret = ept->rx_cb(rpmsg_hdr->data, rpmsg_hdr->len, rpmsg_hdr->src, ept->rx_cb_data);
+            cb_ret = ept->rx_cb(rpmsg_msg->data, rpmsg_msg->hdr.len, rpmsg_msg->hdr.src, ept->rx_cb_data);
         }
 
         if (cb_ret == RL_HOLD)
         {
-            rsvd = (struct rpmsg_hdr_reserved *)&rpmsg_hdr->reserved;
+            rsvd = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
             rsvd->idx = idx;
-            rsvd->totlen = len;
         }
         else
         {
-            rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_hdr, len, idx);
+            rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_msg, len, idx);
         }
-        rpmsg_hdr = (struct rpmsg_std_hdr *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
+        rpmsg_msg = (struct rpmsg_std_msg *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
     }
 }
 
@@ -173,7 +201,6 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
             #
  In case this processor has the REMOTE role
 *****************************************************************************/
-
 /*!
  * @brief
  * Places buffer on the virtqueue for consumption by the other side.
@@ -273,14 +300,8 @@ static void vq_rx_free_remote(struct virtqueue *rvq, void *buffer, unsigned long
  */
 static void vq_tx_master(struct virtqueue *tvq, void *buffer, unsigned long len, unsigned short idx)
 {
-    struct llist node;
     int status;
-    /* Initialize buffer node */
-    node.data = buffer;
-    node.attr = len;
-    node.next = RL_NULL;
-    node.prev = RL_NULL;
-    status = virtqueue_add_buffer(tvq, &node, 0, 1, buffer);
+    status = virtqueue_add_buffer(tvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
     /* As long as the length of the virtqueue ring buffer is not shorter
@@ -300,7 +321,7 @@ static void vq_tx_master(struct virtqueue *tvq, void *buffer, unsigned long len,
  */
 static void *vq_tx_alloc_master(struct virtqueue *tvq, unsigned long *len, unsigned short *idx)
 {
-    return virtqueue_get_buffer(tvq, (uint32_t *)len);
+    return virtqueue_get_buffer(tvq, (uint32_t *)len, idx);
 }
 
 /*!
@@ -316,7 +337,7 @@ static void *vq_tx_alloc_master(struct virtqueue *tvq, unsigned long *len, unsig
  */
 static void *vq_rx_master(struct virtqueue *rvq, unsigned long *len, unsigned short *idx)
 {
-    return virtqueue_get_buffer(rvq, (uint32_t *)len);
+    return virtqueue_get_buffer(rvq, (uint32_t *)len, idx);
 }
 
 /*!
@@ -330,15 +351,9 @@ static void *vq_rx_master(struct virtqueue *rvq, unsigned long *len, unsigned sh
  */
 static void vq_rx_free_master(struct virtqueue *rvq, void *buffer, unsigned long len, unsigned short idx)
 {
-    struct llist node;
     int status;
-    /* Initialize buffer node */
-    node.data = buffer;
-    node.attr = len;
-    node.next = RL_NULL;
-    node.prev = RL_NULL;
 
-    status = virtqueue_add_buffer(rvq, &node, 0, 1, buffer);
+    status = virtqueue_add_buffer(rvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
     /* As long as the length of the virtqueue ring buffer is not shorter
@@ -534,7 +549,7 @@ int rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_dev,
                               int flags,
                               unsigned long timeout)
 {
-    struct rpmsg_std_hdr *rpmsg_hdr;
+    struct rpmsg_std_msg *rpmsg_msg;
     void *buffer;
     unsigned short idx;
     unsigned long tick_count = 0;
@@ -571,16 +586,16 @@ int rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_dev,
         }
     }
 
-    rpmsg_hdr = (struct rpmsg_std_hdr *)buffer;
+    rpmsg_msg = (struct rpmsg_std_msg *)buffer;
 
     /* Initialize RPMSG header. */
-    rpmsg_hdr->dst = dst;
-    rpmsg_hdr->src = src;
-    rpmsg_hdr->len = size;
-    rpmsg_hdr->flags = flags;
+    rpmsg_msg->hdr.dst = dst;
+    rpmsg_msg->hdr.src = src;
+    rpmsg_msg->hdr.len = size;
+    rpmsg_msg->hdr.flags = flags;
 
     /* Copy data to rpmsg buffer. */
-    env_memcpy(rpmsg_hdr->data, data, size);
+    env_memcpy(rpmsg_msg->data, data, size);
 
     env_lock_mutex(rpmsg_lite_dev->lock);
     /* Enqueue buffer on virtqueue. */
@@ -603,7 +618,7 @@ int rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
         return RL_ERR_PARAM;
 
     // FIXME : may be just copy the data size equal to buffer length and Tx it.
-    if (size > (RL_BUFFER_SIZE - sizeof(struct rpmsg_std_hdr)))
+    if (size > RL_BUFFER_PAYLOAD_SIZE)
         return RL_ERR_BUFF_SIZE;
 
     return rpmsg_lite_format_message(rpmsg_lite_dev, ept->addr, dst, data, size, 0, timeout);
@@ -613,7 +628,7 @@ int rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
 void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, unsigned long *size, unsigned long timeout)
 {
-    struct rpmsg_std_hdr *rpmsg_hdr;
+    struct rpmsg_std_msg *rpmsg_msg;
     struct rpmsg_hdr_reserved *reserved = RL_NULL;
     void *buffer;
     unsigned short idx;
@@ -654,14 +669,13 @@ void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uns
         }
     }
 
-    rpmsg_hdr = (struct rpmsg_std_hdr *)buffer;
+    rpmsg_msg = (struct rpmsg_std_msg *)buffer;
 
     /* keep idx and totlen information for nocopy tx function */
-    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_hdr->reserved;
+    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
     reserved->idx = idx;
-    reserved->totlen = *size;
 
-    return rpmsg_hdr->data;
+    return rpmsg_msg->data;
 }
 
 int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
@@ -670,14 +684,14 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
                            void *data,
                            unsigned long size)
 {
-    struct rpmsg_std_hdr *rpmsg_hdr;
+    struct rpmsg_std_msg *rpmsg_msg;
     unsigned long src;
     struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if (!ept || !data)
         return RL_ERR_PARAM;
 
-    if (size > (RL_BUFFER_SIZE - sizeof(struct rpmsg_std_hdr)))
+    if (size > RL_BUFFER_PAYLOAD_SIZE)
         return RL_ERR_BUFF_SIZE;
 
     if (!rpmsg_lite_dev->link_state)
@@ -685,19 +699,20 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
     src = ept->addr;
 
-    rpmsg_hdr = RPMSG_STD_HDR_FROM_BUF(data);
+    rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(data);
 
     /* Initialize RPMSG header. */
-    rpmsg_hdr->dst = dst;
-    rpmsg_hdr->src = src;
-    rpmsg_hdr->len = size;
-    rpmsg_hdr->flags = 0;
+    rpmsg_msg->hdr.dst = dst;
+    rpmsg_msg->hdr.src = src;
+    rpmsg_msg->hdr.len = size;
+    rpmsg_msg->hdr.flags = 0;
 
-    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_hdr->reserved;
+    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
 
     env_lock_mutex(rpmsg_lite_dev->lock);
     /* Enqueue buffer on virtqueue. */
-    rpmsg_lite_dev->vq_ops->vq_tx(rpmsg_lite_dev->tvq, (void *)rpmsg_hdr, (unsigned long)reserved->totlen,
+    rpmsg_lite_dev->vq_ops->vq_tx(rpmsg_lite_dev->tvq, (void *)rpmsg_msg,
+                                  (unsigned long)virtqueue_get_buffer_length(rpmsg_lite_dev->tvq, reserved->idx),
                                   reserved->idx);
     /* Let the other side know that there is a job to process. */
     virtqueue_kick(rpmsg_lite_dev->tvq);
@@ -718,7 +733,7 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
 int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, void *rxbuf)
 {
-    struct rpmsg_std_hdr *rpmsg_hdr;
+    struct rpmsg_std_msg *rpmsg_msg;
     struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if (!rpmsg_lite_dev)
@@ -726,15 +741,17 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
     if (!rxbuf)
         return RL_ERR_PARAM;
 
-    rpmsg_hdr = RPMSG_STD_HDR_FROM_BUF(rxbuf);
+    rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(rxbuf);
 
     /* Get the pointer to the reserved field that contains buffer size and the index */
-    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_hdr->reserved;
+    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
 
     env_lock_mutex(rpmsg_lite_dev->lock);
 
     /* Return used buffer, with total length (header length + buffer size). */
-    rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_hdr, (unsigned long)reserved->totlen, reserved->idx);
+    rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_msg,
+                                       (unsigned long)virtqueue_get_buffer_length(rpmsg_lite_dev->rvq, reserved->idx),
+                                       reserved->idx);
 
     env_unlock_mutex(rpmsg_lite_dev->lock);
 
@@ -753,15 +770,12 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
 
  *****************************/
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
-                                                   size_t shmem_length,
-                                                   int remote_core_id,
-                                                   uint32_t init_flags,
-                                                   struct rpmsg_lite_instance *static_context)
+struct rpmsg_lite_instance *rpmsg_lite_master_init(
+    void *shmem_addr, size_t shmem_length, int link_id, uint32_t init_flags, struct rpmsg_lite_instance *static_context)
 #else
 struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                                                    size_t shmem_length,
-                                                   int remote_core_id,
+                                                   int link_id,
                                                    uint32_t init_flags)
 #endif
 {
@@ -771,14 +785,13 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     struct vring_alloc_info ring_info;
     struct virtqueue *vqs[2];
     void *buffer;
-    struct llist node;
     int idx, j;
     struct rpmsg_lite_instance *rpmsg_lite_dev = NULL;
 
     if (shmem_length < (RL_VRING_OVERHEAD + (RL_BUFFER_COUNT * RL_BUFFER_SIZE)))
         return NULL;
 
-    if (remote_core_id > RL_PLATFORM_HIGHEST_CORE_ID)
+    if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
         return NULL;
 
     if (!shmem_addr)
@@ -798,7 +811,12 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 
     status = env_init();
     if (status != RL_SUCCESS)
+    {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(rpmsg_lite_dev);
+#endif
         return NULL;
+    }
 
     /*
      * Since device is RPMSG Remote so we need to manage the
@@ -807,9 +825,6 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP(shmem_addr + RL_VRING_OVERHEAD);
     rpmsg_lite_dev->sh_mem_remaining = (RL_WORD_ALIGN_DOWN(shmem_length - RL_VRING_OVERHEAD)) / RL_BUFFER_SIZE;
     rpmsg_lite_dev->sh_mem_total = rpmsg_lite_dev->sh_mem_remaining;
-
-    if (!rpmsg_lite_dev->sh_mem_base)
-        return NULL;
 
     /* Initialize names and callbacks*/
     vq_names[0] = "rx_vq";
@@ -828,16 +843,31 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         env_memset((void *)ring_info.phy_addr, 0x00, vring_size(ring_info.num_descs, ring_info.align));
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-        status = virtqueue_create_static(RL_GET_VQ_ID(remote_core_id, idx), (char *)vq_names[idx], &ring_info,
-                                         callback[idx], virtqueue_notify, &vqs[idx],
+        status = virtqueue_create_static(RL_GET_VQ_ID(link_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
+                                         virtqueue_notify, &vqs[idx],
                                          (struct vq_static_context *)&rpmsg_lite_dev->vq_ctxt[idx]);
 #else
-        status = virtqueue_create(RL_GET_VQ_ID(remote_core_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
+        status = virtqueue_create(RL_GET_VQ_ID(link_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
                                   virtqueue_notify, &vqs[idx]);
 #endif /* RL_USE_STATIC_API */
 
-        if (status != RL_SUCCESS)
+        if (status == RL_SUCCESS)
+        {
+            /* Initialize vring control block in virtqueue. */
+            vq_ring_init(vqs[idx]);
+
+            /* Disable callbacks - will be enabled by the application
+            * once initialization is completed.
+            */
+            virtqueue_disable_cb(vqs[idx]);
+        }
+        else
+        {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+            env_free_memory(rpmsg_lite_dev);
+#endif
             return NULL;
+        }
 
         /* virtqueue has reference to the RPMsg Lite instance */
         vqs[idx]->priv = (void *)rpmsg_lite_dev;
@@ -845,7 +875,12 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 
     status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1);
     if (status != RL_SUCCESS)
+    {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(rpmsg_lite_dev);
+#endif
         return NULL;
+    }
 
     // FIXME - a better way to handle this , tx for master is rx for remote and vice versa.
     rpmsg_lite_dev->tvq = vqs[1];
@@ -863,21 +898,20 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 
             RL_ASSERT(buffer);
 
-            node.data = buffer;
-            node.attr = RL_BUFFER_SIZE;
-            node.next = RL_NULL;
-
             env_memset(buffer, 0x00, RL_BUFFER_SIZE);
             if (vqs[j] == rpmsg_lite_dev->rvq)
-                status = virtqueue_add_buffer(vqs[j], &node, 0, 1, buffer);
+                status = virtqueue_fill_avail_buffers(vqs[j], buffer, RL_BUFFER_SIZE);
             else if (vqs[j] == rpmsg_lite_dev->tvq)
-                status = virtqueue_fill_used_buffers(vqs[j], &node, RL_BUFFER_SIZE, buffer);
+                status = virtqueue_fill_used_buffers(vqs[j], buffer, RL_BUFFER_SIZE);
             else
                 RL_ASSERT(0); /* should not happen */
 
             if (status != RL_SUCCESS)
             {
-                /* Clean up! */
+/* Clean up! */
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+                env_free_memory(rpmsg_lite_dev);
+#endif
                 env_delete_mutex(rpmsg_lite_dev->lock);
                 return NULL;
             }
@@ -887,9 +921,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     /* Install ISRs */
     platform_init_interrupt(rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
     platform_init_interrupt(rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
-    env_disable_interrupts();
+    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
     rpmsg_lite_dev->link_state = 1;
-    env_restore_interrupts();
+    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     /*
      * Let the remote device know that Master is ready for
@@ -902,11 +938,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
-                                                   int master_core_id,
+                                                   int link_id,
                                                    uint32_t init_flags,
                                                    struct rpmsg_lite_instance *static_context)
 #else
-struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_core_id, uint32_t init_flags)
+struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags)
 #endif
 {
     int status;
@@ -917,7 +953,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_
     int idx;
     struct rpmsg_lite_instance *rpmsg_lite_dev = NULL;
 
-    if (master_core_id > RL_PLATFORM_HIGHEST_CORE_ID)
+    if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
         return NULL;
 
     if (!shmem_addr)
@@ -937,7 +973,12 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_
 
     status = env_init();
     if (status != RL_SUCCESS)
+    {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(rpmsg_lite_dev);
+#endif
         return NULL;
+    }
 
     vq_names[0] = "tx_vq"; /* swapped in case of remote */
     vq_names[1] = "rx_vq";
@@ -953,16 +994,21 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_
         ring_info.num_descs = RL_BUFFER_COUNT;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-        status = virtqueue_create_static(RL_GET_VQ_ID(master_core_id, idx), (char *)vq_names[idx], &ring_info,
-                                         callback[idx], virtqueue_notify, &vqs[idx],
+        status = virtqueue_create_static(RL_GET_VQ_ID(link_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
+                                         virtqueue_notify, &vqs[idx],
                                          (struct vq_static_context *)&rpmsg_lite_dev->vq_ctxt[idx]);
 #else
-        status = virtqueue_create(RL_GET_VQ_ID(master_core_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
+        status = virtqueue_create(RL_GET_VQ_ID(link_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
                                   virtqueue_notify, &vqs[idx]);
 #endif /* RL_USE_STATIC_API */
 
         if (status != RL_SUCCESS)
+        {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+            env_free_memory(rpmsg_lite_dev);
+#endif
             return NULL;
+        }
 
         /* virtqueue has reference to the RPMsg Lite instance */
         vqs[idx]->priv = (void *)rpmsg_lite_dev;
@@ -970,7 +1016,12 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_
 
     status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1);
     if (status != RL_SUCCESS)
+    {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(rpmsg_lite_dev);
+#endif
         return NULL;
+    }
 
     // FIXME - a better way to handle this , tx for master is rx for remote and vice versa.
     rpmsg_lite_dev->tvq = vqs[0];
@@ -979,9 +1030,11 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int master_
     /* Install ISRs */
     platform_init_interrupt(rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
     platform_init_interrupt(rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
-    env_disable_interrupts();
+    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
     rpmsg_lite_dev->link_state = 0;
-    env_restore_interrupts();
+    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     return rpmsg_lite_dev;
 }
@@ -1001,9 +1054,11 @@ int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
     if (!rpmsg_lite_dev)
         return RL_ERR_PARAM;
 
-    env_disable_interrupts();
+    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
     rpmsg_lite_dev->link_state = 0;
-    env_restore_interrupts();
+    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     if (!(rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock))
     {
@@ -1024,6 +1079,10 @@ int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
 #endif /* RL_USE_STATIC_API */
 
     env_delete_mutex(rpmsg_lite_dev->lock);
+
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+    env_free_memory(rpmsg_lite_dev);
+#endif /* RL_USE_STATIC_API */
 
     env_deinit();
 

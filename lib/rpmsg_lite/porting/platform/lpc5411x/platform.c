@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -9,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of the <ORGANIZATION> nor the names of its contributors
+ * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -33,6 +35,10 @@
 
 #include "fsl_device_registers.h"
 #include "fsl_mailbox.h"
+
+static int isr_counter = 0;
+static int disable_counter = 0;
+static void *lock;
 
 void MAILBOX_IRQHandler(void)
 {
@@ -59,48 +65,62 @@ void MAILBOX_IRQHandler(void)
 
 int platform_init_interrupt(int vq_id, void *isr_data)
 {
-/* Do any HW related interrupt initialization here */
-#if defined(__CM4_CMSIS_VERSION)
-    NVIC_SetPriority(MAILBOX_IRQn, 5);
-#else
-    NVIC_SetPriority(MAILBOX_IRQn, 2);
-#endif
-
     /* Register ISR to environment layer */
     env_register_isr(vq_id, isr_data);
+
+    env_lock_mutex(lock);
+
+    assert(0 <= isr_counter);
+    if (!isr_counter)
+
+#if defined(__CM4_CMSIS_VERSION)
+        NVIC_SetPriority(MAILBOX_IRQn, 5);
+#else
+        NVIC_SetPriority(MAILBOX_IRQn, 2);
+#endif
+    isr_counter++;
+
+    env_unlock_mutex(lock);
+
     return 0;
 }
 
 int platform_deinit_interrupt(int vq_id)
 {
-    /* Do any HW related interrupt deinitialization here */
-    NVIC_DisableIRQ(MAILBOX_IRQn);
+    /* Prepare the MU Hardware */
+    env_lock_mutex(lock);
+
+    assert(0 < isr_counter);
+    isr_counter--;
+    if (!isr_counter)
+        NVIC_DisableIRQ(MAILBOX_IRQn);
 
     /* Unregister ISR from environment layer */
-    /* nothing */
+    env_unregister_isr(vq_id);
+
+    env_unlock_mutex(lock);
+
     return 0;
 }
 
 void platform_notify(int vq_id)
 {
-    switch (RL_GET_CORE_ID(vq_id))
+    switch (RL_GET_LINK_ID(vq_id))
     {
         case 0:
+            env_lock_mutex(lock);
 #if defined(__CM4_CMSIS_VERSION)
             MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vq_id)));
 #else
             MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM4, (1 << RL_GET_Q_ID(vq_id)));
 #endif
+            env_unlock_mutex(lock);
             return;
 
         default:
             return;
     }
 }
-
-#define PLATFORM_DISABLE_COUNTERS (2) /* Change for multiple remote cores */
-static int disable_counters[PLATFORM_DISABLE_COUNTERS] = { 0 };
-static int disable_counter_all = 0;
 
 /**
  * platform_time_delay
@@ -116,27 +136,15 @@ void platform_time_delay(int num_msec)
     /* Recalculate the CPU frequency */
     SystemCoreClockUpdate();
 
-    /* Calculate the CPU loops to delay, each loop has 6 cycles */
-    loop = SystemCoreClock / 6 / 1000 * num_msec;
+    /* Calculate the CPU loops to delay, each loop has 3 cycles */
+    loop = SystemCoreClock / 3 / 1000 * num_msec;
 
-    /* There's some difference among toolchains */
+    /* There's some difference among toolchains, 3 or 4 cycles each loop */
     while (loop)
     {
         __NOP();
         loop--;
     }
-
-#if 0
-    num_msec++;
-    /* Wait desired time */
-    while (num_msec > 0)
-    {
-        if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
-        {
-            num_msec--;
-        }
-    }
-#endif
 }
 
 /**
@@ -166,11 +174,14 @@ int platform_in_isr(void)
  */
 int platform_interrupt_enable(unsigned int vq_id)
 {
-    assert(vq_id < PLATFORM_DISABLE_COUNTERS);
-    assert(0 < disable_counters[vq_id]);
-    disable_counters[vq_id]--;
-    if (0 == disable_counters[vq_id])
+    assert(0 < disable_counter);
+
+    __asm volatile("cpsid i");
+    disable_counter--;
+
+    if (!disable_counter)
         NVIC_EnableIRQ(MAILBOX_IRQn);
+    __asm volatile("cpsie i");
     return (vq_id);
 }
 
@@ -186,40 +197,17 @@ int platform_interrupt_enable(unsigned int vq_id)
  */
 int platform_interrupt_disable(unsigned int vq_id)
 {
-    assert(vq_id < PLATFORM_DISABLE_COUNTERS);
-    assert(0 <= disable_counters[vq_id]);
-    if (0 == disable_counters[vq_id])
+    assert(0 <= disable_counter);
+
+    __asm volatile("cpsid i");
+    // virtqueues use the same NVIC vector
+    // if counter is set - the interrupts are disabled
+    if (!disable_counter)
         NVIC_DisableIRQ(MAILBOX_IRQn);
-    disable_counters[vq_id]++;
+
+    disable_counter++;
+    __asm volatile("cpsie i");
     return (vq_id);
-}
-
-/**
- * platform_interrupt_enable_all
- *
- * Enable all platform-related interrupts.
- *
- */
-void platform_interrupt_enable_all(void)
-{
-    assert(0 < disable_counter_all);
-    disable_counter_all--;
-    if (0 == disable_counter_all)
-        platform_interrupt_enable(0);
-}
-
-/**
- * platform_interrupt_disable_all
- *
- * Enable all platform-related interrupts.
- *
- */
-void platform_interrupt_disable_all(void)
-{
-    assert(0 <= disable_counter_all);
-    if (0 == disable_counter_all)
-        platform_interrupt_disable(0);
-    disable_counter_all++;
 }
 
 /**
@@ -283,16 +271,8 @@ int platform_init(void)
 {
     MAILBOX_Init(MAILBOX);
 
-#if 0
-    /* Disable SysTick timer */
-    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-    /* Initialize Reload value to 1ms */
-    SysTick->LOAD = CLOCK_GetFreq(kCLOCK_CoreSysClk) / 1000;
-    /* Set clock source to processor clock */
-    SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-    /* Enable SysTick timer */
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-#endif
+    /* Create lock used in multi-instanced RPMsg */
+    env_create_mutex(&lock, 1);
 
     return 0;
 }
@@ -315,5 +295,9 @@ int platform_deinit(void)
 #endif
 
     MAILBOX_Deinit(MAILBOX);
+
+    /* Delete lock used in multi-instanced RPMsg */
+    env_delete_mutex(lock);
+    lock = NULL;
     return 0;
 }

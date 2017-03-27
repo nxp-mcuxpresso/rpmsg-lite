@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright (c) 2015 Xilinx, Inc.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
- * Copyright (c) 2015 Xilinx, Inc. All rights reserved.
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -12,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of Mentor Graphics Corporation nor the names of its
+ * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
  *
@@ -67,8 +68,8 @@
 *       env_lock_mutex
 *       env_unlock_mutex
 *       env_sleep_msec
-*       env_disable_interrupts
-*       env_restore_interrupts
+*       env_disable_interrupt
+*       env_enable_interrupt
 *       env_create_queue
 *       env_delete_queue
 *       env_put_queue
@@ -318,30 +319,23 @@ void env_release_sync_lock(void *lock);
 void env_sleep_msec(int num_msec);
 
 /*!
- * env_disable_interrupts
- *
- * Disables system interrupts
- *
- */
-void env_disable_interrupts(void);
-
-/*!
- * env_restore_interrupts
- *
- * Enables system interrupts
- *
- */
-void env_restore_interrupts(void);
-
-/*!
  * env_register_isr
  *
- * Registers interrupt handler for the given interrupt vector.
+ * Registers interrupt handler data for the given interrupt vector.
  *
  * @param vector_id - virtual interrupt vector number
  * @param data      - interrupt handler data (virtqueue)
  */
 void env_register_isr(int vector_id, void *data);
+
+/*!
+ * env_unregister_isr
+ *
+ * Unregisters interrupt handler data for the given interrupt vector.
+ *
+ * @param vector_id - virtual interrupt vector number
+ */
+void env_unregister_isr(int vector_id);
 
 /*!
  * env_enable_interrupt
