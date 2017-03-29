@@ -87,6 +87,14 @@ struct virtqueue_ops
 /* Zero-Copy extension macros */
 #define RPMSG_STD_MSG_FROM_BUF(buf) (struct rpmsg_std_msg *)((char *)buf - offsetof(struct rpmsg_std_msg, data))
 
+#if (!RL_BUFFER_PAYLOAD_SIZE) || (RL_BUFFER_PAYLOAD_SIZE & (RL_BUFFER_PAYLOAD_SIZE - 1))
+#error "RL_BUFFER_PAYLOAD_SIZE must be power of two (256, 512, ...)"
+#endif
+
+#if (!RL_BUFFER_COUNT) || (RL_BUFFER_COUNT & (RL_BUFFER_COUNT - 1))
+#error "RL_BUFFER_COUNT must be power of two (256, 512, ...)"
+#endif
+
 #define RL_BUFFER_SIZE (RL_BUFFER_PAYLOAD_SIZE + sizeof(struct rpmsg_std_hdr))
 
 /*!
@@ -1054,18 +1062,18 @@ int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
     if (!rpmsg_lite_dev)
         return RL_ERR_PARAM;
 
-    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
-    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 0;
-    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
-    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-
     if (!(rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock))
     {
         /* ERROR - trying to initialize uninitialized RPMSG? */
         RL_ASSERT((rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock));
         return RL_ERR_PARAM;
     }
+
+    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
+    rpmsg_lite_dev->link_state = 0;
+    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     platform_deinit_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     platform_deinit_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
