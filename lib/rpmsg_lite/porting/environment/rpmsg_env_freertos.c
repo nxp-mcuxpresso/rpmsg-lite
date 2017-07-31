@@ -43,13 +43,13 @@
  *
  **************************************************************************/
 
-#include "env.h"
+#include "rpmsg_env.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-#include "platform.h"
+#include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "compiler.h"
+#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -59,7 +59,7 @@ static int env_init_counter = 0;
 SemaphoreHandle_t env_sema = NULL;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (10)
+#define ISR_COUNT (32)
 /*!
  * Structure to keep track of registered ISR's.
  */

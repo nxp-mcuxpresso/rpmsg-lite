@@ -30,8 +30,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "platform.h"
-#include "env.h"
+#include "rpmsg_platform.h"
+#include "rpmsg_env.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_mailbox.h"
@@ -284,7 +284,7 @@ int platform_init(void)
  */
 int platform_deinit(void)
 {
-/* Important for LPC5411x - do not deinit mailbox, if there
+/* Important for LPC54102 - do not deinit mailbox, if there
    is a pending ISR on the other core! */
 #if defined(__CM4_CMSIS_VERSION)
     while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM0Plus))

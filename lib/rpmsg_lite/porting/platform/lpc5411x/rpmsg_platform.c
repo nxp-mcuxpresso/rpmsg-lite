@@ -30,29 +30,54 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "platform.h"
-#include "env.h"
+#include "rpmsg_platform.h"
+#include "rpmsg_env.h"
 
-#include "board.h"
-#include "mu_imx.h"
-
-#define APP_MU_IRQ_PRIORITY (3)
+#include "fsl_device_registers.h"
+#include "fsl_mailbox.h"
 
 static int isr_counter = 0;
 static int disable_counter = 0;
 static void *lock;
+
+void MAILBOX_IRQHandler(void)
+{
+    mailbox_cpu_id_t cpu_id;
+#if defined(__CM4_CMSIS_VERSION)
+    cpu_id = kMAILBOX_CM4;
+#else
+    cpu_id = kMAILBOX_CM0Plus;
+#endif
+
+    uint32_t value = MAILBOX_GetValue(MAILBOX, cpu_id);
+
+    if (value & 0x01)
+    {
+        env_isr(0);
+        MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x01);
+    }
+    if (value & 0x02)
+    {
+        env_isr(1);
+        MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x02);
+    }
+}
 
 int platform_init_interrupt(int vq_id, void *isr_data)
 {
     /* Register ISR to environment layer */
     env_register_isr(vq_id, isr_data);
 
-    /* Prepare the MU Hardware, enable channel 1 interrupt */
     env_lock_mutex(lock);
 
     assert(0 <= isr_counter);
     if (!isr_counter)
-        MU_EnableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+
+#if defined(__CM4_CMSIS_VERSION)
+        NVIC_SetPriority(MAILBOX_IRQn, 5);
+#else
+        NVIC_SetPriority(MAILBOX_IRQn, 2);
+#endif
     isr_counter++;
 
     env_unlock_mutex(lock);
@@ -62,13 +87,13 @@ int platform_init_interrupt(int vq_id, void *isr_data)
 
 int platform_deinit_interrupt(int vq_id)
 {
-    /* Prepare the MU Hardware, enable channel 1 interrupt */
+    /* Prepare the MU Hardware */
     env_lock_mutex(lock);
 
     assert(0 < isr_counter);
     isr_counter--;
     if (!isr_counter)
-        MU_DisableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+        NVIC_DisableIRQ(MAILBOX_IRQn);
 
     /* Unregister ISR from environment layer */
     env_unregister_isr(vq_id);
@@ -80,28 +105,21 @@ int platform_deinit_interrupt(int vq_id)
 
 void platform_notify(int vq_id)
 {
-    /* As Linux suggests, use MU->Data Channle 1 as communication channel */
-    uint32_t msg = (RL_GET_Q_ID(vq_id)) << 16;
-
-    env_lock_mutex(lock);
-    MU_SendMsg(MUB, RPMSG_MU_CHANNEL, msg);
-    env_unlock_mutex(lock);
-}
-
-/*
- * MU Interrrupt RPMsg handler
- */
-void rpmsg_handler(void)
-{
-    uint32_t msg, channel;
-
-    if (MU_TryReceiveMsg(MUB, RPMSG_MU_CHANNEL, &msg) == kStatus_MU_Success)
+    switch (RL_GET_LINK_ID(vq_id))
     {
-        channel = msg >> 16;
-        env_isr(channel);
-    }
+        case 0:
+            env_lock_mutex(lock);
+#if defined(__CM4_CMSIS_VERSION)
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vq_id)));
+#else
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM4, (1 << RL_GET_Q_ID(vq_id)));
+#endif
+            env_unlock_mutex(lock);
+            return;
 
-    return;
+        default:
+            return;
+    }
 }
 
 /**
@@ -162,7 +180,7 @@ int platform_interrupt_enable(unsigned int vq_id)
     disable_counter--;
 
     if (!disable_counter)
-        NVIC_EnableIRQ(MU_M4_IRQn);
+        NVIC_EnableIRQ(MAILBOX_IRQn);
     __asm volatile("cpsie i");
     return (vq_id);
 }
@@ -185,7 +203,7 @@ int platform_interrupt_disable(unsigned int vq_id)
     // virtqueues use the same NVIC vector
     // if counter is set - the interrupts are disabled
     if (!disable_counter)
-        NVIC_DisableIRQ(MU_M4_IRQn);
+        NVIC_DisableIRQ(MAILBOX_IRQn);
 
     disable_counter++;
     __asm volatile("cpsie i");
@@ -251,13 +269,7 @@ void *platform_patova(unsigned long addr)
  */
 int platform_init(void)
 {
-    /*
-     * Prepare for the MU Interrupt
-     *  MU must be initialized before rpmsg init is called
-     */
-    MU_Init(BOARD_MU_BASE_ADDR);
-    NVIC_SetPriority(BOARD_MU_IRQ_NUM, APP_MU_IRQ_PRIORITY);
-    NVIC_EnableIRQ(BOARD_MU_IRQ_NUM);
+    MAILBOX_Init(MAILBOX);
 
     /* Create lock used in multi-instanced RPMsg */
     env_create_mutex(&lock, 1);
@@ -272,6 +284,18 @@ int platform_init(void)
  */
 int platform_deinit(void)
 {
+/* Important for LPC5411x - do not deinit mailbox, if there
+   is a pending ISR on the other core! */
+#if defined(__CM4_CMSIS_VERSION)
+    while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM0Plus))
+        ;
+#else
+    while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM4))
+        ;
+#endif
+
+    MAILBOX_Deinit(MAILBOX);
+
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(lock);
     lock = NULL;

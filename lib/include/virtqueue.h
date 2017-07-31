@@ -33,7 +33,7 @@
 typedef uint8_t boolean;
 
 #include "virtio_ring.h"
-#include "env.h"
+#include "rpmsg_env.h"
 #include "llist.h"
 
 /*Error Codes*/

@@ -32,15 +32,15 @@
 /**************************************************************************
  * FILE NAME
  *
- *       compiler.h
+ *       rpmsg_compiler.h
  *
  * DESCRIPTION
  *
  *       This file defines compiler-specific macros.
  *
  ***************************************************************************/
-#ifndef _COMPILER_H_
-#define _COMPILER_H_
+#ifndef _RPMSG_COMPILER_H_
+#define _RPMSG_COMPILER_H_
 
 /* IAR ARM build tools */
 #if defined(__ICCARM__)
@@ -88,4 +88,4 @@
 #error Please implement the structure packing macros for your compiler here!
 #endif
 
-#endif /* _COMPILER_H_ */
+#endif /* _RPMSG_COMPILER_H_ */

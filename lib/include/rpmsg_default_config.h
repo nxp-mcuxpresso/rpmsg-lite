@@ -46,7 +46,7 @@
 #endif
 
 #ifndef RL_BUFFER_PAYLOAD_SIZE
-#define RL_BUFFER_PAYLOAD_SIZE (512)
+#define RL_BUFFER_PAYLOAD_SIZE (496)
 #endif
 
 #ifndef RL_BUFFER_COUNT
@@ -61,6 +61,14 @@
 #define RL_USE_STATIC_API (0)
 #endif
 
+#ifndef RL_CLEAR_USED_BUFFERS
+#define RL_CLEAR_USED_BUFFERS (0)
+#endif
+
+#ifndef RL_USE_MCMGR_IPC_ISR_HANDLER
+#define RL_USE_MCMGR_IPC_ISR_HANDLER (1)
+#endif
+
 #ifndef RL_ASSERT
 #define RL_ASSERT(x)  \
     do                \
@@ -71,7 +79,5 @@
     } while (0);
 #endif
 /* } END */
-
-#define RPMSG_BUFFER_COUNT (RL_BUFFER_COUNT)
 
 #endif /* _RPMSG_DEFAULT_CONFIG_H */

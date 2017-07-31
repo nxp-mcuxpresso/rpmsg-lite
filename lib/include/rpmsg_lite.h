@@ -39,9 +39,9 @@ extern "C" {
 
 #include <stddef.h>
 #include "virtqueue.h"
-#include "env.h"
+#include "rpmsg_env.h"
 #include "llist.h"
-#include "compiler.h"
+#include "rpmsg_compiler.h"
 
 //! @addtogroup rpmsg_lite
 //! @{
@@ -50,7 +50,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "1.1.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "1.2.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(unsigned long))
@@ -150,7 +150,7 @@ struct rpmsg_lite_instance
  *
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
  * @param shmem_length     Length of memory area given by previous parameter
- * @param link_id          Link ID used to define the rpmsg-lite instance, see platform.h
+ * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
  * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
 *
@@ -176,7 +176,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
  * To be called by the remote side.
  *
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
- * @param link_id          Link ID used to define the rpmsg-lite instance, see platform.h
+ * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
  *
  * @return  New RPMsg-Lite instance pointer or NULL.

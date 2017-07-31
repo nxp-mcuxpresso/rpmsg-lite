@@ -31,8 +31,8 @@
  */
 
 #include "rpmsg_lite.h"
-#include "platform.h"
-#include "env.h"
+#include "rpmsg_platform.h"
+#include "rpmsg_env.h"
 
 RL_PACKED_BEGIN
 /*!
@@ -87,7 +87,18 @@ struct virtqueue_ops
 /* Zero-Copy extension macros */
 #define RPMSG_STD_MSG_FROM_BUF(buf) (struct rpmsg_std_msg *)((char *)buf - offsetof(struct rpmsg_std_msg, data))
 
-#define RL_BUFFER_SIZE (RL_BUFFER_PAYLOAD_SIZE + sizeof(struct rpmsg_std_hdr))
+#if (!RL_BUFFER_COUNT) || (RL_BUFFER_COUNT & (RL_BUFFER_COUNT - 1))
+#error "RL_BUFFER_COUNT must be power of two (2, 4, ...)"
+#endif
+
+/* Buffer is formed by payload and struct rpmsg_std_hdr */
+#define RL_BUFFER_SIZE (RL_BUFFER_PAYLOAD_SIZE + 16)
+
+#if (!RL_BUFFER_SIZE) || (RL_BUFFER_SIZE & (RL_BUFFER_SIZE - 1))
+#error "RL_BUFFER_SIZE must be power of two (256, 512, ...)"\
+       "RL_BUFFER_PAYLOAD_SIZE must be equal to (240, 496, 1008, ...) [2^n - 16]."
+#endif
+
 
 /*!
  * @brief
@@ -267,7 +278,9 @@ static void *vq_rx_remote(struct virtqueue *rvq, unsigned long *len, unsigned sh
 static void vq_rx_free_remote(struct virtqueue *rvq, void *buffer, unsigned long len, unsigned short idx)
 {
     int status;
-
+#if defined(RL_CLEAR_USED_BUFFERS) && (RL_CLEAR_USED_BUFFERS == 1)
+    env_memset(buffer, 0x00, len);
+#endif
     status = virtqueue_add_consumed_buffer(rvq, idx, len);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
                                          /* As long as the length of the virtqueue ring buffer is not shorter
@@ -352,7 +365,9 @@ static void *vq_rx_master(struct virtqueue *rvq, unsigned long *len, unsigned sh
 static void vq_rx_free_master(struct virtqueue *rvq, void *buffer, unsigned long len, unsigned short idx)
 {
     int status;
-
+#if defined(RL_CLEAR_USED_BUFFERS) && (RL_CLEAR_USED_BUFFERS == 1)
+    env_memset(buffer, 0x00, len);
+#endif
     status = virtqueue_add_buffer(rvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -402,6 +417,9 @@ struct rpmsg_lite_endpoint *rpmsg_lite_create_ept(struct rpmsg_lite_instance *rp
     struct rpmsg_lite_endpoint *rl_ept;
     struct llist *node;
     unsigned int i;
+    
+    if (!rpmsg_lite_dev)
+        return RL_NULL;
 
     env_lock_mutex(rpmsg_lite_dev->lock);
     {
@@ -488,6 +506,10 @@ int rpmsg_lite_destroy_ept(struct rpmsg_lite_instance *rpmsg_lite_dev, struct rp
 
     if (!rpmsg_lite_dev)
         return RL_ERR_PARAM;
+    
+    if (!rl_ept)
+        return RL_ERR_PARAM;
+    
     env_lock_mutex(rpmsg_lite_dev->lock);
     node = rpmsg_lite_get_endpoint_from_addr(rpmsg_lite_dev, rl_ept->addr);
     if (node)
@@ -1054,18 +1076,18 @@ int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
     if (!rpmsg_lite_dev)
         return RL_ERR_PARAM;
 
-    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
-    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 0;
-    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
-    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-
     if (!(rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock))
     {
         /* ERROR - trying to initialize uninitialized RPMSG? */
         RL_ASSERT((rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock));
         return RL_ERR_PARAM;
     }
+
+    env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
+    rpmsg_lite_dev->link_state = 0;
+    env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
+    env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     platform_deinit_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     platform_deinit_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);

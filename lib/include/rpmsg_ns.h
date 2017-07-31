@@ -50,11 +50,33 @@ enum rpmsg_ns_flags
 /*! \typedef rpmsg_ns_new_ept_cb
     \brief New endpoint NS callback function type.
 */
-typedef void (*rpmsg_ns_new_ept_cb)(unsigned int new_ept, const char *new_ept_name, unsigned long flags);
+typedef void (*rpmsg_ns_new_ept_cb)(unsigned int new_ept,
+                                    const char *new_ept_name,
+                                    unsigned long flags,
+                                    void *user_data);
 
-typedef struct rpmsg_lite_endpoint *rpmsg_ns_handle;
+struct rpmsg_ns_callback_data
+{
+    rpmsg_ns_new_ept_cb cb;
+    void *user_data;
+};
 
-typedef struct rpmsg_lite_ept_static_context rpmsg_ns_static_context;
+struct rpmsg_ns_context
+{
+    struct rpmsg_lite_endpoint *ept;
+    struct rpmsg_ns_callback_data *cb_ctxt;
+};
+
+typedef struct rpmsg_ns_context *rpmsg_ns_handle;
+
+struct rpmsg_ns_static_context_container
+{
+    struct rpmsg_lite_ept_static_context ept_ctxt;
+    struct rpmsg_ns_callback_data cb_ctxt;
+    struct rpmsg_ns_context ns_ctxt;
+};
+
+typedef struct rpmsg_ns_static_context_container rpmsg_ns_static_context;
 
 #if defined(__cplusplus)
 extern "C" {
@@ -71,6 +93,7 @@ extern "C" {
  *
  * @param rpmsg_lite_dev    RPMsg-Lite instance
  * @param app_cb            Application nameservice callback
+ * @param user_data         Application nameservice callback data
  *
  * @return NameService handle, to be kept for unbinding.
  *
@@ -78,9 +101,10 @@ extern "C" {
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev,
                               rpmsg_ns_new_ept_cb app_cb,
+                              void *user_data,
                               rpmsg_ns_static_context *ns_ept_ctxt);
 #else
-rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_new_ept_cb app_cb);
+rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_new_ept_cb app_cb, void *user_data);
 #endif /* RL_USE_STATIC_API */
 
 /*!

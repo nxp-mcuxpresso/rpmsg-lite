@@ -33,7 +33,7 @@
 /**************************************************************************
 * FILE NAME
 *
-*       env.h
+*       rpmsg_env.h
 *
 * COMPONENT
 *
@@ -76,12 +76,12 @@
 *       env_get_queue
 *
 **************************************************************************/
-#ifndef _ENV_H_
-#define _ENV_H_
+#ifndef _RPMSG_ENV_H_
+#define _RPMSG_ENV_H_
 
 #include <stdio.h>
 #include "rpmsg_default_config.h"
-#include "platform.h"
+#include "rpmsg_platform.h"
 
 /*!
  * env_init
@@ -477,4 +477,4 @@ int env_get_queue(void *queue, void *msg, int timeout_ms);
 
 void env_isr(int vector);
 
-#endif /* _ENV_H_ */
+#endif /* _RPMSG_ENV_H_ */

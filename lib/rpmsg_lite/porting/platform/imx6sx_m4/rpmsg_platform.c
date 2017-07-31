@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -9,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 3. Neither the name of the <ORGANIZATION> nor the names of its contributors
+ * 3. Neither the name of the copyright holder nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -28,13 +30,17 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "platform.h"
-#include "env.h"
- 
+#include "rpmsg_platform.h"
+#include "rpmsg_env.h"
+
 #include "board.h"
 #include "mu_imx.h"
 
 #define APP_MU_IRQ_PRIORITY (3)
+
+static int isr_counter = 0;
+static int disable_counter = 0;
+static void *lock;
 
 int platform_init_interrupt(int vq_id, void *isr_data)
 {
@@ -42,7 +48,14 @@ int platform_init_interrupt(int vq_id, void *isr_data)
     env_register_isr(vq_id, isr_data);
 
     /* Prepare the MU Hardware, enable channel 1 interrupt */
-    MU_EnableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+    env_lock_mutex(lock);
+
+    assert(0 <= isr_counter);
+    if (!isr_counter)
+        MU_EnableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+    isr_counter++;
+
+    env_unlock_mutex(lock);
 
     return 0;
 }
@@ -50,7 +63,17 @@ int platform_init_interrupt(int vq_id, void *isr_data)
 int platform_deinit_interrupt(int vq_id)
 {
     /* Prepare the MU Hardware, enable channel 1 interrupt */
-    MU_DisableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+    env_lock_mutex(lock);
+
+    assert(0 < isr_counter);
+    isr_counter--;
+    if (!isr_counter)
+        MU_DisableRxFullInt(MUB, RPMSG_MU_CHANNEL);
+
+    /* Unregister ISR from environment layer */
+    env_unregister_isr(vq_id);
+
+    env_unlock_mutex(lock);
 
     return 0;
 }
@@ -59,9 +82,11 @@ void platform_notify(int vq_id)
 {
     /* As Linux suggests, use MU->Data Channle 1 as communication channel */
     uint32_t msg = (RL_GET_Q_ID(vq_id)) << 16;
-    MU_SendMsg(MUB, RPMSG_MU_CHANNEL, msg);
-}
 
+    env_lock_mutex(lock);
+    MU_SendMsg(MUB, RPMSG_MU_CHANNEL, msg);
+    env_unlock_mutex(lock);
+}
 
 /*
  * MU Interrrupt RPMsg handler
@@ -78,10 +103,6 @@ void rpmsg_handler(void)
 
     return;
 }
-
-#define PLATFORM_DISABLE_COUNTERS (2) /* Change for multiple remote cores */
-static int disable_counters[PLATFORM_DISABLE_COUNTERS] = { 0 };
-static int disable_counter_all = 0;
 
 /**
  * platform_time_delay
@@ -106,7 +127,6 @@ void platform_time_delay(int num_msec)
         __NOP();
         loop--;
     }
-
 }
 
 /**
@@ -136,17 +156,14 @@ int platform_in_isr(void)
  */
 int platform_interrupt_enable(unsigned int vq_id)
 {
-    assert(vq_id < PLATFORM_DISABLE_COUNTERS);
-    assert(0 < disable_counters[vq_id]);
-    disable_counters[vq_id]--;
-    // channels use the same NVIC vector
-    // enable only if all counters are zero
-    for (int i = 0; i < PLATFORM_DISABLE_COUNTERS; i++)
-    {
-        if (disable_counters[i])
-            return (vq_id);
-    }
-    NVIC_EnableIRQ(MU_M4_IRQn);
+    assert(0 < disable_counter);
+
+    __asm volatile("cpsid i");
+    disable_counter--;
+
+    if (!disable_counter)
+        NVIC_EnableIRQ(MU_M4_IRQn);
+    __asm volatile("cpsie i");
     return (vq_id);
 }
 
@@ -162,52 +179,17 @@ int platform_interrupt_enable(unsigned int vq_id)
  */
 int platform_interrupt_disable(unsigned int vq_id)
 {
-    assert(vq_id < PLATFORM_DISABLE_COUNTERS);
-    assert(0 <= disable_counters[vq_id]);
-    int disabled = 0;
-    // channels use the same NVIC vector
-    // if one counter is set - the interrupts are disabled
-    for (int i = 0; i < PLATFORM_DISABLE_COUNTERS; i++)
-    {
-        if (disable_counters[i])
-        {
-            disabled = 1;
-            break;
-        }
-    }
-    // if not disabled - disable interrutps
-    if (!disabled)
+    assert(0 <= disable_counter);
+
+    __asm volatile("cpsid i");
+    // virtqueues use the same NVIC vector
+    // if counter is set - the interrupts are disabled
+    if (!disable_counter)
         NVIC_DisableIRQ(MU_M4_IRQn);
-    disable_counters[vq_id]++;
+
+    disable_counter++;
+    __asm volatile("cpsie i");
     return (vq_id);
-}
-
-/**
- * platform_interrupt_enable_all
- *
- * Enable all platform-related interrupts.
- *
- */
-void platform_interrupt_enable_all(void)
-{
-    assert(0 < disable_counter_all);
-    disable_counter_all--;
-    if (0 == disable_counter_all)
-        platform_interrupt_enable(0);
-}
-
-/**
- * platform_interrupt_disable_all
- *
- * Enable all platform-related interrupts.
- *
- */
-void platform_interrupt_disable_all(void)
-{
-    assert(0 <= disable_counter_all);
-    if (0 == disable_counter_all)
-        platform_interrupt_disable(0);
-    disable_counter_all++;
 }
 
 /**
@@ -277,6 +259,9 @@ int platform_init(void)
     NVIC_SetPriority(BOARD_MU_IRQ_NUM, APP_MU_IRQ_PRIORITY);
     NVIC_EnableIRQ(BOARD_MU_IRQ_NUM);
 
+    /* Create lock used in multi-instanced RPMsg */
+    env_create_mutex(&lock, 1);
+
     return 0;
 }
 
@@ -287,5 +272,8 @@ int platform_init(void)
  */
 int platform_deinit(void)
 {
+    /* Delete lock used in multi-instanced RPMsg */
+    env_delete_mutex(lock);
+    lock = NULL;
     return 0;
 }

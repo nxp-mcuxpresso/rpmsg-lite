@@ -43,10 +43,10 @@
  *
  **************************************************************************/
 
-#include "env.h"
-#include "platform.h"
+#include "rpmsg_env.h"
+#include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "compiler.h"
+#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +55,7 @@
 static int env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (10) /* Change for multiple remote cores */
+#define ISR_COUNT (12) /* Change for multiple remote cores */
                       /*!
                        * Structure to keep track of registered ISR's.
                        */
