@@ -70,13 +70,14 @@
 #endif
 
 #ifndef RL_ASSERT
-#define RL_ASSERT(x)  \
+#define RL_ASSERT_BOOL(b)  \
     do                \
     {                 \
-        if (!x)       \
+        if (!(b))       \
             while (1) \
                 ;     \
     } while (0);
+#define RL_ASSERT(x) RL_ASSERT_BOOL((x)!=0)
 #endif
 /* } END */
 

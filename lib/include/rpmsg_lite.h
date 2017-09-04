@@ -296,7 +296,7 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
  * parameters to the rpmsg_lite_send_nocopy() function to perform data no-copy-send mechanism.
  *
  * @param     rpmsg_lite_dev    RPMsg-Lite instance
- * @param[in] size              Pointer to store tx buffer size
+ * @param[in] size              Pointer to store maximum payload size available
  * @param[in] timeout           Integer, wait upto timeout ms or not for buffer to become available
  *
  * @return The tx buffer address on success and NULL on failure.

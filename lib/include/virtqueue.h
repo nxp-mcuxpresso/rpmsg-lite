@@ -158,8 +158,7 @@ typedef void vq_callback(struct virtqueue *);
 typedef void vq_notify(struct virtqueue *);
 
 #if (VQUEUE_DEBUG == true)
-
-#define VQASSERT(_vq, _exp, _msg)                                  \
+#define VQASSERT_BOOL(_vq, _exp, _msg)                             \
     do                                                             \
     {                                                              \
         if (!(_exp))                                               \
@@ -169,6 +168,7 @@ typedef void vq_notify(struct virtqueue *);
                 ;                                                  \
         }                                                          \
     } while (0)
+#define VQASSERT(_vq, _exp, _msg) VQASSERT_BOOL(_vq, (_exp) != 0, _msg)
 
 #define VQ_RING_ASSERT_VALID_IDX(_vq, _idx) VQASSERT((_vq), (_idx) < (_vq)->vq_nentries, "invalid ring index")
 

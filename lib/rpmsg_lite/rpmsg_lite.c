@@ -697,6 +697,9 @@ void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uns
     reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
     reserved->idx = idx;
 
+    /* return the maximum payload size */
+    *size -= sizeof(struct rpmsg_std_hdr);
+
     return rpmsg_msg->data;
 }
 
@@ -810,7 +813,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     int idx, j;
     struct rpmsg_lite_instance *rpmsg_lite_dev = NULL;
 
-    if (shmem_length < (RL_VRING_OVERHEAD + (RL_BUFFER_COUNT * RL_BUFFER_SIZE)))
+    if ((2 * RL_BUFFER_COUNT) > ((RL_WORD_ALIGN_DOWN(shmem_length - RL_VRING_OVERHEAD)) / RL_BUFFER_SIZE))
         return NULL;
 
     if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
