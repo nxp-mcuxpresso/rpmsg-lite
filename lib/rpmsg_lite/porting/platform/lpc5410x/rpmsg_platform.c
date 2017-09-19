@@ -30,16 +30,27 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_mailbox.h"
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+#include "mcmgr.h"
+#endif
+
 static int isr_counter = 0;
 static int disable_counter = 0;
 static void *lock;
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+{
+    env_isr(vring_idx);
+}
+#else
 void MAILBOX_IRQHandler(void)
 {
     mailbox_cpu_id_t cpu_id;
@@ -62,6 +73,12 @@ void MAILBOX_IRQHandler(void)
         MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x02);
     }
 }
+    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+      exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+#endif
 
 int platform_init_interrupt(int vq_id, void *isr_data)
 {
@@ -105,6 +122,11 @@ int platform_deinit_interrupt(int vq_id)
 
 void platform_notify(int vq_id)
 {
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    env_lock_mutex(lock);
+    MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vq_id));
+    env_unlock_mutex(lock);
+#else
     switch (RL_GET_LINK_ID(vq_id))
     {
         case 0:
@@ -120,6 +142,7 @@ void platform_notify(int vq_id)
         default:
             return;
     }
+#endif
 }
 
 /**
@@ -269,7 +292,11 @@ void *platform_patova(unsigned long addr)
  */
 int platform_init(void)
 {
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, NULL);
+#else
     MAILBOX_Init(MAILBOX);
+#endif
 
     /* Create lock used in multi-instanced RPMsg */
     env_create_mutex(&lock, 1);

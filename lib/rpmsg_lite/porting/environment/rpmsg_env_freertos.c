@@ -255,7 +255,7 @@ int env_strncmp(char *dest, const char *src, unsigned long len)
  * env_mb - implementation
  *
  */
-void env_mb()
+void env_mb(void)
 {
     MEM_BARRIER();
 }
@@ -263,7 +263,7 @@ void env_mb()
 /*!
  * osalr_mb - implementation
  */
-void env_rmb()
+void env_rmb(void)
 {
     MEM_BARRIER();
 }
@@ -271,7 +271,7 @@ void env_rmb()
 /*!
  * env_wmb - implementation
  */
-void env_wmb()
+void env_wmb(void)
 {
     MEM_BARRIER();
 }

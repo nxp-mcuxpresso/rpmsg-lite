@@ -139,13 +139,13 @@ void env_free_memory(void *ptr);
  *-------------------------------------------------------------------------
  */
 
-void env_memset(void *, int, unsigned long);
-void env_memcpy(void *, void const *, unsigned long);
-size_t env_strlen(const char *);
-void env_strcpy(char *, const char *);
-int env_strcmp(const char *, const char *);
-void env_strncpy(char *, const char *, unsigned long);
-int env_strncmp(char *, const char *, unsigned long);
+void env_memset(void *ptr, int value, unsigned long size);
+void env_memcpy(void *dst, void const *src, unsigned long len);
+size_t env_strlen(const char *str);
+void env_strcpy(char *dest, const char *src);
+int env_strcmp(const char *dst, const char *src);
+void env_strncpy(char *dest, const char *src, unsigned long len);
+int env_strncmp(char *dest, const char *src, unsigned long len);
 #define env_print(...) printf(__VA_ARGS__)
 
 /*!
@@ -352,10 +352,10 @@ void env_enable_interrupt(unsigned int vector_id);
  *
  * Disables the given interrupt.
  *
- * @param vector   - interrupt vector number
+ * @param vector_id   - interrupt vector number
  */
 
-void env_disable_interrupt(unsigned int vector);
+void env_disable_interrupt(unsigned int vector_id);
 
 /*!
  * env_map_memory

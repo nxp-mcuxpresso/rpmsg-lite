@@ -82,7 +82,7 @@ inline int env_in_isr(void)
  * Initializes OS/BM environment.
  *
  */
-int env_init()
+int env_init(void)
 {
     // verify 'env_init_counter'
     assert(env_init_counter >= 0);
@@ -104,7 +104,7 @@ int env_init()
  *
  * @returns Execution status
  */
-int env_deinit()
+int env_deinit(void)
 {
     // verify 'env_init_counter'
     assert(env_init_counter > 0);
@@ -212,7 +212,7 @@ int env_strncmp(char *dest, const char *src, unsigned long len)
  * env_mb - implementation
  *
  */
-void env_mb()
+void env_mb(void)
 {
     MEM_BARRIER();
 }
@@ -220,7 +220,7 @@ void env_mb()
 /*!
  * osalr_mb - implementation
  */
-void env_rmb()
+void env_rmb(void)
 {
     MEM_BARRIER();
 }
@@ -228,7 +228,7 @@ void env_rmb()
 /*!
  * env_wmb - implementation
  */
-void env_wmb()
+void env_wmb(void)
 {
     MEM_BARRIER();
 }
@@ -316,15 +316,15 @@ void env_sleep_msec(int num_msec)
  *
  * Registers interrupt handler data for the given interrupt vector.
  *
- * @param vq_id Virtual interrupt vector number
+ * @param vector_id Virtual interrupt vector number
  * @param data Interrupt handler data (virtqueue)
  */
-void env_register_isr(int vq_id, void *data)
+void env_register_isr(int vector_id, void *data)
 {
-    assert(vq_id < ISR_COUNT);
-    if (vq_id < ISR_COUNT)
+    assert(vector_id < ISR_COUNT);
+    if (vector_id < ISR_COUNT)
     {
-        isr_table[vq_id].data = data;
+        isr_table[vector_id].data = data;
     }
 }
 
@@ -349,12 +349,12 @@ void env_unregister_isr(int vector_id)
  *
  * Enables the given interrupt
  *
- * @param vq_id Interrupt vector number
+ * @param vector_id Interrupt vector number
  */
 
-void env_enable_interrupt(unsigned int vq_id)
+void env_enable_interrupt(unsigned int vector_id)
 {
-    platform_interrupt_enable(vq_id);
+    platform_interrupt_enable(vector_id);
 }
 
 /*!
@@ -362,12 +362,12 @@ void env_enable_interrupt(unsigned int vq_id)
  *
  * Disables the given interrupt
  *
- * @param vq_id Interrupt vector number
+ * @param vector_id Interrupt vector number
  */
 
-void env_disable_interrupt(unsigned int vq_id)
+void env_disable_interrupt(unsigned int vector_id)
 {
-    platform_interrupt_disable(vq_id);
+    platform_interrupt_disable(vector_id);
 }
 
 /*!
