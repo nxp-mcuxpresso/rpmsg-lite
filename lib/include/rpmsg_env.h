@@ -468,6 +468,18 @@ int env_put_queue(void *queue, void *msg, int timeout_ms);
 int env_get_queue(void *queue, void *msg, int timeout_ms);
 
 /*!
+ * env_get_current_queue_size
+ *
+ * Get current queue size.
+ *
+ * @param queue - queue pointer
+ *
+ * @return - Number of queued items in the queue
+ */
+
+int env_get_current_queue_size(void *queue);
+
+/*!
  * env_isr
  *
  * Invoke RPMSG/IRQ callback

@@ -174,6 +174,15 @@ int rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
  */
 int rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *data);
 
+/*!
+ * @brief This function returns the number of pending messages in the queue.
+ *
+ * @param[in] q             RPMsg queue handle
+ *
+ * @return Number of pending messages in the queue.
+ */
+int rpmsg_queue_get_current_size(rpmsg_queue_handle q);
+
 //! @}
 
 #if defined(__cplusplus)

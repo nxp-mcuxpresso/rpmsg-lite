@@ -170,6 +170,8 @@ int rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
 int rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *data)
 {
+    if (!rpmsg_lite_dev)
+        return RL_ERR_PARAM;
     if (!data)
         return RL_ERR_PARAM;
 
@@ -177,4 +179,13 @@ int rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *da
     rpmsg_lite_release_rx_buffer(rpmsg_lite_dev, data);
 
     return RL_SUCCESS;
+}
+
+int rpmsg_queue_get_current_size(rpmsg_queue_handle q)
+{
+    if (!q)
+        return RL_ERR_PARAM;
+
+    /* Return actual queue size. */
+    return env_get_current_queue_size((void *)q);
 }

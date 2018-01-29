@@ -656,3 +656,25 @@ int env_get_queue(void *queue, void *msg, int timeout_ms)
     }
     return 0;
 }
+
+/*!
+ * env_get_current_queue_size
+ *
+ * Get current queue size.
+ *
+ * @param queue - queue pointer
+ *
+ * @return - Number of queued items in the queue
+ */
+
+int env_get_current_queue_size(void *queue)
+{
+    if (env_in_isr())
+    {
+        return(uxQueueMessagesWaitingFromISR(queue));
+    }
+    else
+    {
+        return(uxQueueMessagesWaiting(queue));
+    }
+}

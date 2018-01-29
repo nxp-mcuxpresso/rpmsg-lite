@@ -1,10 +1,13 @@
 /*
+ * The Clear BSD License
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
  * All rights reserved.
  *
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted (subject to the limitations in the disclaimer below) provided
+ * that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
@@ -15,6 +18,7 @@
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,13 +68,13 @@ void MAILBOX_IRQHandler(void)
 
     if (value & 0x01)
     {
-        env_isr(0);
         MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x01);
+        env_isr(0);
     }
     if (value & 0x02)
     {
-        env_isr(1);
         MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x02);
+        env_isr(1);
     }
 }
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
@@ -124,13 +128,17 @@ void platform_notify(int vq_id)
 {
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     env_lock_mutex(lock);
-    MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vq_id));
+    MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vq_id));
     env_unlock_mutex(lock);
 #else
     switch (RL_GET_LINK_ID(vq_id))
     {
         case 0:
             env_lock_mutex(lock);
+/* Write directly into the Mailbox register, no need to wait until the content is cleared
+   (consumed by the receiver side) because the same walue of the virtqueu ID is written
+   into this register when trigerring the ISR for the receiver side. The whole queue of
+   received buffers for associated virtqueue is handled in the ISR then. */
 #if defined(__CM4_CMSIS_VERSION)
             MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vq_id)));
 #else
