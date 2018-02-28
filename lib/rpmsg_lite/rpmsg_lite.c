@@ -32,7 +32,6 @@
 
 #include "rpmsg_lite.h"
 #include "rpmsg_platform.h"
-#include "rpmsg_env.h"
 
 RL_PACKED_BEGIN
 /*!
@@ -111,7 +110,7 @@ struct virtqueue_ops
  * @return       RL_NULL if not found, node pointer containing the ept on success
  *
  */
-struct llist *rpmsg_lite_get_endpoint_from_addr(struct rpmsg_lite_instance *rpmsg_lite_dev, unsigned long addr)
+static struct llist *rpmsg_lite_get_endpoint_from_addr(struct rpmsg_lite_instance *rpmsg_lite_dev, unsigned long addr)
 {
     struct llist *rl_ept_lut_head;
 
@@ -387,7 +386,7 @@ static const struct virtqueue_ops remote_vq_ops = {
 };
 
 /* helper function for virtqueue notification */
-void virtqueue_notify(struct virtqueue *vq)
+static void virtqueue_notify(struct virtqueue *vq)
 {
     platform_notify(vq->vq_queue_index);
 }
@@ -417,9 +416,11 @@ struct rpmsg_lite_endpoint *rpmsg_lite_create_ept(struct rpmsg_lite_instance *rp
     struct rpmsg_lite_endpoint *rl_ept;
     struct llist *node;
     unsigned int i;
-    
+
     if (!rpmsg_lite_dev)
+    {
         return RL_NULL;
+    }
 
     env_lock_mutex(rpmsg_lite_dev->lock);
     {
@@ -505,11 +506,15 @@ int rpmsg_lite_destroy_ept(struct rpmsg_lite_instance *rpmsg_lite_dev, struct rp
     struct llist *node;
 
     if (!rpmsg_lite_dev)
+    {
         return RL_ERR_PARAM;
-    
+    }
+
     if (!rl_ept)
+    {
         return RL_ERR_PARAM;
-    
+    }
+
     env_lock_mutex(rpmsg_lite_dev->lock);
     node = rpmsg_lite_get_endpoint_from_addr(rpmsg_lite_dev, rl_ept->addr);
     if (node)
@@ -542,7 +547,9 @@ mmmmmmm m    m          mm   mmmmm  mmmmm
 int rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
 {
     if (!rpmsg_lite_dev)
+    {
         return 0;
+    }
 
     return rpmsg_lite_dev->link_state;
 }
@@ -578,13 +585,19 @@ int rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_dev,
     unsigned long buff_len;
 
     if (!rpmsg_lite_dev)
+    {
         return RL_ERR_PARAM;
+    }
 
     if (!data)
+    {
         return RL_ERR_PARAM;
+    }
 
     if (!rpmsg_lite_dev->link_state)
+    {
         return RL_NOT_READY;
+    }
 
     /* Lock the device to enable exclusive access to virtqueues */
     env_lock_mutex(rpmsg_lite_dev->lock);
@@ -593,7 +606,9 @@ int rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_dev,
     env_unlock_mutex(rpmsg_lite_dev->lock);
 
     if (!buffer && !timeout)
+    {
         return RL_ERR_NO_MEM;
+    }
 
     while (!buffer)
     {
@@ -637,13 +652,17 @@ int rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                     unsigned long timeout)
 {
     if (!ept)
+    {
         return RL_ERR_PARAM;
+    }
 
     // FIXME : may be just copy the data size equal to buffer length and Tx it.
     if (size > RL_BUFFER_PAYLOAD_SIZE)
+    {
         return RL_ERR_BUFF_SIZE;
+    }
 
-    return rpmsg_lite_format_message(rpmsg_lite_dev, ept->addr, dst, data, size, 0, timeout);
+    return rpmsg_lite_format_message(rpmsg_lite_dev, ept->addr, dst, data, size, RL_NO_FLAGS, timeout);
 }
 
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
@@ -714,13 +733,19 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if (!ept || !data)
+    {
         return RL_ERR_PARAM;
+    }
 
     if (size > RL_BUFFER_PAYLOAD_SIZE)
+    {
         return RL_ERR_BUFF_SIZE;
+    }
 
     if (!rpmsg_lite_dev->link_state)
+    {
         return RL_NOT_READY;
+    }
 
     src = ept->addr;
 
@@ -730,7 +755,7 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     rpmsg_msg->hdr.dst = dst;
     rpmsg_msg->hdr.src = src;
     rpmsg_msg->hdr.len = size;
-    rpmsg_msg->hdr.flags = 0;
+    rpmsg_msg->hdr.flags = RL_NO_FLAGS;
 
     reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
 
@@ -762,9 +787,13 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
     struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if (!rpmsg_lite_dev)
+    {
         return RL_ERR_PARAM;
+    }
     if (!rxbuf)
+    {
         return RL_ERR_PARAM;
+    }
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(rxbuf);
 
@@ -814,22 +843,32 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     struct rpmsg_lite_instance *rpmsg_lite_dev = NULL;
 
     if ((2 * RL_BUFFER_COUNT) > ((RL_WORD_ALIGN_DOWN(shmem_length - RL_VRING_OVERHEAD)) / RL_BUFFER_SIZE))
+    {
         return NULL;
+    }
 
     if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
+    {
         return NULL;
+    }
 
     if (!shmem_addr)
+    {
         return NULL;
+    }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (!static_context)
+    {
         return NULL;
+    }
     rpmsg_lite_dev = static_context;
 #else
     rpmsg_lite_dev = env_allocate_memory(sizeof(struct rpmsg_lite_instance));
     if (!rpmsg_lite_dev)
+    {
         return NULL;
+    }
 #endif
 
     env_memset(rpmsg_lite_dev, 0, sizeof(struct rpmsg_lite_instance));
@@ -925,11 +964,17 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 
             env_memset(buffer, 0x00, RL_BUFFER_SIZE);
             if (vqs[j] == rpmsg_lite_dev->rvq)
+            {
                 status = virtqueue_fill_avail_buffers(vqs[j], buffer, RL_BUFFER_SIZE);
+            }
             else if (vqs[j] == rpmsg_lite_dev->tvq)
+            {
                 status = virtqueue_fill_used_buffers(vqs[j], buffer, RL_BUFFER_SIZE);
+            }
             else
+            {
                 RL_ASSERT(0); /* should not happen */
+            }
 
             if (status != RL_SUCCESS)
             {
@@ -979,19 +1024,27 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id
     struct rpmsg_lite_instance *rpmsg_lite_dev = NULL;
 
     if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
+    {
         return NULL;
+    }
 
     if (!shmem_addr)
+    {
         return NULL;
+    }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (!static_context)
+    {
         return NULL;
+    }
     rpmsg_lite_dev = static_context;
 #else
     rpmsg_lite_dev = env_allocate_memory(sizeof(struct rpmsg_lite_instance));
     if (!rpmsg_lite_dev)
+    {
         return NULL;
+    }
 #endif
 
     env_memset(rpmsg_lite_dev, 0, sizeof(struct rpmsg_lite_instance));
@@ -1077,7 +1130,9 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id
 int rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
 {
     if (!rpmsg_lite_dev)
+    {
         return RL_ERR_PARAM;
+    }
 
     if (!(rpmsg_lite_dev->rvq && rpmsg_lite_dev->tvq && rpmsg_lite_dev->lock))
     {

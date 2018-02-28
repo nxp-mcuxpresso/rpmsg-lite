@@ -33,7 +33,6 @@
 typedef uint8_t boolean;
 
 #include "virtio_ring.h"
-#include "rpmsg_env.h"
 #include "llist.h"
 
 /*Error Codes*/
@@ -154,8 +153,8 @@ struct vq_static_context
     struct virtqueue vq;
 };
 
-typedef void vq_callback(struct virtqueue *);
-typedef void vq_notify(struct virtqueue *);
+typedef void vq_callback(struct virtqueue *vq);
+typedef void vq_notify(struct virtqueue *vq);
 
 #if (VQUEUE_DEBUG == true)
 #define VQASSERT_BOOL(_vq, _exp, _msg)                             \

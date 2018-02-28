@@ -131,9 +131,11 @@ void platform_notify(int vq_id)
     MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vq_id));
     env_unlock_mutex(lock);
 #else
+/* Only single RPMsg-Lite instance (LINK_ID) is defined for this dual core device. Extend
+   this statement in case multiple instances of RPMsg-Lite are needed. */
     switch (RL_GET_LINK_ID(vq_id))
     {
-        case 0:
+        case RL_PLATFORM_LPC5410x_M4_M0_LINK_ID:
             env_lock_mutex(lock);
 /* Write directly into the Mailbox register, no need to wait until the content is cleared
    (consumed by the receiver side) because the same walue of the virtqueu ID is written

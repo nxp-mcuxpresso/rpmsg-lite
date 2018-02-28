@@ -24,6 +24,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rpmsg_env.h"
 #include "virtqueue.h"
 
 /* Prototype for internal functions. */

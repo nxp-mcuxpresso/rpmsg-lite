@@ -29,6 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include "rpmsg_lite.h"
 #include "rpmsg_ns.h"
 
 /* from rpmsg_lite.c { */
@@ -76,7 +78,7 @@ struct rpmsg_ns_msg
  * @return  RL_RELEASE, message is always freed
  *
  */
-int rpmsg_ns_rx_cb(void *payload, int payload_len, unsigned long src, void *priv)
+static int rpmsg_ns_rx_cb(void *payload, int payload_len, unsigned long src, void *priv)
 {
     struct rpmsg_ns_msg *ns_msg_ptr = payload;
     struct rpmsg_ns_callback_data *cb_ctxt = priv;
@@ -85,7 +87,9 @@ int rpmsg_ns_rx_cb(void *payload, int payload_len, unsigned long src, void *priv
 
     /* Drop likely bad messages received at nameservice address */
     if (payload_len == sizeof(struct rpmsg_ns_msg))
+    {
         cb_ctxt->cb(ns_msg_ptr->addr, ns_msg_ptr->name, ns_msg_ptr->flags, cb_ctxt->user_data);
+    }
 
     return RL_RELEASE;
 }
@@ -102,11 +106,15 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
     struct rpmsg_ns_context *ns_ctxt;
 
     if (app_cb == NULL)
+    {
         return NULL;
+    }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (ns_ept_ctxt == NULL)
+    {
         return NULL;
+    }
 
     ns_ctxt = &ns_ept_ctxt->ns_ctxt;
 
@@ -124,7 +132,9 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
 
         cb_ctxt = env_allocate_memory(sizeof(struct rpmsg_ns_callback_data));
         if (cb_ctxt == NULL)
+        {
             return NULL;
+        }
         ns_ctxt = env_allocate_memory(sizeof(struct rpmsg_ns_context));
         if (ns_ctxt == NULL)
         {
@@ -171,15 +181,19 @@ int rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
     struct rpmsg_ns_msg ns_msg;
 
     if (!ept_name)
+    {
         return RL_ERR_PARAM;
+    }
 
     if (!new_ept)
+    {
         return RL_ERR_PARAM;
+    }
 
     env_strncpy(ns_msg.name, ept_name, RL_NS_NAME_SIZE);
     ns_msg.flags = flags;
     ns_msg.addr = new_ept->addr;
 
     return rpmsg_lite_format_message(rpmsg_lite_dev, new_ept->addr, RL_NS_EPT_ADDR, (char *)&ns_msg,
-                                     sizeof(struct rpmsg_ns_msg), 0, RL_BLOCK);
+                                     sizeof(struct rpmsg_ns_msg), RL_NO_FLAGS, RL_BLOCK);
 }

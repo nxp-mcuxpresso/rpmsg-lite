@@ -56,7 +56,9 @@
 void add_to_list(struct llist **head, struct llist *node)
 {
     if (!node)
+    {
         return;
+    }
 
     if (*head)
     {
@@ -87,7 +89,9 @@ void add_to_list(struct llist **head, struct llist *node)
 void remove_from_list(struct llist **head, struct llist *node)
 {
     if (!(*head) || !(node))
+    {
         return;
+    }
 
     if (node == *head)
     {

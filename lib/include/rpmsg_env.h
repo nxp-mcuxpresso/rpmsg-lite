@@ -54,8 +54,6 @@
 *       env_free_memory
 *       env_memset
 *       env_memcpy
-*       env_strlen
-*       env_strcpy
 *       env_strncpy
 *       env_print
 *       env_map_vatopa
@@ -141,8 +139,6 @@ void env_free_memory(void *ptr);
 
 void env_memset(void *ptr, int value, unsigned long size);
 void env_memcpy(void *dst, void const *src, unsigned long len);
-size_t env_strlen(const char *str);
-void env_strcpy(char *dest, const char *src);
 int env_strcmp(const char *dst, const char *src);
 void env_strncpy(char *dest, const char *src, unsigned long len);
 int env_strncmp(char *dest, const char *src, unsigned long len);
@@ -342,7 +338,7 @@ void env_unregister_isr(int vector_id);
  *
  * Enables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_enable_interrupt(unsigned int vector_id);
@@ -352,7 +348,7 @@ void env_enable_interrupt(unsigned int vector_id);
  *
  * Disables the given interrupt.
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_disable_interrupt(unsigned int vector_id);

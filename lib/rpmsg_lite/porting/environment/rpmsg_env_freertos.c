@@ -53,7 +53,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 static int env_init_counter = 0;
 SemaphoreHandle_t env_sema = NULL;
@@ -75,7 +74,7 @@ static struct isr_info isr_table[ISR_COUNT];
  * @returns - true, if currently in ISR
  *
  */
-int env_in_isr(void)
+static int env_in_isr(void)
 {
     return platform_in_isr();
 }
@@ -91,7 +90,7 @@ int env_init(void)
     int retval;
     vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
-    assert(env_init_counter >= 0);
+    RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
         xTaskResumeAll(); /* re-enable scheduler */
@@ -137,7 +136,7 @@ int env_deinit(void)
 
     vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
-    assert(env_init_counter > 0);
+    RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
         xTaskResumeAll(); /* re-enable scheduler */
@@ -182,7 +181,10 @@ void *env_allocate_memory(unsigned int size)
  */
 void env_free_memory(void *ptr)
 {
-    vPortFree(ptr);
+    if (ptr != NULL)
+    {
+        vPortFree(ptr);
+    }
 }
 
 /*!
@@ -376,7 +378,9 @@ int env_create_sync_lock(void **lock, int state)
 void env_delete_sync_lock(void *lock)
 {
     if (lock)
+    {
         env_delete_mutex(lock);
+    }
 }
 
 /*!
@@ -440,7 +444,7 @@ void env_sleep_msec(int num_msec)
  */
 void env_register_isr(int vector_id, void *data)
 {
-    assert(vector_id < ISR_COUNT);
+    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = data;
@@ -456,7 +460,7 @@ void env_register_isr(int vector_id, void *data)
  */
 void env_unregister_isr(int vector_id)
 {
-    assert(vector_id < ISR_COUNT);
+    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = NULL;
@@ -468,7 +472,7 @@ void env_unregister_isr(int vector_id)
  *
  * Enables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_enable_interrupt(unsigned int vector_id)
@@ -481,7 +485,7 @@ void env_enable_interrupt(unsigned int vector_id)
  *
  * Disables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_disable_interrupt(unsigned int vector_id)
@@ -544,7 +548,7 @@ unsigned long long env_get_timestamp(void)
 void env_isr(int vector)
 {
     struct isr_info *info;
-    assert(vector < ISR_COUNT);
+    RL_ASSERT(vector < ISR_COUNT);
     if (vector < ISR_COUNT)
     {
         info = &isr_table[vector];
