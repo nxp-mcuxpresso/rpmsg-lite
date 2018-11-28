@@ -751,12 +751,12 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
     RL_ASSERT(
             /* master check */
-            ((rpmsg_lite_dev->vq_ops == master_vq_ops) &&
+            ((rpmsg_lite_dev->vq_ops == &master_vq_ops) &&
             (data >= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE))) &&
             (data <= (rpmsg_lite_dev->sh_mem_base + (2*RL_BUFFER_COUNT*RL_BUFFER_SIZE)))) ||
 
             /* remote check */
-            ((rpmsg_lite_dev->vq_ops == remote_vq_ops) &&
+            ((rpmsg_lite_dev->vq_ops == &remote_vq_ops) &&
             (data >= rpmsg_lite_dev->sh_mem_base) &&
             (data <= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE))))
         )
@@ -810,12 +810,12 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
 
     RL_ASSERT(
             /* master check */
-            ((rpmsg_lite_dev->vq_ops == master_vq_ops) &&
+            ((rpmsg_lite_dev->vq_ops == &master_vq_ops) &&
             (rxbuf >= rpmsg_lite_dev->sh_mem_base) &&
             (rxbuf <= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE)))) ||
 
             /* remote check */
-            ((rpmsg_lite_dev->vq_ops == remote_vq_ops) &&
+            ((rpmsg_lite_dev->vq_ops == &remote_vq_ops) &&
             (rxbuf >= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE))) &&
             (rxbuf <= (rpmsg_lite_dev->sh_mem_base + (2*RL_BUFFER_COUNT*RL_BUFFER_SIZE))))
         )
