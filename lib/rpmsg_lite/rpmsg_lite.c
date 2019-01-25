@@ -749,6 +749,7 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
     src = ept->addr;
 
+#if defined(RL_DEBUG_CHECK_BUFFERS) && (RL_DEBUG_CHECK_BUFFERS == 1)
     RL_ASSERT(
             /* master check */
             ((rpmsg_lite_dev->vq_ops == &master_vq_ops) &&
@@ -760,6 +761,7 @@ int rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
             (data >= rpmsg_lite_dev->sh_mem_base) &&
             (data <= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE))))
         )
+#endif
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(data);
 
@@ -807,7 +809,7 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
         return RL_ERR_PARAM;
     }
 
-
+#if defined(RL_DEBUG_CHECK_BUFFERS) && (RL_DEBUG_CHECK_BUFFERS == 1)
     RL_ASSERT(
             /* master check */
             ((rpmsg_lite_dev->vq_ops == &master_vq_ops) &&
@@ -819,6 +821,7 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
             (rxbuf >= (rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT*RL_BUFFER_SIZE))) &&
             (rxbuf <= (rpmsg_lite_dev->sh_mem_base + (2*RL_BUFFER_COUNT*RL_BUFFER_SIZE))))
         )
+#endif
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(rxbuf);
 
