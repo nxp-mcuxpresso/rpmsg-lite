@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,10 @@ struct isr_info
     void *data;
 };
 static struct isr_info isr_table[ISR_COUNT];
+
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+#error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
+#endif
 
 /*!
  * env_init
@@ -214,7 +218,7 @@ void env_mb(void)
 }
 
 /*!
- * osalr_mb - implementation
+ * env_rmb - implementation
  */
 void env_rmb(void)
 {

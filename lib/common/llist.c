@@ -55,12 +55,12 @@
  */
 void add_to_list(struct llist **head, struct llist *node)
 {
-    if (!node)
+    if (node == LIST_NULL)
     {
         return;
     }
 
-    if (*head)
+    if (*head != LIST_NULL)
     {
         /* Place the new element at the start of list. */
         node->next = *head;
@@ -88,7 +88,7 @@ void add_to_list(struct llist **head, struct llist *node)
  */
 void remove_from_list(struct llist **head, struct llist *node)
 {
-    if (!(*head) || !(node))
+    if ((*head == LIST_NULL) || (node == LIST_NULL))
     {
         return;
     }

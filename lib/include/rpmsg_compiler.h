@@ -57,21 +57,12 @@
 #define RL_PACKED_END
 #endif
 
-/* GNUC */
-#elif defined(__GNUC__)
-
-#define MEM_BARRIER() asm volatile("dsb" : : : "memory")
-
-#ifndef RL_PACKED_BEGIN
-#define RL_PACKED_BEGIN
-#endif
-
-#ifndef RL_PACKED_END
-#define RL_PACKED_END __attribute__((__packed__))
-#endif
-
 /* ARM GCC */
-#elif defined(__CC_ARM)
+#elif defined(__CC_ARM) || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+
+#if (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+#include <arm_compat.h>
+#endif
 
 #define MEM_BARRIER() __schedule_barrier()
 
@@ -81,6 +72,38 @@
 
 #ifndef RL_PACKED_END
 #define RL_PACKED_END _Pragma("pack()")
+#endif
+
+/* XCC HiFi4 */
+#elif defined(__XCC__)
+
+/*
+ * The XCC HiFi4 compiler is compatible with GNU compiler, with restrictions.
+ * For ARM __schedule_barrier, there's no identical intrinsic in HiFi4.
+ * A complete synchronization barrier would require initialize and wait ops.
+ * Here use NOP instead, similar to ARM __nop.
+*/
+#define MEM_BARRIER() __asm__ __volatile__("nop" : : : "memory")
+
+#ifndef RL_PACKED_BEGIN
+#define RL_PACKED_BEGIN
+#endif
+
+#ifndef RL_PACKED_END
+#define RL_PACKED_END __attribute__((__packed__))
+#endif
+
+/* GNUC */
+#elif defined(__GNUC__)
+
+#define MEM_BARRIER() __asm__ volatile("dsb" : : : "memory")
+
+#ifndef RL_PACKED_BEGIN
+#define RL_PACKED_BEGIN
+#endif
+
+#ifndef RL_PACKED_END
+#define RL_PACKED_END __attribute__((__packed__))
 #endif
 
 #else

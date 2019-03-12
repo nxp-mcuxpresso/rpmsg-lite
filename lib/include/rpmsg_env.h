@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,20 +86,32 @@
  *
  * Initializes OS/BM environment.
  *
+ * @param env_context        Pointer to preallocated environment context data
+ * @param env_init_data      Initialization data for the environment layer
+ *
  * @returns - execution status
  */
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+int env_init(void ** env_context, void * env_init_data);
+#else
 int env_init(void);
+#endif
 
 /*!
  * env_deinit
  *
  * Uninitializes OS/BM environment.
  *
+ * @param env_context   Pointer to environment context data
+ *
  * @returns - execution status
  */
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+int env_deinit(void *env_context);
+#else
 int env_deinit(void);
+#endif
+
 /*!
  * -------------------------------------------------------------------------
  *
@@ -157,23 +169,33 @@ int env_strncmp(char *dest, const char *src, unsigned long len);
  *
  * Converts logical address to physical address
  *
- * @param address - pointer to logical address
+ * @param env       Pointer to environment context data
+ * @param address   Pointer to logical address
  *
  * @return  - physical address
  */
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+unsigned long env_map_vatopa(void *env, void *address);
+#else
 unsigned long env_map_vatopa(void *address);
+#endif
 
 /*!
  * env_map_patova
  *
  * Converts physical address to logical address
  *
- * @param address - pointer to physical address
+ * @param env_context   Pointer to environment context data
+ * @param address       Pointer to physical address
  *
  * @return  - logical address
  *
  */
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void *env_map_patova(void * env, unsigned long address);
+#else
 void *env_map_patova(unsigned long address);
+#endif
 
 /*!
  *-----------------------------------------------------------------------------
@@ -319,39 +341,57 @@ void env_sleep_msec(int num_msec);
  *
  * Registers interrupt handler data for the given interrupt vector.
  *
- * @param vector_id - virtual interrupt vector number
- * @param data      - interrupt handler data (virtqueue)
+ * @param env           Pointer to environment context data
+ * @param vector_id     Virtual interrupt vector number
+ * @param data          Interrupt handler data (virtqueue)
  */
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void env_register_isr(void *env, int vector_id, void *data);
+#else
 void env_register_isr(int vector_id, void *data);
+#endif
 
 /*!
  * env_unregister_isr
  *
  * Unregisters interrupt handler data for the given interrupt vector.
  *
- * @param vector_id - virtual interrupt vector number
+ * @param env           Pointer to environment context data
+ * @param vector_id     Virtual interrupt vector number
  */
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void env_unregister_isr(void *env, int vector_id);
+#else
 void env_unregister_isr(int vector_id);
+#endif
 
 /*!
  * env_enable_interrupt
  *
  * Enables the given interrupt
  *
- * @param vector_id   - virtual interrupt vector number
+ * @param env           Pointer to environment context data
+ * @param vector_id     Virtual interrupt vector number
  */
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void env_enable_interrupt(void *env, unsigned int vector_id);
+#else
 void env_enable_interrupt(unsigned int vector_id);
+#endif
 
 /*!
  * env_disable_interrupt
  *
  * Disables the given interrupt.
  *
- * @param vector_id   - virtual interrupt vector number
+ * @param env           Pointer to environment context data
+ * @param vector_id     Virtual interrupt vector number
  */
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void env_disable_interrupt(void *env, unsigned int vector_id);
+#else
 void env_disable_interrupt(unsigned int vector_id);
+#endif
 
 /*!
  * env_map_memory
@@ -417,9 +457,9 @@ typedef void LOCK;
  *
  * Creates a message queue.
  *
- * @param queue -  pointer to created queue
- * @param length -  maximum number of elements in the queue
- * @param item_size - queue element size in bytes
+ * @param queue      Pointer to created queue
+ * @param length     Maximum number of elements in the queue
+ * @param item_size  Queue element size in bytes
  *
  * @return - status of function execution
  */
@@ -430,7 +470,7 @@ int env_create_queue(void **queue, int length, int element_size);
  *
  * Deletes the message queue.
  *
- * @param queue - queue to delete
+ * @param queue   Queue to delete
  */
 
 void env_delete_queue(void *queue);
@@ -440,9 +480,9 @@ void env_delete_queue(void *queue);
  *
  * Put an element in a queue.
  *
- * @param queue - queue to put element in
- * @param msg - pointer to the message to be put into the queue
- * @param timeout_ms - timeout in ms
+ * @param queue       Queue to put element in
+ * @param msg         Pointer to the message to be put into the queue
+ * @param timeout_ms  Timeout in ms
  *
  * @return - status of function execution
  */
@@ -454,9 +494,9 @@ int env_put_queue(void *queue, void *msg, int timeout_ms);
  *
  * Get an element out of a queue.
  *
- * @param queue - queue to get element from
- * @param msg - pointer to a memory to save the message
- * @param timeout_ms - timeout in ms
+ * @param queue       Queue to get element from
+ * @param msg         Pointer to a memory to save the message
+ * @param timeout_ms  Timeout in ms
  *
  * @return - status of function execution
  */
@@ -468,7 +508,7 @@ int env_get_queue(void *queue, void *msg, int timeout_ms);
  *
  * Get current queue size.
  *
- * @param queue - queue pointer
+ * @param queue    Queue pointer
  *
  * @return - Number of queued items in the queue
  */
@@ -480,9 +520,52 @@ int env_get_current_queue_size(void *queue);
  *
  * Invoke RPMSG/IRQ callback
  *
- * @param vector - RPMSG IRQ vector ID.
+ * @param env           Pointer to environment context data
+ * @param vector        RPMSG IRQ vector ID.
  */
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+void env_isr(void *env, int vector);
+#else
 void env_isr(int vector);
+#endif
+
+
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+/*!
+ * env_get_platform_context
+ *
+ * Get the platform layer context from the environment platform context
+ *
+ * @param env     Pointer to environment context data
+ *
+ * @return        Pointer to platform context data
+ */
+void * env_get_platform_context(void * env_context);
+
+/*!
+ * env_init_interrupt
+ *
+ * Initialize the ISR data for given virtqueue interrupt
+ *
+ * @param env       Pointer to environment context data
+ * @param vq_id     Virtqueue ID
+ * @param isr_data  Pointer to initial ISR data
+ *
+ * @return        Execution status, 0 on success
+ */
+int env_init_interrupt(void *env, int vq_id, void *isr_data);
+
+/*!
+ * env_deinit_interrupt
+ *
+ * Deinitialize the ISR data for given virtqueue interrupt
+ *
+ * @param env       Pointer to environment context data
+ * @param vq_id     Virtqueue ID
+ *
+ * @return        Execution status, 0 on success
+ */
+int env_deinit_interrupt(void *env, int vq_id);
+#endif
 
 #endif /* _RPMSG_ENV_H_ */

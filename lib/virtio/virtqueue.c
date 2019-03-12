@@ -1,6 +1,9 @@
 /*-
  * Copyright (c) 2011, Bryan Venteicher <bryanv@FreeBSD.org>
+ * Copyright (c) 2016 Freescale Semiconductor, Inc.
+ * Copyright 2016-2019 NXP
  * All rights reserved.
+ *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -212,7 +215,11 @@ int virtqueue_fill_avail_buffers(struct virtqueue *vq, void *buffer, uint32_t le
         head_idx = vq->vq_desc_head_idx;
 
         dp = &vq->vq_ring.desc[head_idx];
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+        dp->addr = env_map_vatopa(vq->env, buffer);
+#else
         dp->addr = env_map_vatopa(buffer);
+#endif
         dp->len = len;
         dp->flags = VRING_DESC_F_WRITE;
 
@@ -245,7 +252,7 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
 
     VQUEUE_BUSY(vq, used_read);
 
-    used_idx = vq->vq_used_cons_idx & (vq->vq_nentries - 1);
+    used_idx = (uint16_t)(vq->vq_used_cons_idx & ((uint16_t)(vq->vq_nentries - 1U)));
     uep = &vq->vq_ring.used->ring[used_idx];
 
     env_rmb();
@@ -261,7 +268,11 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
 
     VQUEUE_IDLE(vq, used_read);
 
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    return env_map_patova(vq->env, vq->vq_ring.desc[desc_idx].addr);
+#else
     return env_map_patova(vq->vq_ring.desc[desc_idx].addr);
+#endif
 }
 
 /*!
@@ -337,12 +348,15 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
 
     VQUEUE_BUSY(vq, avail_read);
 
-    head_idx = vq->vq_available_idx++ & (vq->vq_nentries - 1);
+    head_idx = (uint16_t)(vq->vq_available_idx++ & ((uint16_t)(vq->vq_nentries - 1U)));
     *avail_idx = vq->vq_ring.avail->ring[head_idx];
 
     env_rmb();
-
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    buffer = env_map_patova(vq->env, vq->vq_ring.desc[*avail_idx].addr);
+#else
     buffer = env_map_patova(vq->vq_ring.desc[*avail_idx].addr);
+#endif
     *len = vq->vq_ring.desc[*avail_idx].len;
 
     VQUEUE_IDLE(vq, avail_read);
@@ -486,16 +500,16 @@ void virtqueue_dump(struct virtqueue *vq)
  */
 uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
 {
-    uint16_t head_idx = 0;
-    uint16_t avail_idx = 0;
-    uint32_t len = 0;
+    uint16_t head_idx;
+    uint16_t avail_idx;
+    uint32_t len;
 
     if (vq->vq_available_idx == vq->vq_ring.avail->idx)
     {
         return 0;
     }
 
-    head_idx = vq->vq_available_idx & (vq->vq_nentries - 1);
+    head_idx = (uint16_t)(vq->vq_available_idx & ((uint16_t)(vq->vq_nentries - 1U)));
     avail_idx = vq->vq_ring.avail->ring[head_idx];
     len = vq->vq_ring.desc[avail_idx].len;
 
@@ -524,7 +538,11 @@ static uint16_t vq_ring_add_buffer(
     VQASSERT(vq, head_idx != VQ_RING_DESC_CHAIN_END, "premature end of free desc chain");
 
     dp = &desc[head_idx];
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    dp->addr = env_map_vatopa(vq->env, buffer);
+#else
     dp->addr = env_map_vatopa(buffer);
+#endif
     dp->len = length;
     dp->flags = VRING_DESC_F_WRITE;
 
@@ -565,7 +583,7 @@ static void vq_ring_update_avail(struct virtqueue *vq, uint16_t desc_idx)
      * currently running on another CPU, we can keep it processing the new
      * descriptor.
      */
-    avail_idx = vq->vq_ring.avail->idx & (vq->vq_nentries - 1);
+    avail_idx = (uint16_t)(vq->vq_ring.avail->idx & ((uint16_t)(vq->vq_nentries - 1U)));
     vq->vq_ring.avail->ring[avail_idx] = desc_idx;
 
     env_wmb();

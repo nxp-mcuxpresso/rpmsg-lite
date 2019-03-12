@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ extern "C" {
 #include "rpmsg_env.h"
 #include "llist.h"
 #include "rpmsg_compiler.h"
+#include "rpmsg_default_config.h"
 
 //! @addtogroup rpmsg_lite
 //! @{
@@ -50,7 +51,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "2.0.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "2.2.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(unsigned long))
@@ -131,6 +132,9 @@ struct rpmsg_lite_instance
     unsigned int sh_mem_remaining;      /*!< remaining free bytes of shared memory */
     unsigned int sh_mem_total;          /*!< total size of shared memory */
     struct virtqueue_ops const *vq_ops; /*!< ops functions table pointer */
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    void *env;                          /*!< pointer to the environment layer context */
+#endif
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     struct vq_static_context vq_ctxt[2];
@@ -152,8 +156,9 @@ struct rpmsg_lite_instance
  * @param shmem_length     Length of memory area given by previous parameter
  * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
+ * @param env_cfg          Initialization data for the environement RPMsg-Lite layer
  * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
-*
+ *
  * @return  New RPMsg-Lite instance pointer or NULL.
  *
  */
@@ -163,6 +168,12 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                                                    int link_id,
                                                    uint32_t init_flags,
                                                    struct rpmsg_lite_instance *static_context);
+#elif defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
+                                                    size_t shmem_length,
+                                                    int link_id,
+                                                    uint32_t init_flags,
+                                                    void *env_cfg);
 #else
 struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                                                    size_t shmem_length,
@@ -178,6 +189,8 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
  * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
+ * @param env_cfg          Initialization data for the environement RPMsg-Lite layer
+ * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
  *
  * @return  New RPMsg-Lite instance pointer or NULL.
  *
@@ -187,6 +200,8 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
                                                    int link_id,
                                                    uint32_t init_flags,
                                                    struct rpmsg_lite_instance *static_context);
+#elif defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags, void *env_cfg);
 #else
 struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags);
 #endif

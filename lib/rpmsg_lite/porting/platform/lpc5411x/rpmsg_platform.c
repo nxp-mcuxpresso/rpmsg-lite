@@ -1,37 +1,11 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holder nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -45,9 +19,13 @@
 #include "mcmgr.h"
 #endif
 
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+#error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
+#endif
+
 static int isr_counter = 0;
 static int disable_counter = 0;
-static void *lock;
+static void *platform_lock;
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 static void mcmgr_event_handler(uint16_t vring_idx, void *context)
@@ -58,7 +36,7 @@ static void mcmgr_event_handler(uint16_t vring_idx, void *context)
 void MAILBOX_IRQHandler(void)
 {
     mailbox_cpu_id_t cpu_id;
-#if defined(__CM4_CMSIS_VERSION)
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
     cpu_id = kMAILBOX_CM4;
 #else
     cpu_id = kMAILBOX_CM0Plus;
@@ -76,77 +54,92 @@ void MAILBOX_IRQHandler(void)
         MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x02);
         env_isr(1);
     }
-}
+
     /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
       exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
     __DSB();
 #endif
+}
 #endif
 
-int platform_init_interrupt(int vq_id, void *isr_data)
+void platform_global_isr_disable(void)
+{
+    __asm volatile("cpsid i");
+}
+
+
+void platform_global_isr_enable(void)
+{
+    __asm volatile("cpsie i");
+}
+
+int platform_init_interrupt(unsigned int vector_id, void *isr_data)
 {
     /* Register ISR to environment layer */
-    env_register_isr(vq_id, isr_data);
+    env_register_isr(vector_id, isr_data);
 
-    env_lock_mutex(lock);
+    env_lock_mutex(platform_lock);
 
-    assert(0 <= isr_counter);
+    RL_ASSERT(0 <= isr_counter);
     if (!isr_counter)
-
-#if defined(__CM4_CMSIS_VERSION)
+    {
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
         NVIC_SetPriority(MAILBOX_IRQn, 5);
 #else
         NVIC_SetPriority(MAILBOX_IRQn, 2);
 #endif
+    }
     isr_counter++;
 
-    env_unlock_mutex(lock);
+    env_unlock_mutex(platform_lock);
 
     return 0;
 }
 
-int platform_deinit_interrupt(int vq_id)
+int platform_deinit_interrupt(unsigned int vector_id)
 {
     /* Prepare the MU Hardware */
-    env_lock_mutex(lock);
+    env_lock_mutex(platform_lock);
 
-    assert(0 < isr_counter);
+    RL_ASSERT(0 < isr_counter);
     isr_counter--;
     if (!isr_counter)
+    {
         NVIC_DisableIRQ(MAILBOX_IRQn);
+    }
 
     /* Unregister ISR from environment layer */
-    env_unregister_isr(vq_id);
+    env_unregister_isr(vector_id);
 
-    env_unlock_mutex(lock);
+    env_unlock_mutex(platform_lock);
 
     return 0;
 }
 
-void platform_notify(int vq_id)
+void platform_notify(unsigned int vector_id)
 {
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    env_lock_mutex(lock);
-    MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vq_id));
-    env_unlock_mutex(lock);
+    env_lock_mutex(platform_lock);
+    MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
+    env_unlock_mutex(platform_lock);
 #else
 /* Only single RPMsg-Lite instance (LINK_ID) is defined for this dual core device. Extend
    this statement in case multiple instances of RPMsg-Lite are needed. */
-    switch (RL_GET_LINK_ID(vq_id))
+    switch (RL_GET_LINK_ID(vector_id))
     {
         case RL_PLATFORM_LPC5411x_M4_M0_LINK_ID:
-            env_lock_mutex(lock);
+            env_lock_mutex(platform_lock);
 /* Write directly into the Mailbox register, no need to wait until the content is cleared
    (consumed by the receiver side) because the same walue of the virtqueu ID is written
    into this register when trigerring the ISR for the receiver side. The whole queue of
    received buffers for associated virtqueue is handled in the ISR then. */
-#if defined(__CM4_CMSIS_VERSION)
-            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vq_id)));
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vector_id)));
 #else
-            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM4, (1 << RL_GET_Q_ID(vq_id)));
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM4, (1 << RL_GET_Q_ID(vector_id)));
 #endif
-            env_unlock_mutex(lock);
+            env_unlock_mutex(platform_lock);
             return;
 
         default:
@@ -196,26 +189,26 @@ int platform_in_isr(void)
 /**
  * platform_interrupt_enable
  *
- * Enable peripheral-related interrupt with passed priority and type.
+ * Enable peripheral-related interrupt
  *
- * @param vq_id Vector ID that need to be converted to IRQ number
- * @param trigger_type IRQ active level
- * @param trigger_type IRQ priority
+ * @param vector_id Virtual vector ID that needs to be converted to IRQ number
  *
- * @return vq_id. Return value is never checked..
+ * @return vector_id Return value is never checked.
  *
  */
-int platform_interrupt_enable(unsigned int vq_id)
+int platform_interrupt_enable(unsigned int vector_id)
 {
-    assert(0 < disable_counter);
+    RL_ASSERT(0 < disable_counter);
 
-    __asm volatile("cpsid i");
+    platform_global_isr_disable();
     disable_counter--;
 
     if (!disable_counter)
+    {
         NVIC_EnableIRQ(MAILBOX_IRQn);
-    __asm volatile("cpsie i");
-    return (vq_id);
+    }
+    platform_global_isr_enable();
+    return (vector_id);
 }
 
 /**
@@ -223,24 +216,25 @@ int platform_interrupt_enable(unsigned int vq_id)
  *
  * Disable peripheral-related interrupt.
  *
- * @param vq_id Vector ID that need to be converted to IRQ number
+ * @param vector_id Virtual vector ID that needs to be converted to IRQ number
  *
- * @return vq_id. Return value is never checked.
+ * @return vector_id Return value is never checked.
  *
  */
-int platform_interrupt_disable(unsigned int vq_id)
+int platform_interrupt_disable(unsigned int vector_id)
 {
-    assert(0 <= disable_counter);
+    RL_ASSERT(0 <= disable_counter);
 
-    __asm volatile("cpsid i");
-    // virtqueues use the same NVIC vector
-    // if counter is set - the interrupts are disabled
+    platform_global_isr_disable();
+    /* virtqueues use the same NVIC vector
+       if counter is set - the interrupts are disabled */
     if (!disable_counter)
+    {
         NVIC_DisableIRQ(MAILBOX_IRQn);
-
+    }
     disable_counter++;
-    __asm volatile("cpsie i");
-    return (vq_id);
+    platform_global_isr_enable();
+    return (vector_id);
 }
 
 /**
@@ -259,7 +253,7 @@ void platform_map_mem_region(unsigned int vrt_addr, unsigned int phy_addr, unsig
  * Dummy implementation
  *
  */
-void platform_cache_all_flush_invalidate()
+void platform_cache_all_flush_invalidate(void)
 {
 }
 
@@ -269,7 +263,7 @@ void platform_cache_all_flush_invalidate()
  * Dummy implementation
  *
  */
-void platform_cache_disable()
+void platform_cache_disable(void)
 {
 }
 
@@ -303,13 +297,21 @@ void *platform_patova(unsigned long addr)
 int platform_init(void)
 {
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, NULL);
+    mcmgr_status_t retval;
+    retval = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, NULL);
+    if(kStatus_MCMGR_Success != retval)
+    {
+        return -1;
+    }
 #else
     MAILBOX_Init(MAILBOX);
 #endif
 
     /* Create lock used in multi-instanced RPMsg */
-    env_create_mutex(&lock, 1);
+    if(0 != env_create_mutex(&platform_lock, 1))
+    {
+        return -1;
+    }
 
     return 0;
 }
@@ -323,18 +325,20 @@ int platform_deinit(void)
 {
 /* Important for LPC5411x - do not deinit mailbox, if there
    is a pending ISR on the other core! */
-#if defined(__CM4_CMSIS_VERSION)
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
     while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM0Plus))
-        ;
+    {
+    }
 #else
     while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM4))
-        ;
+    {
+    }
 #endif
 
     MAILBOX_Deinit(MAILBOX);
 
     /* Delete lock used in multi-instanced RPMsg */
-    env_delete_mutex(lock);
-    lock = NULL;
+    env_delete_mutex(platform_lock);
+    platform_lock = NULL;
     return 0;
 }
