@@ -7,7 +7,7 @@ Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (Op
 
 The RPMsg-Lite is an open-source component developed by NXP Semiconductor and released under the BSD compatible license.
 
-For Further documentation, please look at doxygen documentation at: https://codeauroraforum.github.io/rpmsg-lite/
+For Further documentation, please look at doxygen documentation at: https://nxpmicro.github.io/rpmsg-lite/
 
 # Motivation to create RPMsg-Lite
 
