@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 1.1</span>
+   &#160;<span id="projectnumber">Rev. 2.2.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -121,9 +121,9 @@ $(document).ready(function(){initNavTree('group__rpmsg__lite.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:structrpmsg__lite__endpoint"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_ns_handle</a></td></tr>
+<tr class="memitem:structrpmsg__lite__endpoint"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a></td></tr>
 <tr class="separator:structrpmsg__lite__endpoint"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:structrpmsg__lite__ept__static__context"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__ept__static__context">rpmsg_ns_static_context</a></td></tr>
+<tr class="memitem:structrpmsg__lite__ept__static__context"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__ept__static__context">rpmsg_lite_ept_static_context</a></td></tr>
 <tr class="separator:structrpmsg__lite__ept__static__context"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:structrpmsg__lite__instance"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a></td></tr>
 <tr class="separator:structrpmsg__lite__instance"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -259,28 +259,28 @@ Functions</h2></td></tr>
 </div><table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="a46dae43ac5b6658a933b13d5a121ccb4"></a>unsigned long</td>
+<a class="anchor" id="a28c0e9a7a70fbc58a497f2d3fac96f70"></a>unsigned long</td>
 <td class="fieldname">
 addr</td>
 <td class="fielddoc">
 <p>endpoint address </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="ad679d3da51d5e6dcda6201c7e4a5291f"></a><a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a></td>
+<a class="anchor" id="a457c132df214a78150ae4525b6100700"></a><a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a></td>
 <td class="fieldname">
 rx_cb</td>
 <td class="fielddoc">
 <p>ISR callback function </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="aaa39ddc86f55cdf49cec67c285604571"></a>void *</td>
+<a class="anchor" id="a30e868937950060fbcce818a2bc35db8"></a>void *</td>
 <td class="fieldname">
 rx_cb_data</td>
 <td class="fielddoc">
 <p>ISR callback data </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="a08ad41ca77de937c13dfceda46b0bdd5"></a>void *</td>
+<a class="anchor" id="adae527c972c102f433354448d3ab05a7"></a>void *</td>
 <td class="fieldname">
 rfu</td>
 <td class="fielddoc">
@@ -300,25 +300,17 @@ rfu</td>
       </table>
 </div><div class="memdoc">
 <div class="textblock"><p>RPMsg Lite Endpoint static context </p>
-</div><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Collaboration diagram for rpmsg_ns_static_context:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><!-- SVG 0 -->
-</div>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
-<table class="fieldtable">
+</div><table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="ac3179c5af2a40e3887879c8683eb8013"></a>struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a></td>
+<a class="anchor" id="a4cbac751c0f2b20768136c31610906f8"></a>struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a></td>
 <td class="fieldname">
 ept</td>
 <td class="fielddoc">
 <p>memory for endpoint structure </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="ae0c5512d3f5585158b15b0071e59b939"></a>struct llist</td>
+<a class="anchor" id="aac24ffeec310481457938c02b916c426"></a>struct llist</td>
 <td class="fieldname">
 node</td>
 <td class="fielddoc">
@@ -463,8 +455,9 @@ vq_ops</td>
   <table class="params">
     <tr><td class="paramname">shmem_addr</td><td>Shared memory base used for this instance of RPMsg-Lite </td></tr>
     <tr><td class="paramname">shmem_length</td><td>Length of memory area given by previous parameter </td></tr>
-    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see platform.h </td></tr>
+    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h </td></tr>
     <tr><td class="paramname">init_flags</td><td>Initialization flags </td></tr>
+    <tr><td class="paramname">env_cfg</td><td>Initialization data for the environement RPMsg-Lite layer, used when the environment layer uses its own context (RL_USE_ENVIRONMENT_CONTEXT) </td></tr>
     <tr><td class="paramname">static_context</td><td>RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)</td></tr>
   </table>
   </dd>
@@ -507,8 +500,10 @@ vq_ops</td>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">shmem_addr</td><td>Shared memory base used for this instance of RPMsg-Lite </td></tr>
-    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see platform.h </td></tr>
-    <tr><td class="paramname">init_flags</td><td>Initialization flags</td></tr>
+    <tr><td class="paramname">link_id</td><td>Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h </td></tr>
+    <tr><td class="paramname">init_flags</td><td>Initialization flags </td></tr>
+    <tr><td class="paramname">env_cfg</td><td>Initialization data for the environement RPMsg-Lite layer, used when the environment layer uses its own context (RL_USE_ENVIRONMENT_CONTEXT) </td></tr>
+    <tr><td class="paramname">static_context</td><td>RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)</td></tr>
   </table>
   </dd>
 </dl>
@@ -787,7 +782,7 @@ vq_ops</td>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Pointer to store tx buffer size </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Pointer to store maximum payload size available </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">timeout</td><td>Integer, wait upto timeout ms or not for buffer to become available</td></tr>
   </table>
   </dd>

@@ -1,14 +1,14 @@
 var group__rpmsg__lite =
 [
-    [ "rpmsg_ns_handle", "group__rpmsg__lite.html#structrpmsg__lite__endpoint", [
-      [ "addr", "group__rpmsg__lite.html#a46dae43ac5b6658a933b13d5a121ccb4", null ],
-      [ "rx_cb", "group__rpmsg__lite.html#ad679d3da51d5e6dcda6201c7e4a5291f", null ],
-      [ "rx_cb_data", "group__rpmsg__lite.html#aaa39ddc86f55cdf49cec67c285604571", null ],
-      [ "rfu", "group__rpmsg__lite.html#a08ad41ca77de937c13dfceda46b0bdd5", null ]
+    [ "rpmsg_lite_endpoint", "group__rpmsg__lite.html#structrpmsg__lite__endpoint", [
+      [ "addr", "group__rpmsg__lite.html#a28c0e9a7a70fbc58a497f2d3fac96f70", null ],
+      [ "rx_cb", "group__rpmsg__lite.html#a457c132df214a78150ae4525b6100700", null ],
+      [ "rx_cb_data", "group__rpmsg__lite.html#a30e868937950060fbcce818a2bc35db8", null ],
+      [ "rfu", "group__rpmsg__lite.html#adae527c972c102f433354448d3ab05a7", null ]
     ] ],
-    [ "rpmsg_ns_static_context", "group__rpmsg__lite.html#structrpmsg__lite__ept__static__context", [
-      [ "ept", "group__rpmsg__lite.html#ac3179c5af2a40e3887879c8683eb8013", null ],
-      [ "node", "group__rpmsg__lite.html#ae0c5512d3f5585158b15b0071e59b939", null ]
+    [ "rpmsg_lite_ept_static_context", "group__rpmsg__lite.html#structrpmsg__lite__ept__static__context", [
+      [ "ept", "group__rpmsg__lite.html#a4cbac751c0f2b20768136c31610906f8", null ],
+      [ "node", "group__rpmsg__lite.html#aac24ffeec310481457938c02b916c426", null ]
     ] ],
     [ "rpmsg_lite_instance", "group__rpmsg__lite.html#structrpmsg__lite__instance", [
       [ "rvq", "group__rpmsg__lite.html#a3bf53c7a9d4a0fbfd6ec924a19f7e7b8", null ],

@@ -9,6 +9,7 @@ var NAVTREE =
         [ "Name Service sub-component (optional)", "index.html#rpmsg_nameservice", null ]
       ] ],
       [ "Usage", "index.html#usage", null ],
+      [ "Configuration options", "index.html#configuration", null ],
       [ "References", "index.html#references", null ],
       [ "Revision History", "index.html#revision_history", null ]
     ] ],
@@ -18,7 +19,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"group__rpmsg__lite.html"
+"group__config.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 1.1</span>
+   &#160;<span id="projectnumber">Rev. 2.2.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('group__rpmsg__ns.html','');});
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
@@ -118,6 +119,15 @@ $(document).ready(function(){initNavTree('group__rpmsg__ns.html','');});
 <li>Reception of the announcements. </li>
 </ul>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:structrpmsg__ns__callback__data"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__callback__data">rpmsg_ns_callback_data</a></td></tr>
+<tr class="separator:structrpmsg__ns__callback__data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:structrpmsg__ns__context"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__context">rpmsg_ns_handle</a></td></tr>
+<tr class="separator:structrpmsg__ns__context"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:structrpmsg__ns__static__context__container"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__static__context__container">rpmsg_ns_static_context</a></td></tr>
+<tr class="separator:structrpmsg__ns__static__context__container"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:ga600c32ccc3d6a112cce7d1556433af62"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga600c32ccc3d6a112cce7d1556433af62"></a>
@@ -126,10 +136,10 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ga99daee4acb9576d808ec31b52b2aea5f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga99daee4acb9576d808ec31b52b2aea5f"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#ga99daee4acb9576d808ec31b52b2aea5f">rpmsg_ns_new_ept_cb</a>) (unsigned int new_ept, const char *new_ept_name, unsigned long flags)</td></tr>
-<tr class="memdesc:ga99daee4acb9576d808ec31b52b2aea5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">New endpoint NS callback function type. <br /></td></tr>
-<tr class="separator:ga99daee4acb9576d808ec31b52b2aea5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9c275f7b254e1e3b3a704f17137bd440"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga9c275f7b254e1e3b3a704f17137bd440"></a>
+typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#ga9c275f7b254e1e3b3a704f17137bd440">rpmsg_ns_new_ept_cb</a>) (unsigned int new_ept, const char *new_ept_name, unsigned long flags, void *user_data)</td></tr>
+<tr class="memdesc:ga9c275f7b254e1e3b3a704f17137bd440"><td class="mdescLeft">&#160;</td><td class="mdescRight">New endpoint NS callback function type. <br /></td></tr>
+<tr class="separator:ga9c275f7b254e1e3b3a704f17137bd440"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -143,9 +153,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gab2557e38a41c1d8757e19c04c376205e"><td class="memItemLeft" align="right" valign="top">rpmsg_ns_handle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#gab2557e38a41c1d8757e19c04c376205e">rpmsg_ns_bind</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__ns.html#ga99daee4acb9576d808ec31b52b2aea5f">rpmsg_ns_new_ept_cb</a> app_cb)</td></tr>
-<tr class="memdesc:gab2557e38a41c1d8757e19c04c376205e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers application nameservice callback.  <a href="#gab2557e38a41c1d8757e19c04c376205e">More...</a><br /></td></tr>
-<tr class="separator:gab2557e38a41c1d8757e19c04c376205e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab2e44f497543e00f358bba04566b5e36"><td class="memItemLeft" align="right" valign="top">rpmsg_ns_handle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#gab2e44f497543e00f358bba04566b5e36">rpmsg_ns_bind</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__ns.html#ga9c275f7b254e1e3b3a704f17137bd440">rpmsg_ns_new_ept_cb</a> app_cb, void *user_data)</td></tr>
+<tr class="memdesc:gab2e44f497543e00f358bba04566b5e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers application nameservice callback.  <a href="#gab2e44f497543e00f358bba04566b5e36">More...</a><br /></td></tr>
+<tr class="separator:gab2e44f497543e00f358bba04566b5e36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga359637fe5894c438c7cbd795f28ecd31"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#ga359637fe5894c438c7cbd795f28ecd31">rpmsg_ns_unbind</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, rpmsg_ns_handle handle)</td></tr>
 <tr class="memdesc:ga359637fe5894c438c7cbd795f28ecd31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters application nameservice callback and cleans up.  <a href="#ga359637fe5894c438c7cbd795f28ecd31">More...</a><br /></td></tr>
 <tr class="separator:ga359637fe5894c438c7cbd795f28ecd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,8 +163,97 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga50008dfe70bc440c7803bd44fc1bdc2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends name service announcement to remote device.  <a href="#ga50008dfe70bc440c7803bd44fc1bdc2a">More...</a><br /></td></tr>
 <tr class="separator:ga50008dfe70bc440c7803bd44fc1bdc2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="structrpmsg__ns__callback__data" id="structrpmsg__ns__callback__data"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct rpmsg_ns_callback_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="a02e5cbf5390e2dff441590b2320a8dae"></a><a class="el" href="group__rpmsg__ns.html#ga9c275f7b254e1e3b3a704f17137bd440">rpmsg_ns_new_ept_cb</a></td>
+<td class="fieldname">
+cb</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="ac8005ef661e83b4e1194e5a216879271"></a>void *</td>
+<td class="fieldname">
+user_data</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="structrpmsg__ns__context" id="structrpmsg__ns__context"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct rpmsg_ns_context</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="a84d6877d4fc4f533c84004a48c304644"></a>struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *</td>
+<td class="fieldname">
+ept</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="a89db4bf8601f3786b1c7076472c4c749"></a>struct <a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__callback__data">rpmsg_ns_callback_data</a> *</td>
+<td class="fieldname">
+cb_ctxt</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="structrpmsg__ns__static__context__container" id="structrpmsg__ns__static__context__container"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct rpmsg_ns_static_context_container</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="adb9124f3ad2e764e3d3266e953034e1d"></a>struct <br class="typebreak" />
+<a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__ept__static__context">rpmsg_lite_ept_static_context</a></td>
+<td class="fieldname">
+ept_ctxt</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="a8bfe9304a786baee4a6043e84d7882a4"></a>struct <a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__callback__data">rpmsg_ns_callback_data</a></td>
+<td class="fieldname">
+cb_ctxt</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="aa1a0ab21719083266c19c8102c5445c7"></a>struct <a class="el" href="group__rpmsg__ns.html#structrpmsg__ns__context">rpmsg_ns_context</a></td>
+<td class="fieldname">
+ns_ctxt</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="gab2557e38a41c1d8757e19c04c376205e"></a>
+<a class="anchor" id="gab2e44f497543e00f358bba04566b5e36"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -167,8 +266,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__rpmsg__ns.html#ga99daee4acb9576d808ec31b52b2aea5f">rpmsg_ns_new_ept_cb</a>&#160;</td>
-          <td class="paramname"><em>app_cb</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__rpmsg__ns.html#ga9c275f7b254e1e3b3a704f17137bd440">rpmsg_ns_new_ept_cb</a>&#160;</td>
+          <td class="paramname"><em>app_cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>user_data</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -182,7 +287,8 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance </td></tr>
-    <tr><td class="paramname">app_cb</td><td>Application nameservice callback</td></tr>
+    <tr><td class="paramname">app_cb</td><td>Application nameservice callback </td></tr>
+    <tr><td class="paramname">user_data</td><td>Application nameservice callback data</td></tr>
   </table>
   </dd>
 </dl>
