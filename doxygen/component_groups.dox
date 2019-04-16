@@ -20,3 +20,11 @@
 - Reception of the announcements.
 */
 
+/*!
+@defgroup config RPMsg-Lite Configuration
+@brief The RPMsg-Lite can be configured at the compile time. The default 
+configuration is defined in the rpmsg_default_config.h header file. This 
+configuration can be customized by the user by including rpmsg_config.h file 
+with custom settings. This section summarizes all possible RPMsg-Lite 
+configuration options.
+*/
