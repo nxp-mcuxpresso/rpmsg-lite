@@ -13,8 +13,8 @@ var group__rpmsg__ns =
       [ "cb_ctxt", "group__rpmsg__ns.html#a8bfe9304a786baee4a6043e84d7882a4", null ],
       [ "ns_ctxt", "group__rpmsg__ns.html#aa1a0ab21719083266c19c8102c5445c7", null ]
     ] ],
-    [ "rpmsg_ns_new_ept_cb", "group__rpmsg__ns.html#ga9c275f7b254e1e3b3a704f17137bd440", null ],
+    [ "rpmsg_ns_new_ept_cb", "group__rpmsg__ns.html#gae5a8f145ddda4e1c572ee1053d6d2259", null ],
     [ "rpmsg_ns_bind", "group__rpmsg__ns.html#gab2e44f497543e00f358bba04566b5e36", null ],
-    [ "rpmsg_ns_unbind", "group__rpmsg__ns.html#ga359637fe5894c438c7cbd795f28ecd31", null ],
-    [ "rpmsg_ns_announce", "group__rpmsg__ns.html#ga50008dfe70bc440c7803bd44fc1bdc2a", null ]
+    [ "rpmsg_ns_unbind", "group__rpmsg__ns.html#ga45c0c23ae36e9798bc5054afe3b47b12", null ],
+    [ "rpmsg_ns_announce", "group__rpmsg__ns.html#ga2825f8af95d0892a4e692e726ba45702", null ]
 ];

@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 2.2.0</span>
+   &#160;<span id="projectnumber">Rev. 3.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -135,12 +135,12 @@ Macros</h2></td></tr>
 <tr class="memitem:ga267570e79fefba2931b08a58d0ad917e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga267570e79fefba2931b08a58d0ad917e"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_WORD_SIZE</b></td></tr>
 <tr class="separator:ga267570e79fefba2931b08a58d0ad917e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga720820fcd5a12df1ac13245d5308a4c8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga720820fcd5a12df1ac13245d5308a4c8"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_WORD_ALIGN_UP</b>(a)                                                                                                                                                                </td></tr>
-<tr class="separator:ga720820fcd5a12df1ac13245d5308a4c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae1b71b6f1487a5662e32f7a5ec9150d4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae1b71b6f1487a5662e32f7a5ec9150d4"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_WORD_ALIGN_DOWN</b>(a)                                                                                                                                                </td></tr>
-<tr class="separator:gae1b71b6f1487a5662e32f7a5ec9150d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac084058ac1f8dee1930ceaaeee5120d6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gac084058ac1f8dee1930ceaaeee5120d6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_WORD_ALIGN_UP</b>(a)</td></tr>
+<tr class="separator:gac084058ac1f8dee1930ceaaeee5120d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa2a4c7812526634cbb739d998094cc7c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaa2a4c7812526634cbb739d998094cc7c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_WORD_ALIGN_DOWN</b>(a)</td></tr>
+<tr class="separator:gaa2a4c7812526634cbb739d998094cc7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga13a8e0903b54495e9a33241d03bbfb47"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga13a8e0903b54495e9a33241d03bbfb47"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>RL_SUCCESS</b></td></tr>
 <tr class="separator:ga13a8e0903b54495e9a33241d03bbfb47"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -207,43 +207,43 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ga56f3f1cc5f980976ed1ab0d3ff59109a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga56f3f1cc5f980976ed1ab0d3ff59109a"></a>
-typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a>) (void *payload, int payload_len, unsigned long src, void *priv)</td></tr>
-<tr class="memdesc:ga56f3f1cc5f980976ed1ab0d3ff59109a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive callback function type. <br /></td></tr>
-<tr class="separator:ga56f3f1cc5f980976ed1ab0d3ff59109a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga40d0f39ccf0df3c73ac65bd18da02bfd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga40d0f39ccf0df3c73ac65bd18da02bfd"></a>
+typedef int32_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd">rl_ept_rx_cb_t</a>) (void *payload, uint32_t payload_len, uint32_t src, void *priv)</td></tr>
+<tr class="memdesc:ga40d0f39ccf0df3c73ac65bd18da02bfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receive callback function type. <br /></td></tr>
+<tr class="separator:ga40d0f39ccf0df3c73ac65bd18da02bfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga6ceae6c968214f8aa26be31ff1f4fc58">rpmsg_lite_master_init</a> (void *shmem_addr, size_t shmem_length, int link_id, uint32_t init_flags)</td></tr>
-<tr class="memdesc:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API. To be called by the master side.  <a href="#ga6ceae6c968214f8aa26be31ff1f4fc58">More...</a><br /></td></tr>
-<tr class="separator:ga6ceae6c968214f8aa26be31ff1f4fc58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf6d18dec47cdd58d56505e39cf010991"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaf6d18dec47cdd58d56505e39cf010991">rpmsg_lite_remote_init</a> (void *shmem_addr, int link_id, uint32_t init_flags)</td></tr>
-<tr class="memdesc:gaf6d18dec47cdd58d56505e39cf010991"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API. To be called by the remote side.  <a href="#gaf6d18dec47cdd58d56505e39cf010991">More...</a><br /></td></tr>
-<tr class="separator:gaf6d18dec47cdd58d56505e39cf010991"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf206cb6dd21a08b56495e02045afd364"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaf206cb6dd21a08b56495e02045afd364">rpmsg_lite_deinit</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
-<tr class="memdesc:gaf206cb6dd21a08b56495e02045afd364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinitialized the RPMsg-Lite communication stack This function always succeeds. rpmsg_lite_init() can be called again after this function has been called.  <a href="#gaf206cb6dd21a08b56495e02045afd364">More...</a><br /></td></tr>
-<tr class="separator:gaf206cb6dd21a08b56495e02045afd364"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf9bf28acdd0143208f6e160dbb879fd3"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaf9bf28acdd0143208f6e160dbb879fd3">rpmsg_lite_create_ept</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, unsigned long addr, <a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a> rx_cb, void *rx_cb_data)</td></tr>
-<tr class="memdesc:gaf9bf28acdd0143208f6e160dbb879fd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new rpmsg endpoint, which can be used for communication.  <a href="#gaf9bf28acdd0143208f6e160dbb879fd3">More...</a><br /></td></tr>
-<tr class="separator:gaf9bf28acdd0143208f6e160dbb879fd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae48a5cce278d2b4dd73415ba3e1fb74e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gae48a5cce278d2b4dd73415ba3e1fb74e">rpmsg_lite_destroy_ept</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *rl_ept)</td></tr>
-<tr class="memdesc:gae48a5cce278d2b4dd73415ba3e1fb74e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function deletes rpmsg endpoint and performs cleanup.  <a href="#gae48a5cce278d2b4dd73415ba3e1fb74e">More...</a><br /></td></tr>
-<tr class="separator:gae48a5cce278d2b4dd73415ba3e1fb74e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga01e7c97d49c0969ec17783b8643b9f90"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga01e7c97d49c0969ec17783b8643b9f90">rpmsg_lite_send</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *ept, unsigned long dst, char *data, unsigned long size, unsigned long timeout)</td></tr>
-<tr class="memdesc:ga01e7c97d49c0969ec17783b8643b9f90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message contained in data field of length size to the remote endpoint with address dst. ept-&gt;addr is used as source address in the rpmsg header of the message being sent.  <a href="#ga01e7c97d49c0969ec17783b8643b9f90">More...</a><br /></td></tr>
-<tr class="separator:ga01e7c97d49c0969ec17783b8643b9f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga94c14298cb3bc8d2e16d6115129eef01"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga94c14298cb3bc8d2e16d6115129eef01">rpmsg_lite_is_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
-<tr class="memdesc:ga94c14298cb3bc8d2e16d6115129eef01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to get the link state.  <a href="#ga94c14298cb3bc8d2e16d6115129eef01">More...</a><br /></td></tr>
-<tr class="separator:ga94c14298cb3bc8d2e16d6115129eef01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4f19532c1c3dd69f6bd5a515b06eb9c4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga4f19532c1c3dd69f6bd5a515b06eb9c4">rpmsg_lite_release_rx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, void *rxbuf)</td></tr>
-<tr class="memdesc:ga4f19532c1c3dd69f6bd5a515b06eb9c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases the rx buffer for future reuse in vring. This API can be called at process context when the message in rx buffer is processed.  <a href="#ga4f19532c1c3dd69f6bd5a515b06eb9c4">More...</a><br /></td></tr>
-<tr class="separator:ga4f19532c1c3dd69f6bd5a515b06eb9c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaafaf83655850247f8408ab8a17a6e557"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557">rpmsg_lite_alloc_tx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, unsigned long *size, unsigned long timeout)</td></tr>
-<tr class="memdesc:gaafaf83655850247f8408ab8a17a6e557"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates the tx buffer for message payload.  <a href="#gaafaf83655850247f8408ab8a17a6e557">More...</a><br /></td></tr>
-<tr class="separator:gaafaf83655850247f8408ab8a17a6e557"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0b73b2e4fea12db016eba6b9ffa80861"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861">rpmsg_lite_send_nocopy</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *ept, unsigned long dst, void *data, unsigned long size)</td></tr>
-<tr class="memdesc:ga0b73b2e4fea12db016eba6b9ffa80861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message in tx buffer allocated by <a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a>  <a href="#ga0b73b2e4fea12db016eba6b9ffa80861">More...</a><br /></td></tr>
-<tr class="separator:ga0b73b2e4fea12db016eba6b9ffa80861"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga79d57a0d47c1843c96530505a92a1018"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga79d57a0d47c1843c96530505a92a1018">rpmsg_lite_master_init</a> (void *shmem_addr, size_t shmem_length, uint32_t link_id, uint32_t init_flags)</td></tr>
+<tr class="memdesc:ga79d57a0d47c1843c96530505a92a1018"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API. To be called by the master side.  <a href="#ga79d57a0d47c1843c96530505a92a1018">More...</a><br /></td></tr>
+<tr class="separator:ga79d57a0d47c1843c96530505a92a1018"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga134f3fd8e6817dd2ae80148948dee3ae"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga134f3fd8e6817dd2ae80148948dee3ae">rpmsg_lite_remote_init</a> (void *shmem_addr, uint32_t link_id, uint32_t init_flags)</td></tr>
+<tr class="memdesc:ga134f3fd8e6817dd2ae80148948dee3ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API. To be called by the remote side.  <a href="#ga134f3fd8e6817dd2ae80148948dee3ae">More...</a><br /></td></tr>
+<tr class="separator:ga134f3fd8e6817dd2ae80148948dee3ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga974c3cb2c613f24a6d951b0aead1852a"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga974c3cb2c613f24a6d951b0aead1852a">rpmsg_lite_deinit</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
+<tr class="memdesc:ga974c3cb2c613f24a6d951b0aead1852a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinitialized the RPMsg-Lite communication stack This function always succeeds. rpmsg_lite_init() can be called again after this function has been called.  <a href="#ga974c3cb2c613f24a6d951b0aead1852a">More...</a><br /></td></tr>
+<tr class="separator:ga974c3cb2c613f24a6d951b0aead1852a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad9b5d23e549a4f2adce7a79fd932568d"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gad9b5d23e549a4f2adce7a79fd932568d">rpmsg_lite_create_ept</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, uint32_t addr, <a class="el" href="group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd">rl_ept_rx_cb_t</a> rx_cb, void *rx_cb_data)</td></tr>
+<tr class="memdesc:gad9b5d23e549a4f2adce7a79fd932568d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new rpmsg endpoint, which can be used for communication.  <a href="#gad9b5d23e549a4f2adce7a79fd932568d">More...</a><br /></td></tr>
+<tr class="separator:gad9b5d23e549a4f2adce7a79fd932568d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabd04a23b464f1ba3360d9970b0d09c94"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gabd04a23b464f1ba3360d9970b0d09c94">rpmsg_lite_destroy_ept</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *rl_ept)</td></tr>
+<tr class="memdesc:gabd04a23b464f1ba3360d9970b0d09c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function deletes rpmsg endpoint and performs cleanup.  <a href="#gabd04a23b464f1ba3360d9970b0d09c94">More...</a><br /></td></tr>
+<tr class="separator:gabd04a23b464f1ba3360d9970b0d09c94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4">rpmsg_lite_send</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *ept, uint32_t dst, char *data, uint32_t size, uint32_t timeout)</td></tr>
+<tr class="memdesc:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message contained in data field of length size to the remote endpoint with address dst. ept-&gt;addr is used as source address in the rpmsg header of the message being sent.  <a href="#ga7c1d8c5ef33a89244cf272089c9332e4">More...</a><br /></td></tr>
+<tr class="separator:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa65387e23d815ffae7079158ee34f48b"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaa65387e23d815ffae7079158ee34f48b">rpmsg_lite_is_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
+<tr class="memdesc:gaa65387e23d815ffae7079158ee34f48b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to get the link state.  <a href="#gaa65387e23d815ffae7079158ee34f48b">More...</a><br /></td></tr>
+<tr class="separator:gaa65387e23d815ffae7079158ee34f48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2">rpmsg_lite_release_rx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, void *rxbuf)</td></tr>
+<tr class="memdesc:ga847cb39c655a6068107ac9840cfd7bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases the rx buffer for future reuse in vring. This API can be called at process context when the message in rx buffer is processed.  <a href="#ga847cb39c655a6068107ac9840cfd7bf2">More...</a><br /></td></tr>
+<tr class="separator:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5b7a2aee9f3824a3297b6db5ef19a1f4"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4">rpmsg_lite_alloc_tx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, uint32_t *size, uint32_t timeout)</td></tr>
+<tr class="memdesc:ga5b7a2aee9f3824a3297b6db5ef19a1f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates the tx buffer for message payload.  <a href="#ga5b7a2aee9f3824a3297b6db5ef19a1f4">More...</a><br /></td></tr>
+<tr class="separator:ga5b7a2aee9f3824a3297b6db5ef19a1f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga90bcc1cb74c40a6966492288cd8a3d31"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31">rpmsg_lite_send_nocopy</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *ept, uint32_t dst, void *data, uint32_t size)</td></tr>
+<tr class="memdesc:ga90bcc1cb74c40a6966492288cd8a3d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message in tx buffer allocated by <a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a>  <a href="#ga90bcc1cb74c40a6966492288cd8a3d31">More...</a><br /></td></tr>
+<tr class="separator:ga90bcc1cb74c40a6966492288cd8a3d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
 <a name="structrpmsg__lite__endpoint" id="structrpmsg__lite__endpoint"></a>
@@ -259,14 +259,14 @@ Functions</h2></td></tr>
 </div><table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="a28c0e9a7a70fbc58a497f2d3fac96f70"></a>unsigned long</td>
+<a class="anchor" id="a87b18d59972b705c71d03a502fb816ce"></a>uint32_t</td>
 <td class="fieldname">
 addr</td>
 <td class="fielddoc">
 <p>endpoint address </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="a457c132df214a78150ae4525b6100700"></a><a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a></td>
+<a class="anchor" id="a457c132df214a78150ae4525b6100700"></a><a class="el" href="group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd">rl_ept_rx_cb_t</a></td>
 <td class="fieldname">
 rx_cb</td>
 <td class="fielddoc">
@@ -361,7 +361,7 @@ lock</td>
 <p>local RPMsg Lite mutex lock </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="ab4fb1dac3c1924deba08c38ee6cb828b"></a>unsigned int</td>
+<a class="anchor" id="a69643b8c8c9dc78a671eee1397836e34"></a>uint32_t</td>
 <td class="fieldname">
 link_state</td>
 <td class="fielddoc">
@@ -375,14 +375,14 @@ sh_mem_base</td>
 <p>base address of the shared memory </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="ab2ce5bdfa263cdffc6563997e25acd50"></a>unsigned int</td>
+<a class="anchor" id="ac224a28fb8923c5ea0368dce3673f9cc"></a>uint32_t</td>
 <td class="fieldname">
 sh_mem_remaining</td>
 <td class="fielddoc">
 <p>remaining free bytes of shared memory </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a class="anchor" id="a17ae507517bfe8f585893b5f61b953f6"></a>unsigned int</td>
+<a class="anchor" id="ae135c73c797cbbdbbb3cb61131d3a667"></a>uint32_t</td>
 <td class="fieldname">
 sh_mem_total</td>
 <td class="fielddoc">
@@ -414,7 +414,7 @@ vq_ops</td>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ga6ceae6c968214f8aa26be31ff1f4fc58"></a>
+<a class="anchor" id="ga79d57a0d47c1843c96530505a92a1018"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -433,7 +433,7 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>link_id</em>, </td>
         </tr>
         <tr>
@@ -462,11 +462,11 @@ vq_ops</td>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>New RPMsg-Lite instance pointer or NULL. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>New RPMsg-Lite instance pointer or RL_NULL. </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="gaf6d18dec47cdd58d56505e39cf010991"></a>
+<a class="anchor" id="ga134f3fd8e6817dd2ae80148948dee3ae"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -479,7 +479,7 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>link_id</em>, </td>
         </tr>
         <tr>
@@ -507,16 +507,16 @@ vq_ops</td>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>New RPMsg-Lite instance pointer or NULL. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>New RPMsg-Lite instance pointer or RL_NULL. </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="gaf206cb6dd21a08b56495e02045afd364"></a>
+<a class="anchor" id="ga974c3cb2c613f24a6d951b0aead1852a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_deinit </td>
+          <td class="memname">int32_t rpmsg_lite_deinit </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em></td><td>)</td>
@@ -536,7 +536,7 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="gaf9bf28acdd0143208f6e160dbb879fd3"></a>
+<a class="anchor" id="gad9b5d23e549a4f2adce7a79fd932568d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -549,13 +549,13 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>addr</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__rpmsg__lite.html#ga56f3f1cc5f980976ed1ab0d3ff59109a">rl_ept_rx_cb_t</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd">rl_ept_rx_cb_t</a>&#160;</td>
           <td class="paramname"><em>rx_cb</em>, </td>
         </tr>
         <tr>
@@ -587,12 +587,12 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="gae48a5cce278d2b4dd73415ba3e1fb74e"></a>
+<a class="anchor" id="gabd04a23b464f1ba3360d9970b0d09c94"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_destroy_ept </td>
+          <td class="memname">int32_t rpmsg_lite_destroy_ept </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em>, </td>
@@ -622,12 +622,12 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="ga01e7c97d49c0969ec17783b8643b9f90"></a>
+<a class="anchor" id="ga7c1d8c5ef33a89244cf272089c9332e4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_send </td>
+          <td class="memname">int32_t rpmsg_lite_send </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em>, </td>
@@ -641,7 +641,7 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>dst</em>, </td>
         </tr>
         <tr>
@@ -653,13 +653,13 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>size</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>timeout</em>&#160;</td>
         </tr>
         <tr>
@@ -686,12 +686,12 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="ga94c14298cb3bc8d2e16d6115129eef01"></a>
+<a class="anchor" id="gaa65387e23d815ffae7079158ee34f48b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_is_link_up </td>
+          <td class="memname">int32_t rpmsg_lite_is_link_up </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em></td><td>)</td>
@@ -711,12 +711,12 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="ga4f19532c1c3dd69f6bd5a515b06eb9c4"></a>
+<a class="anchor" id="ga847cb39c655a6068107ac9840cfd7bf2"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_release_rx_buffer </td>
+          <td class="memname">int32_t rpmsg_lite_release_rx_buffer </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em>, </td>
@@ -747,7 +747,7 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="gaafaf83655850247f8408ab8a17a6e557"></a>
+<a class="anchor" id="ga5b7a2aee9f3824a3297b6db5ef19a1f4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -760,13 +760,13 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long *&#160;</td>
+          <td class="paramtype">uint32_t *&#160;</td>
           <td class="paramname"><em>size</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>timeout</em>&#160;</td>
         </tr>
         <tr>
@@ -778,7 +778,7 @@ vq_ops</td>
 </div><div class="memdoc">
 
 <p>Allocates the tx buffer for message payload. </p>
-<p>This API can only be called at process context to get the tx buffer in vring. By this way, the application can directly put its message into the vring tx buffer without copy from an application buffer. It is the application responsibility to correctly fill the allocated tx buffer by data and passing correct parameters to the <a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function to perform data no-copy-send mechanism.</p>
+<p>This API can only be called at process context to get the tx buffer in vring. By this way, the application can directly put its message into the vring tx buffer without copy from an application buffer. It is the application responsibility to correctly fill the allocated tx buffer by data and passing correct parameters to the <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function to perform data no-copy-send mechanism.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance </td></tr>
@@ -787,17 +787,17 @@ vq_ops</td>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The tx buffer address on success and NULL on failure.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The tx buffer address on success and RL_NULL on failure.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy</a> </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="ga0b73b2e4fea12db016eba6b9ffa80861"></a>
+<a class="anchor" id="ga90bcc1cb74c40a6966492288cd8a3d31"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int rpmsg_lite_send_nocopy </td>
+          <td class="memname">int32_t rpmsg_lite_send_nocopy </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em>, </td>
@@ -811,7 +811,7 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>dst</em>, </td>
         </tr>
         <tr>
@@ -823,7 +823,7 @@ vq_ops</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>size</em>&#160;</td>
         </tr>
         <tr>
@@ -834,14 +834,14 @@ vq_ops</td>
       </table>
 </div><div class="memdoc">
 
-<p>Sends a message in tx buffer allocated by <a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> </p>
+<p>Sends a message in tx buffer allocated by <a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> </p>
 <p>This function sends txbuf of length len to the remote dst address, and uses ept-&gt;addr as the source address. The application has to take the responsibility for:</p><ol type="1">
-<li>tx buffer allocation (<a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a>)</li>
+<li>tx buffer allocation (<a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a>)</li>
 <li>filling the data to be sent into the pre-allocated tx buffer</li>
 <li>not exceeding the buffer size when filling the data</li>
 <li>data cache coherency</li>
 </ol>
-<p>After the <a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function is issued the tx buffer is no more owned by the sending task and must not be touched anymore unless the <a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function fails and returns an error.</p>
+<p>After the <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function is issued the tx buffer is no more owned by the sending task and must not be touched anymore unless the <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function fails and returns an error.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance </td></tr>
@@ -853,7 +853,7 @@ vq_ops</td>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>0 on success and an appropriate error value on failure.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer</a> </dd></dl>
 
 </div>
 </div>

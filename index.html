@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 2.2.0</span>
+   &#160;<span id="projectnumber">Rev. 3.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -150,19 +150,19 @@ Name Service sub-component (optional)</h2>
 <h1><a class="anchor" id="usage"></a>
 Usage</h1>
 <p>The application should put the /rpmsg_lite/lib/include directory to the include path and in the application, include either the <a class="el" href="rpmsg__lite_8h_source.html">rpmsg_lite.h</a> header file, or optionally also include the <a class="el" href="rpmsg__queue_8h_source.html">rpmsg_queue.h</a> and/or <a class="el" href="rpmsg__ns_8h_source.html">rpmsg_ns.h</a> files. Both porting sublayers should be provided for you by NXP, but if you plan to use your own RTOS, all you need to do is to implement your own environment layer (in other words, rpmsg_env_myrtos.c) and to include it in the project build.</p>
-<p>The initialization of the stack is done by calling the <a class="el" href="group__rpmsg__lite.html#ga6ceae6c968214f8aa26be31ff1f4fc58" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API...">rpmsg_lite_master_init()</a> on the master side and the <a class="el" href="group__rpmsg__lite.html#gaf6d18dec47cdd58d56505e39cf010991" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API...">rpmsg_lite_remote_init()</a> on the remote side. This initialization function must be called prior to any RPMsg-Lite API call. After the init, it is wise to create a communication endpoint, otherwise communication is not possible. This can be done by calling the <a class="el" href="group__rpmsg__lite.html#gaf9bf28acdd0143208f6e160dbb879fd3" title="Create a new rpmsg endpoint, which can be used for communication. ">rpmsg_lite_create_ept()</a> function. It optionally accepts a last argument, where an internal context of the endpoint is created, just in case the RL_USE_STATIC_API option is set to 1. If not, the stack internally calls env_alloc() to allocate dynamic memory for it. In case a callback-based receiving is to be used, an ISR-callback is registered to each new endpoint with user-defined callback data pointer. If a blocking receive is desired (in case of RTOS environment), the <a class="el" href="group__rpmsg__queue.html#gaf2b13335342ec06d8c264bbb6e27c88f" title="Create a RPMsg queue which can be used for blocking reception. ">rpmsg_queue_create()</a> function must be called before calling <a class="el" href="group__rpmsg__lite.html#gaf9bf28acdd0143208f6e160dbb879fd3" title="Create a new rpmsg endpoint, which can be used for communication. ">rpmsg_lite_create_ept()</a>. The queue handle is passed to the endpoint creation function as a callback data argument and the callback function is set to <a class="el" href="group__rpmsg__queue.html#ga5333db7bb4b09c87ae4ad9c75dc610a5" title="This callback needs to be registered with an endpoint. ">rpmsg_queue_rx_cb()</a>. Then, it is possible to use rpmsg_queue_receive() function to listen on a queue object for incoming messages. The <a class="el" href="group__rpmsg__lite.html#ga01e7c97d49c0969ec17783b8643b9f90" title="Sends a message contained in data field of length size to the remote endpoint with address dst...">rpmsg_lite_send()</a> function is used to send messages to the other side.</p>
+<p>The initialization of the stack is done by calling the <a class="el" href="group__rpmsg__lite.html#ga79d57a0d47c1843c96530505a92a1018" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API...">rpmsg_lite_master_init()</a> on the master side and the <a class="el" href="group__rpmsg__lite.html#ga134f3fd8e6817dd2ae80148948dee3ae" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API...">rpmsg_lite_remote_init()</a> on the remote side. This initialization function must be called prior to any RPMsg-Lite API call. After the init, it is wise to create a communication endpoint, otherwise communication is not possible. This can be done by calling the <a class="el" href="group__rpmsg__lite.html#gad9b5d23e549a4f2adce7a79fd932568d" title="Create a new rpmsg endpoint, which can be used for communication. ">rpmsg_lite_create_ept()</a> function. It optionally accepts a last argument, where an internal context of the endpoint is created, just in case the RL_USE_STATIC_API option is set to 1. If not, the stack internally calls env_alloc() to allocate dynamic memory for it. In case a callback-based receiving is to be used, an ISR-callback is registered to each new endpoint with user-defined callback data pointer. If a blocking receive is desired (in case of RTOS environment), the <a class="el" href="group__rpmsg__queue.html#gaf2b13335342ec06d8c264bbb6e27c88f" title="Create a RPMsg queue which can be used for blocking reception. ">rpmsg_queue_create()</a> function must be called before calling <a class="el" href="group__rpmsg__lite.html#gad9b5d23e549a4f2adce7a79fd932568d" title="Create a new rpmsg endpoint, which can be used for communication. ">rpmsg_lite_create_ept()</a>. The queue handle is passed to the endpoint creation function as a callback data argument and the callback function is set to <a class="el" href="group__rpmsg__queue.html#gaeb7cba094390762f1131884b2c7e89ce" title="This callback needs to be registered with an endpoint. ">rpmsg_queue_rx_cb()</a>. Then, it is possible to use rpmsg_queue_receive() function to listen on a queue object for incoming messages. The <a class="el" href="group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4" title="Sends a message contained in data field of length size to the remote endpoint with address dst...">rpmsg_lite_send()</a> function is used to send messages to the other side.</p>
 <p>The RPMsg-Lite also implements no-copy mechanisms for both sending and receiving operations. These methods require specifics that have to be considered when used in an application.</p>
 <p><b>no-copy-send mechanism:</b> This mechanism allows sending messages without the cost for copying data from the application buffer to the RPMsg/virtio buffer in the shared memory. The sequence of no-copy sending steps to be performed is as follows:</p><ul>
-<li>Call the <a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> function to get the virtio buffer and provide the buffer pointer to the application.</li>
-<li>Fill the data to be sent into the pre-allocated virtio buffer. Ensure that the filled data does not exceed the buffer size (provided as the <a class="el" href="group__rpmsg__lite.html#gaafaf83655850247f8408ab8a17a6e557" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> <em>size</em> output parameter).</li>
-<li>Call the <a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function to send the message to the destination endpoint. Consider the cache functionality and the virtio buffer alignment. See the <a class="el" href="group__rpmsg__lite.html#ga0b73b2e4fea12db016eba6b9ffa80861" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function description below.</li>
+<li>Call the <a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> function to get the virtio buffer and provide the buffer pointer to the application.</li>
+<li>Fill the data to be sent into the pre-allocated virtio buffer. Ensure that the filled data does not exceed the buffer size (provided as the <a class="el" href="group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4" title="Allocates the tx buffer for message payload. ">rpmsg_lite_alloc_tx_buffer()</a> <em>size</em> output parameter).</li>
+<li>Call the <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function to send the message to the destination endpoint. Consider the cache functionality and the virtio buffer alignment. See the <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> function description below.</li>
 </ul>
 <p><b>no-copy-receive mechanism:</b> This mechanism allows reading messages without the cost for copying data from the virtio buffer in the shared memory to the application buffer. The sequence of no-copy receiving steps to be performed is as follows:</p><ul>
-<li>Call the <a class="el" href="group__rpmsg__queue.html#ga119b346b47ed2fddee31a80de73bfa11" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a> function to get the virtio buffer pointer to the received data.</li>
+<li>Call the <a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a> function to get the virtio buffer pointer to the received data.</li>
 <li>Read received data directly from the shared memory.</li>
-<li>Call the <a class="el" href="group__rpmsg__queue.html#gac31e8495ea7d563a92c2e03acb03e464" title="This function frees a buffer previously returned by rpmsg_queue_recv_nocopy(). ">rpmsg_queue_nocopy_free()</a> function to release the virtio buffer and to make it available for the next data transfer.</li>
+<li>Call the <a class="el" href="group__rpmsg__queue.html#ga1c3cff098b9464fa89788510bda231a3" title="This function frees a buffer previously returned by rpmsg_queue_recv_nocopy(). ">rpmsg_queue_nocopy_free()</a> function to release the virtio buffer and to make it available for the next data transfer.</li>
 </ul>
-<p>The user is responsible for destroying any RPMsg-Lite objects he has created in case of deinitialization. In order to do this, the function <a class="el" href="group__rpmsg__queue.html#ga90d72e18752f3dad3cf9cab348186e6b" title="Destroy a queue and clean up. Do not destroy a queue which is registered with an active endpoint! ...">rpmsg_queue_destroy()</a> is used to destroy a queue, <a class="el" href="group__rpmsg__lite.html#gae48a5cce278d2b4dd73415ba3e1fb74e" title="This function deletes rpmsg endpoint and performs cleanup. ">rpmsg_lite_destroy_ept()</a> is used to destroy an endpoint and finally, <a class="el" href="group__rpmsg__lite.html#gaf206cb6dd21a08b56495e02045afd364" title="Deinitialized the RPMsg-Lite communication stack This function always succeeds. rpmsg_lite_init() can...">rpmsg_lite_deinit()</a> is used to deinitialize the RPMsg-Lite intercore communication stack. Deinitialize all endpoints using a queue before deinitializing the queue. Otherwise, you are actively invalidating the used queue handle, which is not allowed. RPMsg-Lite does not check this internally, since its main aim is to be lightweight.</p>
+<p>The user is responsible for destroying any RPMsg-Lite objects he has created in case of deinitialization. In order to do this, the function <a class="el" href="group__rpmsg__queue.html#ga480a59ddeeef5f54f84cd3977efcd1ec" title="Destroy a queue and clean up. Do not destroy a queue which is registered with an active endpoint! ...">rpmsg_queue_destroy()</a> is used to destroy a queue, <a class="el" href="group__rpmsg__lite.html#gabd04a23b464f1ba3360d9970b0d09c94" title="This function deletes rpmsg endpoint and performs cleanup. ">rpmsg_lite_destroy_ept()</a> is used to destroy an endpoint and finally, <a class="el" href="group__rpmsg__lite.html#ga974c3cb2c613f24a6d951b0aead1852a" title="Deinitialized the RPMsg-Lite communication stack This function always succeeds. rpmsg_lite_init() can...">rpmsg_lite_deinit()</a> is used to deinitialize the RPMsg-Lite intercore communication stack. Deinitialize all endpoints using a queue before deinitializing the queue. Otherwise, you are actively invalidating the used queue handle, which is not allowed. RPMsg-Lite does not check this internally, since its main aim is to be lightweight.</p>
 <div class="image">
 <img src="rpmsg_lite_send_receive.png" alt="rpmsg_lite_send_receive.png"/>
 <div class="caption">
@@ -174,21 +174,25 @@ Configuration options</h1>
 <tr>
 <th>Configuration option </th><th>Default value </th><th>Usage  </th></tr>
 <tr>
-<td>RL_MS_PER_INTERVAL </td><td>(1) </td><td>Delay in milliseconds used in non-blocking API functions for polling </td></tr>
+<td>RL_MS_PER_INTERVAL </td><td>(1) </td><td>Delay in milliseconds used in non-blocking API functions for polling. </td></tr>
 <tr>
 <td>RL_BUFFER_PAYLOAD_SIZE </td><td>(496) </td><td>Size of the buffer payload, it must be equal to (240, 496, 1008, ...) [2^n - 16] </td></tr>
 <tr>
 <td>RL_BUFFER_COUNT </td><td>(2) </td><td>Number of the buffers, it must be power of two (2, 4, ...) </td></tr>
 <tr>
-<td>RL_API_HAS_ZEROCOPY </td><td>(1) </td><td>Zero-copy API functions enabled/disabled </td></tr>
+<td>RL_API_HAS_ZEROCOPY </td><td>(1) </td><td>Zero-copy API functions enabled/disabled. </td></tr>
 <tr>
-<td>RL_USE_STATIC_API </td><td>(0) </td><td>Static API functions (no dynamic allocation) enabled/disabled </td></tr>
+<td>RL_USE_STATIC_API </td><td>(0) </td><td>Static API functions (no dynamic allocation) enabled/disabled. </td></tr>
 <tr>
-<td>RL_CLEAR_USED_BUFFERS </td><td>(0) </td><td>Clearing used buffers before returning back to the pool of free buffers enabled/disabled </td></tr>
+<td>RL_CLEAR_USED_BUFFERS </td><td>(0) </td><td>Clearing used buffers before returning back to the pool of free buffers enabled/disabled. </td></tr>
 <tr>
-<td>RL_USE_MCMGR_IPC_ISR_HANDLER </td><td>(0) </td><td>When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself </td></tr>
+<td>RL_USE_MCMGR_IPC_ISR_HANDLER </td><td>(0) </td><td>When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself. </td></tr>
 <tr>
-<td>RL_ASSERT </td><td>see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> </td><td>Assert implementation </td></tr>
+<td>RL_USE_ENVIRONMENT_CONTEXT </td><td>(0) </td><td>When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM). </td></tr>
+<tr>
+<td>RL_DEBUG_CHECK_BUFFERS </td><td>(0) </td><td>When enabled buffer debug checks in <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> and <a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2" title="Releases the rx buffer for future reuse in vring. This API can be called at process context when the ...">rpmsg_lite_release_rx_buffer()</a> functions are disabled. Do not use in RPMsg-Lite to Linux configuration. </td></tr>
+<tr>
+<td>RL_ASSERT </td><td>see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> </td><td>Assert implementation. </td></tr>
 </table>
 <h1><a class="anchor" id="references"></a>
 References</h1>
@@ -216,7 +220,7 @@ Revision History</h1>
 <p class="endtd">Added the ability to use Multicore Manager (MCMGR) as the IPC interrupts router (RL_USE_MCMGR_IPC_ISR_HANDLER config) </p>
 </td></tr>
 <tr>
-<td>4.0 </td><td>04/2018 </td><td><p class="starttd">New API <a class="el" href="group__rpmsg__queue.html#ga472e6156fa4a705fb5023bbfb2838196" title="This function returns the number of pending messages in the queue. ">rpmsg_queue_get_current_size()</a> </p>
+<td>4.0 </td><td>04/2018 </td><td><p class="starttd">New API <a class="el" href="group__rpmsg__queue.html#ga2d65626ac1279a50be5e1f86ed80acbf" title="This function returns the number of pending messages in the queue. ">rpmsg_queue_get_current_size()</a> </p>
 <p>Fixed bug in interrupt handling for lpc5411x, lpc5410x </p>
 <p class="endtd">Code adjustments based on static analysis tool findings </p>
 </td></tr>
@@ -229,6 +233,10 @@ Revision History</h1>
 <p>Several MISRA violations fixed </p>
 <p>Added environment layers for QNX and Zephyr </p>
 <p class="endtd">Allow environment context required for some environments (controlled by the RL_USE_ENVIRONMENT_CONTEXT configuration macro). </p>
+</td></tr>
+<tr>
+<td>7.0 </td><td>11/2019 </td><td><p class="starttd">MISRA C-2012 violations fixed, incl. data types consolidation </p>
+<p class="endtd">Code formatted. </p>
 </td></tr>
 </table>
 </div></div><!-- contents -->
