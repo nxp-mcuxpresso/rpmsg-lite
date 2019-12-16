@@ -54,43 +54,45 @@
 #include "rpmsg_env_qnx.h"
 
 #if __PTR_BITS__ > 32
-    #include <fcntl.h>
-    #include <aarch64/inline.h>
+#include <fcntl.h>
+#include <aarch64/inline.h>
 #else
-    #include <arm/inline.h>
+#include <arm/inline.h>
 #endif
 
 /* Max supported ISR counts */
-#define ISR_COUNT (32)
+#define ISR_COUNT (32U)
 
 #if (!defined(RL_USE_ENVIRONMENT_CONTEXT)) || (RL_USE_ENVIRONMENT_CONTEXT != 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 1"
 #endif
 
-
 /**
  * Structure to keep track of registered ISR's.
  */
-struct isr_info {
-    void             *data;
-    volatile unsigned enabled;
+struct isr_info
+{
+    void *data;
+    volatile uint32_t enabled;
 };
 
 /**
  * Structure to hold queue information
  */
-typedef struct env_queue {
-    mqd_t        mqd;
-    size_t       msg_len;
+typedef struct env_queue
+{
+    mqd_t mqd;
+    size_t msg_len;
 } env_queue_t;
 
 /**
  * Env. context structure
  */
-typedef struct env_context {
-    void           *platform_context;     /* Pointer to platform context */
-    unsigned long   pa;                   /* Physical address of memory pool reserved for rpmsg */
-    void           *va;                   /* Virtual address of the memory pool */
+typedef struct env_context
+{
+    void *platform_context;               /* Pointer to platform context */
+    uint32_t pa;                          /* Physical address of memory pool reserved for rpmsg */
+    void *va;                             /* Virtual address of the memory pool */
     struct isr_info isr_table[ISR_COUNT]; /* Table with registered Virt. queue data */
 } env_context_t;
 
@@ -101,9 +103,9 @@ typedef struct env_context {
  *
  * @return Pointer to platform context
  */
-void *env_get_platform_context(void * env_context)
+void *env_get_platform_context(void *env_context)
 {
-    env_context_t * env = env_context;
+    env_context_t *env = env_context;
     return env->platform_context;
 }
 
@@ -113,22 +115,25 @@ void *env_get_platform_context(void * env_context)
  * Initializes OS/BM environment.
  *
  */
-int env_init(void ** env_context, void * env_init_data)
+int32_t env_init(void **env_context, void *env_init_data)
 {
     rpmsg_env_init_t *init = env_init_data;
     imx_rpmsg_env_cfg_t *user_cfg;
 
-    if (init) {
-        user_cfg = init->user_input;
+    if (init != ((void *)0))
+    {
+        user_cfg           = init->user_input;
         env_context_t *ctx = env_allocate_memory(sizeof(env_context_t));
-        if (!ctx) {
+        if (ctx == ((void *)0))
+        {
             return -1;
         }
         /* Save virtual and phy address of mmaped memory region */
         ctx->pa = init->pa;
         ctx->va = init->va;
         /* Initialize platform, dereference user_input to get platform cfg address */
-        if (platform_init(&ctx->platform_context, ctx, user_cfg ? user_cfg->platform_cfg : NULL) != 0) {
+        if (platform_init(&ctx->platform_context, ctx, user_cfg ? user_cfg->platform_cfg : ((void *)0)) != 0)
+        {
             env_free_memory(ctx);
             return -1;
         }
@@ -145,7 +150,7 @@ int env_init(void ** env_context, void * env_init_data)
  *
  * @returns - execution status
  */
-int env_deinit(void *env_context)
+int32_t env_deinit(void *env_context)
 {
     env_context_t *ctx = env_context;
     platform_deinit(ctx->platform_context);
@@ -158,7 +163,7 @@ int env_deinit(void *env_context)
  *
  * @param size
  */
-void *env_allocate_memory(unsigned int size)
+void *env_allocate_memory(uint32_t size)
 {
     return malloc(size);
 }
@@ -181,9 +186,9 @@ void env_free_memory(void *ptr)
  * @param value
  * @param size
  */
-void env_memset(void *ptr, int value, unsigned long size)
+void env_memset(void *ptr, int32_t value, uint32_t size)
 {
-    memset(ptr, value, size);
+    (void)memset(ptr, value, size);
 }
 
 /*!
@@ -194,9 +199,9 @@ void env_memset(void *ptr, int value, unsigned long size)
  * @param src
  * @param len
  */
-void env_memcpy(void *dst, void const *src, unsigned long len)
+void env_memcpy(void *dst, void const *src, uint32_t len)
 {
-    memcpy(dst, src, len);
+    (void)memcpy(dst, src, len);
 }
 
 /*!
@@ -207,7 +212,7 @@ void env_memcpy(void *dst, void const *src, unsigned long len)
  * @param src
  */
 
-int env_strcmp(const char *dst, const char *src)
+int32_t env_strcmp(const char *dst, const char *src)
 {
     return (strcmp(dst, src));
 }
@@ -220,9 +225,9 @@ int env_strcmp(const char *dst, const char *src)
  * @param src
  * @param len
  */
-void env_strncpy(char *dest, const char *src, unsigned long len)
+void env_strncpy(char *dest, const char *src, uint32_t len)
 {
-    strncpy(dest, src, len);
+    (void)strncpy(dest, src, len);
 }
 
 /*!
@@ -233,7 +238,7 @@ void env_strncpy(char *dest, const char *src, unsigned long len)
  * @param src
  * @param len
  */
-int env_strncmp(char *dest, const char *src, unsigned long len)
+int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 {
     return (strncmp(dest, src, len));
 }
@@ -269,16 +274,16 @@ void env_wmb(void)
  *
  * @param address
  */
-unsigned long env_map_vatopa(void *env, void *address)
+uint32_t env_map_vatopa(void *env, void *address)
 {
 #if IMX_MMAP_VA_ON_PA
-    return ((unsigned long)address);
+    return ((uint32_t)address);
 #else
     /* This is faster then mem_offset64() */
-    env_context_t * ctx = env;
-    uint64_t va = (uint64_t) address;
-    uint64_t va_start = (uint64_t) ctx->va;
-    uint64_t pa = ctx->pa + (va - va_start);
+    env_context_t *ctx = env;
+    uint64_t va        = (uint64_t)address;
+    uint64_t va_start  = (uint64_t)ctx->va;
+    uint64_t pa        = ctx->pa + (va - va_start);
     return pa;
 #endif
 }
@@ -288,14 +293,14 @@ unsigned long env_map_vatopa(void *env, void *address)
  *
  * @param address
  */
-void *env_map_patova(void *env, unsigned long address)
+void *env_map_patova(void *env, uint32_t address)
 {
 #if IMX_MMAP_VA_ON_PA
     return ((void *)address);
 #else
-    env_context_t * ctx = env;
-    uint64_t va_start = (uint64_t) ctx->va;
-    uint64_t va = (va_start + (address - ctx->pa));
+    env_context_t *ctx = env;
+    uint64_t va_start  = (uint64_t)ctx->va;
+    uint64_t va        = (va_start + (address - ctx->pa));
     return (void *)va;
 #endif
 }
@@ -306,15 +311,17 @@ void *env_map_patova(void *env, unsigned long address)
  * Creates a mutex with the given initial count.
  *
  */
-int env_create_mutex(void **lock, int count)
+int32_t env_create_mutex(void **lock, int32_t count)
 {
     *lock = env_allocate_memory(sizeof(pthread_mutex_t));
-    if (!(*lock)) {
+    if (*lock == ((void *)0))
+    {
         return -1;
     }
-    if (pthread_mutex_init((pthread_mutex_t *)*lock, NULL) != EOK) {
+    if (pthread_mutex_init((pthread_mutex_t *)*lock, ((void *)0)) != EOK)
+    {
         env_free_memory(*lock);
-        *lock = NULL;
+        *lock = ((void *)0);
         return -1;
     }
     return 0;
@@ -360,10 +367,9 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
-int env_create_sync_lock(void **lock, int state)
+int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
-
 }
 
 /*!
@@ -374,7 +380,8 @@ int env_create_sync_lock(void **lock, int state)
  */
 void env_delete_sync_lock(void *lock)
 {
-    if (lock) {
+    if (lock != ((void *)0))
+    {
         env_delete_mutex(lock);
     }
 }
@@ -405,7 +412,7 @@ void env_release_sync_lock(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(int num_msec)
+void env_sleep_msec(uint32_t num_msec)
 {
     delay(num_msec);
 }
@@ -418,16 +425,15 @@ void env_sleep_msec(int num_msec)
  * @param vector_id - virtual interrupt vector number
  * @param data      - interrupt handler data (virtqueue)
  */
-void env_register_isr(void *env, int vector_id, void *data)
+void env_register_isr(void *env, uint32_t vector_id, void *data)
 {
-
-    env_context_t * ctx = env;
+    env_context_t *ctx = env;
 
     RL_ASSERT(vector_id < ISR_COUNT);
-    if (vector_id < ISR_COUNT) {
+    if (vector_id < ISR_COUNT)
+    {
         ctx->isr_table[vector_id].data = data;
     }
-
 }
 
 /*!
@@ -437,13 +443,14 @@ void env_register_isr(void *env, int vector_id, void *data)
  *
  * @param vector_id - virtual interrupt vector number
  */
-void env_unregister_isr(void *env, int vector_id)
+void env_unregister_isr(void *env, uint32_t vector_id)
 {
-    env_context_t * ctx = env;
+    env_context_t *ctx = env;
 
     RL_ASSERT(vector_id < ISR_COUNT);
-    if (vector_id < ISR_COUNT) {
-        ctx->isr_table[vector_id].data = NULL;
+    if (vector_id < ISR_COUNT)
+    {
+        ctx->isr_table[vector_id].data    = ((void *)0);
         ctx->isr_table[vector_id].enabled = 0;
     }
 }
@@ -455,12 +462,13 @@ void env_unregister_isr(void *env, int vector_id)
  *
  * @param vector_id   - virtual interrupt vector number
  */
-void env_enable_interrupt(void *env, unsigned int vector_id)
+void env_enable_interrupt(void *env, uint32_t vector_id)
 {
-    env_context_t * ctx = env;
+    env_context_t *ctx = env;
 
     RL_ASSERT(vector_id < ISR_COUNT);
-    if (vector_id < ISR_COUNT) {
+    if (vector_id < ISR_COUNT)
+    {
         ctx->isr_table[vector_id].enabled = 1;
     }
 }
@@ -472,12 +480,13 @@ void env_enable_interrupt(void *env, unsigned int vector_id)
  *
  * @param vector_id   - virtual interrupt vector number
  */
-void env_disable_interrupt(void *env, unsigned int vector_id)
+void env_disable_interrupt(void *env, uint32_t vector_id)
 {
-    env_context_t  * ctx = env;
+    env_context_t *ctx = env;
 
     RL_ASSERT(vector_id < ISR_COUNT);
-    if (vector_id < ISR_COUNT) {
+    if (vector_id < ISR_COUNT)
+    {
         ctx->isr_table[vector_id].enabled = 0;
     }
 }
@@ -492,7 +501,7 @@ void env_disable_interrupt(void *env, unsigned int vector_id)
  * @param size - memory size
  * param flags - flags for cache/uncached  and access type
  */
-void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigned int flags)
+void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags)
 {
     platform_map_mem_region(va, pa, size, flags);
 }
@@ -517,7 +526,7 @@ void env_disable_cache(void)
  *
  *
  */
-unsigned long long env_get_timestamp(void)
+uint32_t long env_get_timestamp(void)
 {
     fprintf(stderr, "%s unsupported\n", __FUNCTION__);
     return 0;
@@ -532,15 +541,17 @@ unsigned long long env_get_timestamp(void)
  * @param env    Pointer to env context
  * @param vector Vector ID.
  */
-void env_isr(void * env, int vector)
+void env_isr(void *env, uint32_t vector)
 {
     struct isr_info *info;
     env_context_t *ctx = env;
 
     RL_ASSERT(vector < ISR_COUNT);
-    if (vector < ISR_COUNT) {
+    if (vector < ISR_COUNT)
+    {
         info = &ctx->isr_table[vector];
-        if (info->enabled) {
+        if (info->enabled)
+        {
             virtqueue_notification((struct virtqueue *)info->data);
         }
     }
@@ -555,7 +566,7 @@ void env_isr(void * env, int vector)
  *
  * @return         Execution status.
  */
-int env_init_interrupt(void *env, int vq_id, void *isr_data)
+int32_t env_init_interrupt(void *env, int32_t vq_id, void *isr_data)
 {
     env_register_isr(env, vq_id, isr_data);
     return 0;
@@ -569,7 +580,7 @@ int env_init_interrupt(void *env, int vq_id, void *isr_data)
  *
  * @return      Execution status.
  */
-int env_deinit_interrupt(void *env, int vq_id)
+int32_t env_deinit_interrupt(void *env, int32_t vq_id)
 {
     env_unregister_isr(env, vq_id);
     return 0;
@@ -586,25 +597,27 @@ int env_deinit_interrupt(void *env, int vq_id)
  *
  * @return - status of function execution
  */
-int env_create_queue(void **queue, int length, int element_size)
+int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
     char name[100];
     struct mq_attr mqstat;
-    env_queue_t * q = env_allocate_memory(sizeof(env_queue_t));
-    if (!q) {
+    env_queue_t *q = env_allocate_memory(sizeof(env_queue_t));
+    if (q == ((void *)0))
+    {
         return -1;
     }
     /* Creates a unique queue in /dev/mq/PID_virtaddr_length */
     sprintf(name, "/%u_0x%lx_%u", getpid(), (uint64_t)q, length);
-    mqstat.mq_maxmsg = length;
-    mqstat.mq_msgsize = element_size;
-    mqstat.mq_flags = 0;
-    mqstat.mq_curmsgs = 0;
+    mqstat.mq_maxmsg   = length;
+    mqstat.mq_msgsize  = element_size;
+    mqstat.mq_flags    = 0;
+    mqstat.mq_curmsgs  = 0;
     mqstat.mq_recvwait = 0;
     mqstat.mq_sendwait = 0;
-    q->msg_len = element_size;
-    q->mqd = mq_open(name, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR, &mqstat);
-    if (q->mqd == -1) {
+    q->msg_len         = element_size;
+    q->mqd             = mq_open(name, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR, &mqstat);
+    if (q->mqd == -1)
+    {
         env_free_memory(q);
         fprintf(stderr, "mq_open failed: %s\n", strerror(errno));
         return -1;
@@ -623,7 +636,7 @@ int env_create_queue(void **queue, int length, int element_size)
  */
 void env_delete_queue(void *queue)
 {
-    env_queue_t * q = queue;
+    env_queue_t *q = queue;
 
     mq_close(q->mqd);
     env_free_memory(queue);
@@ -640,11 +653,12 @@ void env_delete_queue(void *queue)
  *
  * @return - status of function execution
  */
-int env_put_queue(void *queue, void *msg, int timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
-    env_queue_t * q = queue;
+    env_queue_t *q = queue;
 
-    if (mq_send(q->mqd, (const char *)msg, q->msg_len, 0)) {
+    if (mq_send(q->mqd, (const char *)msg, q->msg_len, 0))
+    {
         fprintf(stderr, "mq_send failed: %s\n", strerror(errno));
         return 0;
     }
@@ -662,10 +676,11 @@ int env_put_queue(void *queue, void *msg, int timeout_ms)
  *
  * @return - status of function execution
  */
-int env_get_queue(void *queue, void *msg, int timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
-    env_queue_t * q = queue;
-    if (mq_receive(q->mqd, msg, q->msg_len, NULL) == -1) {
+    env_queue_t *q = queue;
+    if (mq_receive(q->mqd, msg, q->msg_len, ((void *)0)) == -1)
+    {
         fprintf(stderr, "mq_receive failed: %s\n", strerror(errno));
         return 0;
     }
@@ -681,11 +696,12 @@ int env_get_queue(void *queue, void *msg, int timeout_ms)
  *
  * @return - Number of queued items in the queue
  */
-int env_get_current_queue_size(void *queue)
+int32_t env_get_current_queue_size(void *queue)
 {
     struct mq_attr mqstat;
-    env_queue_t * q = queue;
-    if (mq_getattr(q->mqd, &mqstat) != -1) {
+    env_queue_t *q = queue;
+    if (mq_getattr(q->mqd, &mqstat) != -1)
+    {
         return mqstat.mq_curmsgs;
     }
     return 0;

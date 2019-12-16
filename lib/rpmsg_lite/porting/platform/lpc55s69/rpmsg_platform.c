@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2018-2019 NXP
  * All rights reserved.
  *
  *
@@ -37,9 +36,9 @@ void MAILBOX_IRQHandler(void)
 {
     mailbox_cpu_id_t cpu_id;
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
-    cpu_id = kMAILBOX_CM4;
+    cpu_id = kMAILBOX_CM33_Core0;
 #else
-    cpu_id = kMAILBOX_CM0Plus;
+    cpu_id = kMAILBOX_CM33_Core1;
 #endif
 
     uint32_t value = MAILBOX_GetValue(MAILBOX, cpu_id);
@@ -54,12 +53,6 @@ void MAILBOX_IRQHandler(void)
         MAILBOX_ClearValueBits(MAILBOX, cpu_id, 0x02);
         env_isr(1);
     }
-
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-#endif
 }
 #endif
 
@@ -83,11 +76,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
     RL_ASSERT(0 <= isr_counter);
     if (isr_counter == 0)
     {
-#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
         NVIC_SetPriority(MAILBOX_IRQn, 5);
-#else
-        NVIC_SetPriority(MAILBOX_IRQn, 2);
-#endif
     }
     isr_counter++;
 
@@ -127,16 +116,16 @@ void platform_notify(uint32_t vector_id)
        this statement in case multiple instances of RPMsg-Lite are needed. */
     switch (RL_GET_LINK_ID(vector_id))
     {
-        case RL_PLATFORM_LPC5410x_M4_M0_LINK_ID:
+        case RL_PLATFORM_LPC55S69_M33_M33_LINK_ID:
             env_lock_mutex(platform_lock);
 /* Write directly into the Mailbox register, no need to wait until the content is cleared
    (consumed by the receiver side) because the same walue of the virtqueu ID is written
    into this register when trigerring the ISR for the receiver side. The whole queue of
    received buffers for associated virtqueue is handled in the ISR then. */
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
-            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vector_id)));
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM33_Core1, (1 << RL_GET_Q_ID(vector_id)));
 #else
-            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM4, (1 << RL_GET_Q_ID(vector_id)));
+            MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM33_Core0, (1 << RL_GET_Q_ID(vector_id)));
 #endif
             env_unlock_mutex(platform_lock);
             return;
@@ -322,14 +311,14 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
-/* Important for LPC54102 - do not deinit mailbox, if there
+/* Important for LPC5411x - do not deinit mailbox, if there
    is a pending ISR on the other core! */
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
-    while (0U != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM0Plus))
+    while (0U != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM33_Core1))
     {
     }
 #else
-    while (0U != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM4))
+    while (0U != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM33_Core0))
     {
     }
 #endif

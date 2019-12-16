@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2018-2019 NXP
  * All rights reserved.
  *
  *
@@ -13,7 +12,7 @@
 #include <stdint.h>
 
 /*
- * No need to align the VRING as defined in Linux because LPC54102 is not intended
+ * No need to align the VRING as defined in Linux because LPC55S69 is not intended
  * to run the Linux
  */
 #ifndef VRING_ALIGN
@@ -32,7 +31,7 @@
 #define RL_GET_LINK_ID(id) (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id) ((id)&0x1U)
 
-#define RL_PLATFORM_LPC5410x_M4_M0_LINK_ID (0U)
+#define RL_PLATFORM_LPC55S69_M33_M33_LINK_ID (0U)
 #define RL_PLATFORM_HIGHEST_LINK_ID (0U)
 
 /* platform interrupt related functions */

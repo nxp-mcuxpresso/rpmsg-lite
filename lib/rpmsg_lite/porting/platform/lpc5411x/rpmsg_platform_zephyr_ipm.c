@@ -17,35 +17,34 @@
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-static int isr_counter = 0;
-static int disable_counter = 0;
+static int32_t isr_counter     = 0;
+static int32_t disable_counter = 0;
 static void *platform_lock;
-static struct device *ipm_handle = NULL;
+static struct device *ipm_handle = ((void *)0);
 
 void platform_ipm_callback(void *context, u32_t id, volatile void *data)
 {
-    if ((*(uint32_t*)data) & 0x01)
+    if (((*(uint32_t *)data) & 0x01) != 0UL)
     {
         env_isr(0);
     }
-    if ((*(uint32_t*)data) & 0x02)
+    if (((*(uint32_t *)data) & 0x02) != 0UL)
     {
         env_isr(1);
     }
 }
 
-void platform_global_isr_disable(void)
+static void platform_global_isr_disable(void)
 {
     __asm volatile("cpsid i");
 }
 
-
-void platform_global_isr_enable(void)
+static void platform_global_isr_enable(void)
 {
     __asm volatile("cpsie i");
 }
 
-int platform_init_interrupt(unsigned int vector_id, void *isr_data)
+int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 {
     /* Register ISR to environment layer */
     env_register_isr(vector_id, isr_data);
@@ -61,14 +60,14 @@ int platform_init_interrupt(unsigned int vector_id, void *isr_data)
     return 0;
 }
 
-int platform_deinit_interrupt(unsigned int vector_id)
+int32_t platform_deinit_interrupt(uint32_t vector_id)
 {
     /* Prepare the MU Hardware */
     env_lock_mutex(platform_lock);
 
     RL_ASSERT(0 < isr_counter);
     isr_counter--;
-    if ((!isr_counter) && (ipm_handle != NULL))
+    if ((isr_counter == 0) && (ipm_handle != ((void *)0)))
     {
         ipm_set_enabled(ipm_handle, 0);
     }
@@ -81,7 +80,7 @@ int platform_deinit_interrupt(unsigned int vector_id)
     return 0;
 }
 
-void platform_notify(unsigned int vector_id)
+void platform_notify(uint32_t vector_id)
 {
     switch (RL_GET_LINK_ID(vector_id))
     {
@@ -106,7 +105,7 @@ void platform_notify(unsigned int vector_id)
  * @return True for IRQ, false otherwise.
  *
  */
-int platform_in_isr(void)
+int32_t platform_in_isr(void)
 {
     return (0 != k_is_in_isr());
 }
@@ -121,19 +120,19 @@ int platform_in_isr(void)
  * @return vector_id Return value is never checked.
  *
  */
-int platform_interrupt_enable(unsigned int vector_id)
+int32_t platform_interrupt_enable(uint32_t vector_id)
 {
     RL_ASSERT(0 < disable_counter);
 
     platform_global_isr_disable();
     disable_counter--;
 
-    if ((!disable_counter) && (ipm_handle != NULL))
+    if ((disable_counter == 0) && (ipm_handle != ((void *)0)))
     {
         ipm_set_enabled(ipm_handle, 1);
     }
     platform_global_isr_enable();
-    return (vector_id);
+    return ((int32_t)vector_id);
 }
 
 /**
@@ -146,21 +145,21 @@ int platform_interrupt_enable(unsigned int vector_id)
  * @return vector_id Return value is never checked.
  *
  */
-int platform_interrupt_disable(unsigned int vector_id)
+int32_t platform_interrupt_disable(uint32_t vector_id)
 {
     RL_ASSERT(0 <= disable_counter);
 
     platform_global_isr_disable();
     /* virtqueues use the same NVIC vector
        if counter is set - the interrupts are disabled */
-    if ((!disable_counter) && (ipm_handle != NULL))
+    if ((disable_counter == 0) && (ipm_handle != ((void *)0)))
     {
         ipm_set_enabled(ipm_handle, 0);
     }
 
     disable_counter++;
     platform_global_isr_enable();
-    return (vector_id);
+    return ((int32_t)vector_id);
 }
 
 /**
@@ -169,7 +168,7 @@ int platform_interrupt_disable(unsigned int vector_id)
  * Dummy implementation
  *
  */
-void platform_map_mem_region(unsigned int vrt_addr, unsigned int phy_addr, unsigned int size, unsigned int flags)
+void platform_map_mem_region(uint32_t vrt_addr, uint32_t phy_addr, uint32_t size, uint32_t flags)
 {
 }
 
@@ -199,9 +198,9 @@ void platform_cache_disable(void)
  * Dummy implementation
  *
  */
-unsigned long platform_vatopa(void *addr)
+uint32_t platform_vatopa(void *addr)
 {
-    return ((unsigned long)addr);
+    return ((uint32_t)(char *)addr);
 }
 
 /**
@@ -210,9 +209,9 @@ unsigned long platform_vatopa(void *addr)
  * Dummy implementation
  *
  */
-void *platform_patova(unsigned long addr)
+void *platform_patova(uint32_t addr)
 {
-    return ((void *)addr);
+    return ((void *)(char *)addr);
 }
 
 /**
@@ -220,20 +219,20 @@ void *platform_patova(unsigned long addr)
  *
  * platform/environment init
  */
-int platform_init(void)
+int32_t platform_init(void)
 {
     /* Get IPM device handle */
     ipm_handle = device_get_binding(DT_NXP_LPC_MAILBOX_0_LABEL);
-    if(!ipm_handle)
+    if (!ipm_handle)
     {
         return -1;
     }
 
     /* Register application callback with no context */
-    ipm_register_callback(ipm_handle, platform_ipm_callback, NULL);
+    ipm_register_callback(ipm_handle, platform_ipm_callback, ((void *)0));
 
     /* Create lock used in multi-instanced RPMsg */
-    if(0 != env_create_mutex(&platform_lock, 1))
+    if (0 != env_create_mutex(&platform_lock, 1))
     {
         return -1;
     }
@@ -246,11 +245,10 @@ int platform_init(void)
  *
  * platform/environment deinit process
  */
-int platform_deinit(void)
+int32_t platform_deinit(void)
 {
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);
-    platform_lock = NULL;
+    platform_lock = ((void *)0);
     return 0;
 }
-

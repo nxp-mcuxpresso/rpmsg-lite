@@ -31,53 +31,54 @@
  */
 
 /**************************************************************************
-* FILE NAME
-*
-*       rpmsg_env.h
-*
-* COMPONENT
-*
-*         OpenAMP stack.
-*
-* DESCRIPTION
-*
-*       This file defines abstraction layer for OpenAMP stack. The implementor
-*       must provide definition of all the functions.
-*
-* DATA STRUCTURES
-*
-*        none
-*
-* FUNCTIONS
-*
-*       env_allocate_memory
-*       env_free_memory
-*       env_memset
-*       env_memcpy
-*       env_strncpy
-*       env_print
-*       env_map_vatopa
-*       env_map_patova
-*       env_mb
-*       env_rmb
-*       env_wmb
-*       env_create_mutex
-*       env_delete_mutex
-*       env_lock_mutex
-*       env_unlock_mutex
-*       env_sleep_msec
-*       env_disable_interrupt
-*       env_enable_interrupt
-*       env_create_queue
-*       env_delete_queue
-*       env_put_queue
-*       env_get_queue
-*
-**************************************************************************/
-#ifndef _RPMSG_ENV_H_
-#define _RPMSG_ENV_H_
+ * FILE NAME
+ *
+ *       rpmsg_env.h
+ *
+ * COMPONENT
+ *
+ *         OpenAMP stack.
+ *
+ * DESCRIPTION
+ *
+ *       This file defines abstraction layer for OpenAMP stack. The implementor
+ *       must provide definition of all the functions.
+ *
+ * DATA STRUCTURES
+ *
+ *        none
+ *
+ * FUNCTIONS
+ *
+ *       env_allocate_memory
+ *       env_free_memory
+ *       env_memset
+ *       env_memcpy
+ *       env_strncpy
+ *       env_print
+ *       env_map_vatopa
+ *       env_map_patova
+ *       env_mb
+ *       env_rmb
+ *       env_wmb
+ *       env_create_mutex
+ *       env_delete_mutex
+ *       env_lock_mutex
+ *       env_unlock_mutex
+ *       env_sleep_msec
+ *       env_disable_interrupt
+ *       env_enable_interrupt
+ *       env_create_queue
+ *       env_delete_queue
+ *       env_put_queue
+ *       env_get_queue
+ *
+ **************************************************************************/
+#ifndef RPMSG_ENV_H_
+#define RPMSG_ENV_H_
 
 #include <stdio.h>
+#include <stdint.h>
 #include "rpmsg_default_config.h"
 #include "rpmsg_platform.h"
 
@@ -92,9 +93,9 @@
  * @returns - execution status
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-int env_init(void ** env_context, void * env_init_data);
+int32_t env_init(void **env_context, void *env_init_data);
 #else
-int env_init(void);
+int32_t env_init(void);
 #endif
 
 /*!
@@ -107,9 +108,9 @@ int env_init(void);
  * @returns - execution status
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-int env_deinit(void *env_context);
+int32_t env_deinit(void *env_context);
 #else
-int env_deinit(void);
+int32_t env_deinit(void);
 #endif
 
 /*!
@@ -130,7 +131,7 @@ int env_deinit(void);
  *
  * @return - pointer to allocated memory
  */
-void *env_allocate_memory(unsigned int size);
+void *env_allocate_memory(uint32_t size);
 
 /*!
  * env_free_memory
@@ -149,11 +150,11 @@ void env_free_memory(void *ptr);
  *-------------------------------------------------------------------------
  */
 
-void env_memset(void *ptr, int value, unsigned long size);
-void env_memcpy(void *dst, void const *src, unsigned long len);
-int env_strcmp(const char *dst, const char *src);
-void env_strncpy(char *dest, const char *src, unsigned long len);
-int env_strncmp(char *dest, const char *src, unsigned long len);
+void env_memset(void *ptr, int32_t value, uint32_t size);
+void env_memcpy(void *dst, void const *src, uint32_t len);
+int32_t env_strcmp(const char *dst, const char *src);
+void env_strncpy(char *dest, const char *src, uint32_t len);
+int32_t env_strncmp(char *dest, const char *src, uint32_t len);
 #define env_print(...) printf(__VA_ARGS__)
 
 /*!
@@ -175,9 +176,9 @@ int env_strncmp(char *dest, const char *src, unsigned long len);
  * @return  - physical address
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-unsigned long env_map_vatopa(void *env, void *address);
+uint32_t env_map_vatopa(void *env, void *address);
 #else
-unsigned long env_map_vatopa(void *address);
+uint32_t env_map_vatopa(void *address);
 #endif
 
 /*!
@@ -192,9 +193,9 @@ unsigned long env_map_vatopa(void *address);
  *
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void *env_map_patova(void * env, unsigned long address);
+void *env_map_patova(void *env, uint32_t address);
 #else
-void *env_map_patova(unsigned long address);
+void *env_map_patova(uint32_t address);
 #endif
 
 /*!
@@ -247,7 +248,7 @@ void env_wmb(void);
  *
  * @return - status of function execution
  */
-int env_create_mutex(void **lock, int count);
+int32_t env_create_mutex(void **lock, int32_t count);
 
 /*!
  * env_delete_mutex
@@ -296,7 +297,7 @@ void env_unlock_mutex(void *lock);
 #define LOCKED 0
 #define UNLOCKED 1
 
-int env_create_sync_lock(void **lock, int state);
+int32_t env_create_sync_lock(void **lock, int32_t state);
 
 /*!
  * env_create_sync_lock
@@ -334,7 +335,7 @@ void env_release_sync_lock(void *lock);
  *
  * @param num_msec -  delay in msecs
  */
-void env_sleep_msec(int num_msec);
+void env_sleep_msec(uint32_t num_msec);
 
 /*!
  * env_register_isr
@@ -346,9 +347,9 @@ void env_sleep_msec(int num_msec);
  * @param data          Interrupt handler data (virtqueue)
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void env_register_isr(void *env, int vector_id, void *data);
+void env_register_isr(void *env, uint32_t vector_id, void *data);
 #else
-void env_register_isr(int vector_id, void *data);
+void env_register_isr(uint32_t vector_id, void *data);
 #endif
 
 /*!
@@ -360,9 +361,9 @@ void env_register_isr(int vector_id, void *data);
  * @param vector_id     Virtual interrupt vector number
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void env_unregister_isr(void *env, int vector_id);
+void env_unregister_isr(void *env, uint32_t vector_id);
 #else
-void env_unregister_isr(int vector_id);
+void env_unregister_isr(uint32_t vector_id);
 #endif
 
 /*!
@@ -374,9 +375,9 @@ void env_unregister_isr(int vector_id);
  * @param vector_id     Virtual interrupt vector number
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void env_enable_interrupt(void *env, unsigned int vector_id);
+void env_enable_interrupt(void *env, uint32_t vector_id);
 #else
-void env_enable_interrupt(unsigned int vector_id);
+void env_enable_interrupt(uint32_t vector_id);
 #endif
 
 /*!
@@ -388,9 +389,9 @@ void env_enable_interrupt(unsigned int vector_id);
  * @param vector_id     Virtual interrupt vector number
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void env_disable_interrupt(void *env, unsigned int vector_id);
+void env_disable_interrupt(void *env, uint32_t vector_id);
 #else
-void env_disable_interrupt(unsigned int vector_id);
+void env_disable_interrupt(uint32_t vector_id);
 #endif
 
 /*!
@@ -430,7 +431,7 @@ void env_disable_interrupt(unsigned int vector_id);
 #define SHARED_MEM (1 << 6)
 #define TLB_MEM (1 << 7)
 
-void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigned int flags);
+void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags);
 
 /*!
  * env_get_timestamp
@@ -439,7 +440,7 @@ void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigne
  *
  *
  */
-unsigned long long env_get_timestamp(void);
+uint64_t env_get_timestamp(void);
 
 /*!
  * env_disable_cache
@@ -463,7 +464,7 @@ typedef void LOCK;
  *
  * @return - status of function execution
  */
-int env_create_queue(void **queue, int length, int element_size);
+int32_t env_create_queue(void **queue, int32_t length, int32_t element_size);
 
 /*!
  * env_delete_queue
@@ -487,7 +488,7 @@ void env_delete_queue(void *queue);
  * @return - status of function execution
  */
 
-int env_put_queue(void *queue, void *msg, int timeout_ms);
+int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms);
 
 /*!
  * env_get_queue
@@ -501,7 +502,7 @@ int env_put_queue(void *queue, void *msg, int timeout_ms);
  * @return - status of function execution
  */
 
-int env_get_queue(void *queue, void *msg, int timeout_ms);
+int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms);
 
 /*!
  * env_get_current_queue_size
@@ -513,7 +514,7 @@ int env_get_queue(void *queue, void *msg, int timeout_ms);
  * @return - Number of queued items in the queue
  */
 
-int env_get_current_queue_size(void *queue);
+int32_t env_get_current_queue_size(void *queue);
 
 /*!
  * env_isr
@@ -524,11 +525,10 @@ int env_get_current_queue_size(void *queue);
  * @param vector        RPMSG IRQ vector ID.
  */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-void env_isr(void *env, int vector);
+void env_isr(void *env, uint32_t vector);
 #else
-void env_isr(int vector);
+void env_isr(uint32_t vector);
 #endif
-
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 /*!
@@ -540,7 +540,7 @@ void env_isr(int vector);
  *
  * @return        Pointer to platform context data
  */
-void * env_get_platform_context(void * env_context);
+void *env_get_platform_context(void *env_context);
 
 /*!
  * env_init_interrupt
@@ -553,7 +553,7 @@ void * env_get_platform_context(void * env_context);
  *
  * @return        Execution status, 0 on success
  */
-int env_init_interrupt(void *env, int vq_id, void *isr_data);
+int32_t env_init_interrupt(void *env, int32_t vq_id, void *isr_data);
 
 /*!
  * env_deinit_interrupt
@@ -565,7 +565,7 @@ int env_init_interrupt(void *env, int vq_id, void *isr_data);
  *
  * @return        Execution status, 0 on success
  */
-int env_deinit_interrupt(void *env, int vq_id);
+int32_t env_deinit_interrupt(void *env, int32_t vq_id);
 #endif
 
-#endif /* _RPMSG_ENV_H_ */
+#endif /* RPMSG_ENV_H_ */

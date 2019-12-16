@@ -51,13 +51,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int env_init_counter = 0;
+static int32_t env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (12) /* Change for multiple remote cores */
-                      /*!
-                       * Structure to keep track of registered ISR's.
-                       */
+#define ISR_COUNT (12U) /* Change for multiple remote cores */
+                        /*!
+                         * Structure to keep track of registered ISR's.
+                         */
 struct isr_info
 {
     void *data;
@@ -74,7 +74,7 @@ static struct isr_info isr_table[ISR_COUNT];
  * Initializes OS/BM environment.
  *
  */
-int env_init(void)
+int32_t env_init(void)
 {
     // verify 'env_init_counter'
     RL_ASSERT(env_init_counter >= 0);
@@ -89,7 +89,7 @@ int env_init(void)
         return 0;
     }
     // first call
-    memset(isr_table, 0, sizeof(isr_table));
+    (void)memset(isr_table, 0, sizeof(isr_table));
     return platform_init();
 }
 
@@ -100,7 +100,7 @@ int env_init(void)
  *
  * @returns Execution status
  */
-int env_deinit(void)
+int32_t env_deinit(void)
 {
     // verify 'env_init_counter'
     RL_ASSERT(env_init_counter > 0);
@@ -124,7 +124,7 @@ int env_deinit(void)
  *
  * @param size
  */
-void *env_allocate_memory(unsigned int size)
+void *env_allocate_memory(uint32_t size)
 {
     return (malloc(size));
 }
@@ -136,7 +136,7 @@ void *env_allocate_memory(unsigned int size)
  */
 void env_free_memory(void *ptr)
 {
-    if (ptr != NULL)
+    if (ptr != ((void *)0))
     {
         free(ptr);
     }
@@ -150,9 +150,9 @@ void env_free_memory(void *ptr)
  * @param value
  * @param size
  */
-void env_memset(void *ptr, int value, unsigned long size)
+void env_memset(void *ptr, int32_t value, uint32_t size)
 {
-    memset(ptr, value, size);
+    (void)memset(ptr, value, size);
 }
 
 /*!
@@ -163,9 +163,9 @@ void env_memset(void *ptr, int value, unsigned long size)
  * @param src
  * @param len
  */
-void env_memcpy(void *dst, void const *src, unsigned long len)
+void env_memcpy(void *dst, void const *src, uint32_t len)
 {
-    memcpy(dst, src, len);
+    (void)memcpy(dst, src, len);
 }
 
 /*!
@@ -176,7 +176,7 @@ void env_memcpy(void *dst, void const *src, unsigned long len)
  * @param src
  */
 
-int env_strcmp(const char *dst, const char *src)
+int32_t env_strcmp(const char *dst, const char *src)
 {
     return (strcmp(dst, src));
 }
@@ -189,9 +189,9 @@ int env_strcmp(const char *dst, const char *src)
  * @param src
  * @param len
  */
-void env_strncpy(char *dest, const char *src, unsigned long len)
+void env_strncpy(char *dest, const char *src, uint32_t len)
 {
-    strncpy(dest, src, len);
+    (void)strncpy(dest, src, len);
 }
 
 /*!
@@ -202,7 +202,7 @@ void env_strncpy(char *dest, const char *src, unsigned long len)
  * @param src
  * @param len
  */
-int env_strncmp(char *dest, const char *src, unsigned long len)
+int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 {
     return (strncmp(dest, src, len));
 }
@@ -238,7 +238,7 @@ void env_wmb(void)
  *
  * @param address
  */
-unsigned long env_map_vatopa(void *address)
+uint32_t env_map_vatopa(void *address)
 {
     return platform_vatopa(address);
 }
@@ -248,7 +248,7 @@ unsigned long env_map_vatopa(void *address)
  *
  * @param address
  */
-void *env_map_patova(unsigned long address)
+void *env_map_patova(uint32_t address)
 {
     return platform_patova(address);
 }
@@ -259,7 +259,7 @@ void *env_map_patova(unsigned long address)
  * Creates a mutex with the given initial count.
  *
  */
-int env_create_mutex(void **lock, int count)
+int32_t env_create_mutex(void **lock, int32_t count)
 {
     /* make the mutex pointer point to itself
      * this marks the mutex handle as initialized.
@@ -306,7 +306,7 @@ void env_unlock_mutex(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(int num_msec)
+void env_sleep_msec(uint32_t num_msec)
 {
     platform_time_delay(num_msec);
 }
@@ -319,7 +319,7 @@ void env_sleep_msec(int num_msec)
  * @param vector_id - virtual interrupt vector number
  * @param data      - interrupt handler data (virtqueue)
  */
-void env_register_isr(int vector_id, void *data)
+void env_register_isr(uint32_t vector_id, void *data)
 {
     RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
@@ -335,12 +335,12 @@ void env_register_isr(int vector_id, void *data)
  *
  * @param vector_id - virtual interrupt vector number
  */
-void env_unregister_isr(int vector_id)
+void env_unregister_isr(uint32_t vector_id)
 {
     RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
-        isr_table[vector_id].data = NULL;
+        isr_table[vector_id].data = ((void *)0);
     }
 }
 
@@ -352,9 +352,9 @@ void env_unregister_isr(int vector_id)
  * @param vector_id   - virtual interrupt vector number
  */
 
-void env_enable_interrupt(unsigned int vector_id)
+void env_enable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_enable(vector_id);
+    (void)platform_interrupt_enable(vector_id);
 }
 
 /*!
@@ -365,9 +365,9 @@ void env_enable_interrupt(unsigned int vector_id)
  * @param vector_id   - virtual interrupt vector number
  */
 
-void env_disable_interrupt(unsigned int vector_id)
+void env_disable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_disable(vector_id);
+    (void)platform_interrupt_disable(vector_id);
 }
 
 /*!
@@ -381,7 +381,7 @@ void env_disable_interrupt(unsigned int vector_id)
  * param flags - flags for cache/uncached  and access type
  */
 
-void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigned int flags)
+void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags)
 {
     platform_map_mem_region(va, pa, size, flags);
 }
@@ -402,7 +402,7 @@ void env_disable_cache(void)
 /*========================================================= */
 /* Util data / functions for BM */
 
-void env_isr(int vector)
+void env_isr(uint32_t vector)
 {
     struct isr_info *info;
     RL_ASSERT(vector < ISR_COUNT);

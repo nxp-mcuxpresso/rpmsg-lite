@@ -41,15 +41,16 @@
  *
  *
  **************************************************************************/
-#ifndef RPMSG_ENV_QNX_H
-#define RPMSG_ENV_QNX_H
+#ifndef RPMSG_ENV_QNX_H_
+#define RPMSG_ENV_QNX_H_
 
 #include <sys/imx_rpmsg_lite.h>
 
-typedef struct rpmsg_env_init {
-    void         *user_input; /* Pointer to user init cfg */
-    unsigned long pa;         /* Physical address of memory pool reserved for rpmsg */
-    void         *va;         /* Virtual address of the memory pool */
+typedef struct rpmsg_env_init
+{
+    void *user_input; /* Pointer to user init cfg */
+    uint32_t pa;      /* Physical address of memory pool reserved for rpmsg */
+    void *va;         /* Virtual address of the memory pool */
 } rpmsg_env_init_t;
 
-#endif
+#endif /* RPMSG_ENV_QNX_H_ */

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright 2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,15 +64,15 @@ void add_to_list(struct llist **head, struct llist *node)
     if (*head != LIST_NULL)
     {
         /* Place the new element at the start of list. */
-        node->next = *head;
-        node->prev = LIST_NULL;
+        node->next    = *head;
+        node->prev    = LIST_NULL;
         (*head)->prev = node;
-        *head = node;
+        *head         = node;
     }
     else
     {
         /* List is empty - assign new element to list head. */
-        *head = node;
+        *head         = node;
         (*head)->next = LIST_NULL;
         (*head)->prev = LIST_NULL;
     }

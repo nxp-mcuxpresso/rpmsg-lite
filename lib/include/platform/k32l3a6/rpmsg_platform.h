@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 /*
- * No need to align the VRING as defined in Linux because LPC54102 is not intended
+ * No need to align the VRING as defined in Linux because k32l3a6 is not intended
  * to run the Linux
  */
 #ifndef VRING_ALIGN
@@ -32,7 +32,7 @@
 #define RL_GET_LINK_ID(id) (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id) ((id)&0x1U)
 
-#define RL_PLATFORM_LPC5410x_M4_M0_LINK_ID (0U)
+#define RL_PLATFORM_K32L3A60_M4_M0_LINK_ID (0U)
 #define RL_PLATFORM_HIGHEST_LINK_ID (0U)
 
 /* platform interrupt related functions */

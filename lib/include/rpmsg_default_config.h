@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _RPMSG_DEFAULT_CONFIG_H
-#define _RPMSG_DEFAULT_CONFIG_H
+#ifndef RPMSG_DEFAULT_CONFIG_H_
+#define RPMSG_DEFAULT_CONFIG_H_
 
 #define RL_USE_CUSTOM_CONFIG (1)
 
@@ -58,19 +58,19 @@
 
 //! @def RL_BUFFER_PAYLOAD_SIZE
 //!
-//! Size of the buffer payload, it must be equal to (240, 496, 1008, ...) 
+//! Size of the buffer payload, it must be equal to (240, 496, 1008, ...)
 //! [2^n - 16].
-//! The default value is 496.
+//! The default value is 496U.
 #ifndef RL_BUFFER_PAYLOAD_SIZE
-#define RL_BUFFER_PAYLOAD_SIZE (496)
+#define RL_BUFFER_PAYLOAD_SIZE (496U)
 #endif
 
 //! @def RL_BUFFER_COUNT
 //!
 //! Number of the buffers, it must be power of two (2, 4, ...).
-//! The default value is 2.
+//! The default value is 2U.
 #ifndef RL_BUFFER_COUNT
-#define RL_BUFFER_COUNT (2)
+#define RL_BUFFER_COUNT (2U)
 #endif
 
 //! @def RL_API_HAS_ZEROCOPY
@@ -91,7 +91,7 @@
 
 //! @def RL_CLEAR_USED_BUFFERS
 //!
-//! Clearing used buffers before returning back to the pool of free buffers 
+//! Clearing used buffers before returning back to the pool of free buffers
 //! enabled/disabled.
 //! The default value is 0 (disabled).
 #ifndef RL_CLEAR_USED_BUFFERS
@@ -100,8 +100,8 @@
 
 //! @def RL_USE_MCMGR_IPC_ISR_HANDLER
 //!
-//! When enabled IPC interrupts are managed by the Multicore Manager (IPC 
-//! interrupts router), when disabled RPMsg-Lite manages IPC interrupts 
+//! When enabled IPC interrupts are managed by the Multicore Manager (IPC
+//! interrupts router), when disabled RPMsg-Lite manages IPC interrupts
 //! by itself.
 //! The default value is 0 (no MCMGR IPC ISR handler used).
 #ifndef RL_USE_MCMGR_IPC_ISR_HANDLER
@@ -117,7 +117,6 @@
 #define RL_USE_ENVIRONMENT_CONTEXT (0)
 #endif
 
-
 //! @def RL_DEBUG_CHECK_BUFFERS
 //!
 //! Do not use in RPMsg-Lite to Linux configuration
@@ -125,38 +124,31 @@
 #define RL_DEBUG_CHECK_BUFFERS (0)
 #endif
 
-
-
 //! @def RL_HANG
 //!
 //! Default implementation of hang assert function
- static inline void RL_HANG(void)
- {
-     while(1)
-     {
-
-     }
- }
-
+static inline void RL_HANG(void)
+{
+    for (;;)
+    {
+    }
+}
 
 //! @def RL_ASSERT
 //!
 //! Assert implementation.
 #ifndef RL_ASSERT
-#define RL_ASSERT_BOOL(b)  \
-    do                \
-    {                 \
-        if (!(b))       \
-        { \
-            RL_HANG(); \
-        } \
-    } while (0);
-#define RL_ASSERT(x) RL_ASSERT_BOOL((x)!=0)
-
-
-
+#define RL_ASSERT_BOOL(b) \
+    do                    \
+    {                     \
+        if (!(b))         \
+        {                 \
+            RL_HANG();    \
+        }                 \
+    } while (0 == 1);
+#define RL_ASSERT(x) RL_ASSERT_BOOL((int32_t)(x) != 0)
 
 #endif
 //@}
 
-#endif /* _RPMSG_DEFAULT_CONFIG_H */
+#endif /* RPMSG_DEFAULT_CONFIG_H_ */
