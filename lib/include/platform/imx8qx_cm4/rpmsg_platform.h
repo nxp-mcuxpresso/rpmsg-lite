@@ -33,9 +33,9 @@
 #define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
-#define RL_PLATFORM_IMX7ULP_M4_SRTM_LINK_ID (0U)
-#define RL_PLATFORM_IMX7ULP_M4_USER_LINK_ID (1U)
-#define RL_PLATFORM_HIGHEST_LINK_ID         (1U)
+#define RL_PLATFORM_IMX8QX_CM4_SRTM_LINK_ID (0U)
+#define RL_PLATFORM_IMX8QX_CM4_USER_LINK_ID (1U)
+#define RL_PLATFORM_HIGHEST_LINK_ID         (15U)
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);
@@ -58,5 +58,7 @@ void *platform_patova(uint32_t addr);
 /* platform init/deinit */
 int32_t platform_init(void);
 int32_t platform_deinit(void);
+
+int32_t LSIO_MU5_INT_B_IRQHandler(void);
 
 #endif /* RPMSG_PLATFORM_H_ */

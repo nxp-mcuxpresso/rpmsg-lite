@@ -38,7 +38,7 @@
 //! @addtogroup rpmsg_ns
 //! @{
 
-#define RL_NS_EPT_ADDR (0x35)
+#define RL_NS_EPT_ADDR (0x35u)
 
 /* Up to 32 flags available */
 enum rpmsg_ns_flags
@@ -128,7 +128,7 @@ int32_t rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_han
  */
 int32_t rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
                           struct rpmsg_lite_endpoint *new_ept,
-                          char *ept_name,
+                          const char *ept_name,
                           uint32_t flags);
 
 //! @}

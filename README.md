@@ -97,7 +97,7 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.
 
 ## How to format rpmsg-lite code
-To format code, use the application developed by Google, named *clang-format*. This tool is part of the [llvm](http://llvm.org/) project. Currently, the clang-format 7.0.1 version is used for rpmsg-lite.
+To format code, use the application developed by Google, named *clang-format*. This tool is part of the [llvm](http://llvm.org/) project. Currently, the clang-format 10.0.0 version is used for rpmsg-lite.
 The set of style settings used for clang-format is defined in the `.clang-format` file, placed in a root of the rpmsg-lite directory where Python script ``run_clang_format.py`` can be executed. 
 This script executes the application named *clang-format.exe*. You need to have the path of this application in the OS's environment path, or you need to change the script.
 
@@ -106,4 +106,4 @@ This script executes the application named *clang-format.exe*. You need to have 
 
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2019 NXP
+Copyright © 2016-2020 NXP

@@ -40,18 +40,18 @@ typedef uint8_t boolean;
 #include "llist.h"
 
 /*Error Codes*/
-#define VQ_ERROR_BASE (-3000)
-#define ERROR_VRING_FULL (VQ_ERROR_BASE - 1)
-#define ERROR_INVLD_DESC_IDX (VQ_ERROR_BASE - 2)
-#define ERROR_EMPTY_RING (VQ_ERROR_BASE - 3)
-#define ERROR_NO_MEM (VQ_ERROR_BASE - 4)
-#define ERROR_VRING_MAX_DESC (VQ_ERROR_BASE - 5)
-#define ERROR_VRING_ALIGN (VQ_ERROR_BASE - 6)
-#define ERROR_VRING_NO_BUFF (VQ_ERROR_BASE - 7)
+#define VQ_ERROR_BASE            (-3000)
+#define ERROR_VRING_FULL         (VQ_ERROR_BASE - 1)
+#define ERROR_INVLD_DESC_IDX     (VQ_ERROR_BASE - 2)
+#define ERROR_EMPTY_RING         (VQ_ERROR_BASE - 3)
+#define ERROR_NO_MEM             (VQ_ERROR_BASE - 4)
+#define ERROR_VRING_MAX_DESC     (VQ_ERROR_BASE - 5)
+#define ERROR_VRING_ALIGN        (VQ_ERROR_BASE - 6)
+#define ERROR_VRING_NO_BUFF      (VQ_ERROR_BASE - 7)
 #define ERROR_VQUEUE_INVLD_PARAM (VQ_ERROR_BASE - 8)
 
 #define VQUEUE_SUCCESS (0)
-#define VQUEUE_DEBUG (false)
+#define VQUEUE_DEBUG   (false)
 
 /* This is temporary macro to replace C NULL support.
  * At the moment all the RTL specific functions are present in env.
@@ -63,10 +63,10 @@ typedef uint8_t boolean;
  * in the descriptor table. This is used to verify we are correctly
  * handling vq_free_cnt.
  */
-#define VQ_RING_DESC_CHAIN_END (32768)
-#define VIRTQUEUE_FLAG_INDIRECT (0x0001U)
+#define VQ_RING_DESC_CHAIN_END   (32768)
+#define VIRTQUEUE_FLAG_INDIRECT  (0x0001U)
 #define VIRTQUEUE_FLAG_EVENT_IDX (0x0002U)
-#define VIRTQUEUE_MAX_NAME_SZ (32) /* mind the alignment */
+#define VIRTQUEUE_MAX_NAME_SZ    (32) /* mind the alignment */
 
 /* Support for indirect buffer descriptors. */
 #define VIRTIO_RING_F_INDIRECT_DESC (1 << 28)

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2019 NXP
  * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef RPMSG_PLATFORM_H_
 #define RPMSG_PLATFORM_H_
 
@@ -14,16 +14,19 @@
 /* RPMSG MU channel index */
 #define RPMSG_MU_CHANNEL (1)
 
+#define RPMSG_LITE_LINK_ID 0x1
+
 /*
- * Linux requires the ALIGN to 0x1000(4KB) instead of 0x80
+ * No need to align the VRING as defined in Linux because LPCNEXT0 is not intended
+ * to run the Linux
  */
 #ifndef VRING_ALIGN
-#define VRING_ALIGN (0x1000U)
+#define VRING_ALIGN (0x10U)
 #endif
 
-/* contains pool of descriptors and two circular buffers */
+/* contains pool of descriptos and two circular buffers */
 #ifndef VRING_SIZE
-#define VRING_SIZE (0x8000UL)
+#define VRING_SIZE (0x400UL)
 #endif
 
 /* size of shared memory + 2*VRING size */
@@ -33,9 +36,8 @@
 #define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
-#define RL_PLATFORM_IMX7ULP_M4_SRTM_LINK_ID (0U)
-#define RL_PLATFORM_IMX7ULP_M4_USER_LINK_ID (1U)
-#define RL_PLATFORM_HIGHEST_LINK_ID         (1U)
+#define RL_PLATFORM_LPCNEXT0_LINK_ID (0U)
+#define RL_PLATFORM_HIGHEST_LINK_ID  (1U)
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);

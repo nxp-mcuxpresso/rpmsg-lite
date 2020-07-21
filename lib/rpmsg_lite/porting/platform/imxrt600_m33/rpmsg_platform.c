@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2019 NXP
  * All rights reserved.
  *
  *
@@ -8,23 +7,54 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+#include "mcmgr.h"
+#endif
+
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-#define APP_MU_IRQ_PRIORITY        (3U)
-#define APP_MU_A7_SIDE_READY       (0x1U)
-#define APP_MU_A7_WAIT_INTERVAL_MS (10U)
+#define APP_MU_IRQ_PRIORITY (3U)
+
+/* The MU instance used for CM33 and DSP core communication */
+#define APP_MU      MUA
+#define APP_MU_IRQn MU_A_IRQn
 
 static int32_t isr_counter     = 0;
 static int32_t disable_counter = 0;
 static void *platform_lock;
+
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+{
+    env_isr((uint32_t)vring_idx);
+}
+#else
+void MU_A_IRQHandler(void)
+{
+    uint32_t channel;
+
+    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MU_GetStatusFlags(APP_MU)) != 0UL)
+    {
+        channel = MU_ReceiveMsgNonBlocking(APP_MU, RPMSG_MU_CHANNEL); /* Read message from RX register. */
+        env_isr(RL_GET_VQ_ID(RL_PLATFORM_LPC6324_M33_DSP_LINK_ID, RL_GET_Q_ID(channel >> 16)));
+    }
+
+/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+  exception return operation might vector to incorrect interrupt */
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
+}
+#endif
 
 static void platform_global_isr_disable(void)
 {
@@ -41,13 +71,12 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
     /* Register ISR to environment layer */
     env_register_isr(vector_id, isr_data);
 
-    /* Prepare the MU Hardware, enable channel 1 interrupt */
     env_lock_mutex(platform_lock);
 
     RL_ASSERT(0 <= isr_counter);
     if (isr_counter == 0)
     {
-        MU_EnableInterrupts(MUA, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_EnableInterrupts(APP_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
     }
     isr_counter++;
 
@@ -65,7 +94,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
     isr_counter--;
     if (isr_counter == 0)
     {
-        MU_DisableInterrupts(MUA, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_DisableInterrupts(APP_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
     }
 
     /* Unregister ISR from environment layer */
@@ -78,33 +107,24 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 
 void platform_notify(uint32_t vector_id)
 {
-    /* As Linux suggests, use MU->Data Channel 1 as communication channel */
     uint32_t msg = (uint32_t)(vector_id << 16);
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     env_lock_mutex(platform_lock);
-    MU_SendMsg(MUA, RPMSG_MU_CHANNEL, msg);
+    MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
     env_unlock_mutex(platform_lock);
-}
-
-/*
- * MU Interrrupt RPMsg handler
- */
-int32_t MU_A_IRQHandler()
-{
-    uint32_t channel;
-
-    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MU_GetStatusFlags(MUA)) != 0UL)
+#else
+    switch (RL_GET_LINK_ID(vector_id))
     {
-        channel = MU_ReceiveMsgNonBlocking(MUA, RPMSG_MU_CHANNEL); // Read message from RX register.
-        env_isr(channel >> 16);
+        case 0:
+            env_lock_mutex(platform_lock);
+            MU_SendMsg(APP_MU, RPMSG_MU_CHANNEL, msg);
+            env_unlock_mutex(platform_lock);
+            return;
+        default:
+            return;
     }
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
 #endif
-
-    return 0;
 }
 
 /**
@@ -164,7 +184,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
-        NVIC_EnableIRQ(MU_A_IRQn);
+        NVIC_EnableIRQ(APP_MU_IRQn);
     }
     platform_global_isr_enable();
     return ((int32_t)vector_id);
@@ -189,7 +209,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
-        NVIC_DisableIRQ(MU_A_IRQn);
+        NVIC_DisableIRQ(APP_MU_IRQn);
     }
     disable_counter++;
     platform_global_isr_enable();
@@ -255,13 +275,18 @@ void *platform_patova(uint32_t addr)
  */
 int32_t platform_init(void)
 {
-    /*
-     * Prepare for the MU Interrupt
-     *  MU must be initialized before rpmsg init is called
-     */
-    MU_Init(MUA);
-    NVIC_SetPriority(MU_A_IRQn, APP_MU_IRQ_PRIORITY);
-    NVIC_EnableIRQ(MU_A_IRQn);
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    mcmgr_status_t retval = kStatus_MCMGR_Error;
+    retval                = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
+    if (kStatus_MCMGR_Success != retval)
+    {
+        return -1;
+    }
+#else
+    MU_Init(APP_MU);
+    NVIC_SetPriority(APP_MU_IRQn, APP_MU_IRQ_PRIORITY);
+    NVIC_EnableIRQ(APP_MU_IRQn);
+#endif
 
     /* Create lock used in multi-instanced RPMsg */
     if (0 != env_create_mutex(&platform_lock, 1))
@@ -279,6 +304,8 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+    MU_Deinit(APP_MU);
+
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);
     platform_lock = ((void *)0);

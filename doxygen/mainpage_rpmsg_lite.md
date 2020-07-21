@@ -108,4 +108,5 @@ This table summarizes revisions of this document.
 |5.0            | 09/2018 | Align porting layers to the updated MCUXpressoSDK feature files <p> Allow rpmsg-lite build by Keil MDK ArmClangV6 compiler  |
 |6.0            | 04/2019 | Added configuration macro RL_DEBUG_CHECK_BUFFERS <p> Several MISRA violations fixed <p> Added environment layers for QNX and Zephyr <p> Allow environment context required for some environments (controlled by the RL_USE_ENVIRONMENT_CONTEXT configuration macro).  |
 |7.0            | 11/2019 | MISRA C-2012 violations fixed, incl. data types consolidation <p> Code formatted.  |
+|8.0            | 04/2020 | MISRA C-2012 violations fixed (7.4) <p> Fix missing lock in rpmsg_lite_rx_callback() for QNX env <p> Correction of rpmsg_lite_instance structure members description <p> Address -Waddress-of-packed-member warnings in GCC9 <p> Clang update to v10.0.0, code re-formatted.  |
 

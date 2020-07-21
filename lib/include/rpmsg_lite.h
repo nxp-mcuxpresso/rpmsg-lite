@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "3.0.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "3.1.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
@@ -61,28 +61,28 @@ extern "C" {
     (((((uint32_t)a) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uint32_t)a) & (~(RL_WORD_SIZE - 1U))) : ((uint32_t)a))
 
 /* Definitions for device types , null pointer, etc.*/
-#define RL_SUCCESS (0)
-#define RL_NULL ((void *)0)
-#define RL_REMOTE (0)
-#define RL_MASTER (1)
-#define RL_TRUE (1U)
-#define RL_FALSE (0U)
-#define RL_ADDR_ANY (0xFFFFFFFFU)
-#define RL_RELEASE (0)
-#define RL_HOLD (1)
+#define RL_SUCCESS    (0)
+#define RL_NULL       ((void *)0)
+#define RL_REMOTE     (0)
+#define RL_MASTER     (1)
+#define RL_TRUE       (1U)
+#define RL_FALSE      (0U)
+#define RL_ADDR_ANY   (0xFFFFFFFFU)
+#define RL_RELEASE    (0)
+#define RL_HOLD       (1)
 #define RL_DONT_BLOCK (0)
-#define RL_BLOCK (0xFFFFFFFFU)
+#define RL_BLOCK      (0xFFFFFFFFU)
 
 /* Error macros. */
-#define RL_ERRORS_BASE (-5000)
-#define RL_ERR_NO_MEM (RL_ERRORS_BASE - 1)
+#define RL_ERRORS_BASE   (-5000)
+#define RL_ERR_NO_MEM    (RL_ERRORS_BASE - 1)
 #define RL_ERR_BUFF_SIZE (RL_ERRORS_BASE - 2)
-#define RL_ERR_PARAM (RL_ERRORS_BASE - 3)
-#define RL_ERR_DEV_ID (RL_ERRORS_BASE - 4)
-#define RL_ERR_MAX_VQ (RL_ERRORS_BASE - 5)
-#define RL_ERR_NO_BUFF (RL_ERRORS_BASE - 6)
-#define RL_NOT_READY (RL_ERRORS_BASE - 7)
-#define RL_ALREADY_DONE (RL_ERRORS_BASE - 8)
+#define RL_ERR_PARAM     (RL_ERRORS_BASE - 3)
+#define RL_ERR_DEV_ID    (RL_ERRORS_BASE - 4)
+#define RL_ERR_MAX_VQ    (RL_ERRORS_BASE - 5)
+#define RL_ERR_NO_BUFF   (RL_ERRORS_BASE - 6)
+#define RL_NOT_READY     (RL_ERRORS_BASE - 7)
+#define RL_ALREADY_DONE  (RL_ERRORS_BASE - 8)
 
 /* Init flags */
 #define RL_NO_FLAGS (0)
@@ -127,8 +127,8 @@ struct rpmsg_lite_instance
     LOCK *lock;                         /*!< local RPMsg Lite mutex lock */
     uint32_t link_state;                /*!< state of the link, up/down*/
     char *sh_mem_base;                  /*!< base address of the shared memory */
-    uint32_t sh_mem_remaining;          /*!< remaining free bytes of shared memory */
-    uint32_t sh_mem_total;              /*!< total size of shared memory */
+    uint32_t sh_mem_remaining;          /*!< amount of remaining unused buffers in shared memory */
+    uint32_t sh_mem_total;              /*!< total amount of buffers in shared memory */
     struct virtqueue_ops const *vq_ops; /*!< ops functions table pointer */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     void *env; /*!< pointer to the environment layer context */

@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,10 +153,13 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
     struct rpmsg_lite_endpoint *ept;
     int32_t cb_ret;
     struct llist *node;
-    struct rpmsg_hdr_reserved *rsvd;
     struct rpmsg_lite_instance *rpmsg_lite_dev = (struct rpmsg_lite_instance *)vq->priv;
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
+
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    env_lock_mutex(rpmsg_lite_dev->lock);
+#endif
 
     /* Process the received data from remote node */
     rpmsg_msg = (struct rpmsg_std_msg *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
@@ -174,8 +177,7 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
 
         if (cb_ret == RL_HOLD)
         {
-            rsvd      = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
-            rsvd->idx = idx;
+            rpmsg_msg->hdr.reserved.idx = idx;
         }
         else
         {
@@ -183,6 +185,10 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
         }
         rpmsg_msg = (struct rpmsg_std_msg *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
     }
+
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+    env_unlock_mutex(rpmsg_lite_dev->lock);
+#endif
 }
 
 /*!
@@ -198,7 +204,7 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
     struct rpmsg_lite_instance *rpmsg_lite_dev = (struct rpmsg_lite_instance *)vq->priv;
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
-    rpmsg_lite_dev->link_state = 1;
+    rpmsg_lite_dev->link_state = 1U;
 }
 
 /****************************************************************************
@@ -681,7 +687,6 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uint32_t timeout)
 {
     struct rpmsg_std_msg *rpmsg_msg;
-    struct rpmsg_hdr_reserved *reserved = RL_NULL;
     void *buffer;
     uint16_t idx;
     uint32_t tick_count = 0U;
@@ -726,8 +731,7 @@ void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uin
     rpmsg_msg = (struct rpmsg_std_msg *)buffer;
 
     /* keep idx and totlen information for nocopy tx function */
-    reserved      = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
-    reserved->idx = idx;
+    rpmsg_msg->hdr.reserved.idx = idx;
 
     /* return the maximum payload size */
     *size -= sizeof(struct rpmsg_std_hdr);
@@ -743,7 +747,6 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 {
     struct rpmsg_std_msg *rpmsg_msg;
     uint32_t src;
-    struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if ((ept == RL_NULL) || (data == RL_NULL))
     {
@@ -782,13 +785,12 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     rpmsg_msg->hdr.len   = (uint16_t)size;
     rpmsg_msg->hdr.flags = (uint16_t)RL_NO_FLAGS;
 
-    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
-
     env_lock_mutex(rpmsg_lite_dev->lock);
     /* Enqueue buffer on virtqueue. */
-    rpmsg_lite_dev->vq_ops->vq_tx(rpmsg_lite_dev->tvq, (void *)rpmsg_msg,
-                                  (uint32_t)virtqueue_get_buffer_length(rpmsg_lite_dev->tvq, reserved->idx),
-                                  reserved->idx);
+    rpmsg_lite_dev->vq_ops->vq_tx(
+        rpmsg_lite_dev->tvq, (void *)rpmsg_msg,
+        (uint32_t)virtqueue_get_buffer_length(rpmsg_lite_dev->tvq, rpmsg_msg->hdr.reserved.idx),
+        rpmsg_msg->hdr.reserved.idx);
     /* Let the other side know that there is a job to process. */
     virtqueue_kick(rpmsg_lite_dev->tvq);
     env_unlock_mutex(rpmsg_lite_dev->lock);
@@ -809,7 +811,6 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
 int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, void *rxbuf)
 {
     struct rpmsg_std_msg *rpmsg_msg;
-    struct rpmsg_hdr_reserved *reserved = RL_NULL;
 
     if (rpmsg_lite_dev == RL_NULL)
     {
@@ -834,15 +835,13 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(rxbuf);
 
-    /* Get the pointer to the reserved field that contains buffer size and the index */
-    reserved = (struct rpmsg_hdr_reserved *)&rpmsg_msg->hdr.reserved;
-
     env_lock_mutex(rpmsg_lite_dev->lock);
 
     /* Return used buffer, with total length (header length + buffer size). */
-    rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_msg,
-                                       (uint32_t)virtqueue_get_buffer_length(rpmsg_lite_dev->rvq, reserved->idx),
-                                       reserved->idx);
+    rpmsg_lite_dev->vq_ops->vq_rx_free(
+        rpmsg_lite_dev->rvq, rpmsg_msg,
+        (uint32_t)virtqueue_get_buffer_length(rpmsg_lite_dev->rvq, rpmsg_msg->hdr.reserved.idx),
+        rpmsg_msg->hdr.reserved.idx);
 
     env_unlock_mutex(rpmsg_lite_dev->lock);
 
@@ -1047,7 +1046,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     env_init_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
     env_disable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index);
     env_disable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 1;
+    rpmsg_lite_dev->link_state = 1U;
     env_enable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index);
     env_enable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index);
 #else
@@ -1055,7 +1054,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     (void)platform_init_interrupt(rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
     env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 1;
+    rpmsg_lite_dev->link_state = 1U;
     env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 #endif

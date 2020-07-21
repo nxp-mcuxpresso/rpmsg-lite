@@ -30,11 +30,11 @@
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
 #define RL_GET_VQ_ID(link_id, queue_id) (((queue_id)&0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))
-#define RL_GET_LINK_ID(id) (((id)&0xFFFFFFFEU) >> 1U)
-#define RL_GET_Q_ID(id) ((id)&0x1U)
+#define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
+#define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
 #define RL_PLATFORM_IMX8MQ_M4_USER_LINK_ID (0U)
-#define RL_PLATFORM_HIGHEST_LINK_ID (15U)
+#define RL_PLATFORM_HIGHEST_LINK_ID        (15U)
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);

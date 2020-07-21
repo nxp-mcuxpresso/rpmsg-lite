@@ -165,7 +165,7 @@ int32_t rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_han
 
 int32_t rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
                           struct rpmsg_lite_endpoint *new_ept,
-                          char *ept_name,
+                          const char *ept_name,
                           uint32_t flags)
 {
     struct rpmsg_ns_msg ns_msg;

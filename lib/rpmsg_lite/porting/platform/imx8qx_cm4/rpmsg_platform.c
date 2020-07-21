@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2017-2019 NXP
  * All rights reserved.
  *
  *
@@ -8,19 +7,35 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
 
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
 
+#include "fsl_irqsteer.h"
+
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-#define APP_MU_IRQ_PRIORITY        (3U)
-#define APP_MU_A7_SIDE_READY       (0x1U)
-#define APP_MU_A7_WAIT_INTERVAL_MS (10U)
+#define APP_MU_IRQ_PRIORITY (3U)
+
+#define APP_M4_MU           LSIO__MU5_B
+#define APP_M4_MU_IRQn      LSIO_MU5_INT_B_IRQn
+#define APP_M4_MU_NVIC_IRQn IRQSTEER_3_IRQn
+
+/* NVIC IRQn that correspond to the LSIO MU IRQn is obtained with the following
+ * calculation:
+ *
+ * NVIC_IRQn = IRQSTEER_0_IRQn + (LSIO_MU_IRQn - FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) / 64
+ *
+ * LSIO_MU_IRQn min = LSIO_MU0_INT_IRQn = 259
+ * LSIO_MU_IRQn max = LSIO_MU13_INT_B_IRQn = 291
+ *
+ * With all the LSIO MUs, the NVIC_IRQn = 35, that corresponds to IRQSTEER_3_IRQn
+ */
 
 static int32_t isr_counter     = 0;
 static int32_t disable_counter = 0;
@@ -47,7 +62,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
     RL_ASSERT(0 <= isr_counter);
     if (isr_counter == 0)
     {
-        MU_EnableInterrupts(MUA, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_EnableInterrupts(APP_M4_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
     }
     isr_counter++;
 
@@ -65,7 +80,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
     isr_counter--;
     if (isr_counter == 0)
     {
-        MU_DisableInterrupts(MUA, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_DisableInterrupts(APP_M4_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
     }
 
     /* Unregister ISR from environment layer */
@@ -82,27 +97,22 @@ void platform_notify(uint32_t vector_id)
     uint32_t msg = (uint32_t)(vector_id << 16);
 
     env_lock_mutex(platform_lock);
-    MU_SendMsg(MUA, RPMSG_MU_CHANNEL, msg);
+    MU_SendMsg(APP_M4_MU, RPMSG_MU_CHANNEL, msg);
     env_unlock_mutex(platform_lock);
 }
 
 /*
  * MU Interrrupt RPMsg handler
  */
-int32_t MU_A_IRQHandler()
+int32_t LSIO_MU5_INT_B_IRQHandler(void)
 {
     uint32_t channel;
 
-    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MU_GetStatusFlags(MUA)) != 0UL)
+    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MU_GetStatusFlags(APP_M4_MU)) != 0UL)
     {
-        channel = MU_ReceiveMsgNonBlocking(MUA, RPMSG_MU_CHANNEL); // Read message from RX register.
-        env_isr(channel >> 16);
+        channel = MU_ReceiveMsgNonBlocking(APP_M4_MU, RPMSG_MU_CHANNEL); // Read message from RX register.
+        env_isr((uint32_t)(channel >> 16));
     }
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-#endif
 
     return 0;
 }
@@ -164,7 +174,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
-        NVIC_EnableIRQ(MU_A_IRQn);
+        NVIC_EnableIRQ(APP_M4_MU_NVIC_IRQn);
     }
     platform_global_isr_enable();
     return ((int32_t)vector_id);
@@ -189,7 +199,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
-        NVIC_DisableIRQ(MU_A_IRQn);
+        NVIC_DisableIRQ(APP_M4_MU_NVIC_IRQn);
     }
     disable_counter++;
     platform_global_isr_enable();
@@ -259,9 +269,9 @@ int32_t platform_init(void)
      * Prepare for the MU Interrupt
      *  MU must be initialized before rpmsg init is called
      */
-    MU_Init(MUA);
-    NVIC_SetPriority(MU_A_IRQn, APP_MU_IRQ_PRIORITY);
-    NVIC_EnableIRQ(MU_A_IRQn);
+    MU_Init(APP_M4_MU);
+    NVIC_SetPriority(APP_M4_MU_NVIC_IRQn, APP_MU_IRQ_PRIORITY);
+    IRQSTEER_EnableInterrupt(IRQSTEER, APP_M4_MU_IRQn);
 
     /* Create lock used in multi-instanced RPMsg */
     if (0 != env_create_mutex(&platform_lock, 1))
@@ -279,6 +289,9 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+    MU_Deinit(APP_M4_MU);
+    IRQSTEER_DisableInterrupt(IRQSTEER, APP_M4_MU_IRQn);
+
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);
     platform_lock = ((void *)0);

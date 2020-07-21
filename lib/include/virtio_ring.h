@@ -125,7 +125,7 @@ struct vring
  * We publish the used event index at the end of the available ring, and vice
  * versa. They are at the end for backwards compatibility.
  */
-#define vring_used_event(vr) ((vr)->avail->ring[(vr)->num])
+#define vring_used_event(vr)  ((vr)->avail->ring[(vr)->num])
 #define vring_avail_event(vr) ((vr)->used->ring[(vr)->num].id)
 
 static inline int32_t vring_size(uint32_t num, uint32_t align)

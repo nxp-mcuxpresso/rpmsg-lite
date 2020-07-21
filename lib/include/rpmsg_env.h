@@ -294,7 +294,7 @@ void env_unlock_mutex(void *lock);
  *
  * @returns - status of function execution
  */
-#define LOCKED 0
+#define LOCKED   0
 #define UNLOCKED 1
 
 int32_t env_create_sync_lock(void **lock, int32_t state);
@@ -427,9 +427,9 @@ void env_disable_interrupt(uint32_t vector_id);
 
 /* Memory Types */
 #define MEM_MAPPED (1 << 4)
-#define IO_MAPPED (1 << 5)
+#define IO_MAPPED  (1 << 5)
 #define SHARED_MEM (1 << 6)
-#define TLB_MEM (1 << 7)
+#define TLB_MEM    (1 << 7)
 
 void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags);
 
