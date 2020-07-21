@@ -32,7 +32,7 @@ var searchData=
   ['rpmsg_5flite_5fsend',['rpmsg_lite_send',['../group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4',1,'rpmsg_lite.h']]],
   ['rpmsg_5flite_5fsend_5fnocopy',['rpmsg_lite_send_nocopy',['../group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31',1,'rpmsg_lite.h']]],
   ['rpmsg_20name_20service_20component',['RPMsg Name Service Component',['../group__rpmsg__ns.html',1,'']]],
-  ['rpmsg_5fns_5fannounce',['rpmsg_ns_announce',['../group__rpmsg__ns.html#ga2825f8af95d0892a4e692e726ba45702',1,'rpmsg_ns.h']]],
+  ['rpmsg_5fns_5fannounce',['rpmsg_ns_announce',['../group__rpmsg__ns.html#gad13f3514cf653b1bcf5de4dd2f629eea',1,'rpmsg_ns.h']]],
   ['rpmsg_5fns_5fbind',['rpmsg_ns_bind',['../group__rpmsg__ns.html#gab2e44f497543e00f358bba04566b5e36',1,'rpmsg_ns.h']]],
   ['rpmsg_5fns_5fcallback_5fdata',['rpmsg_ns_callback_data',['../group__rpmsg__ns.html#structrpmsg__ns__callback__data',1,'']]],
   ['rpmsg_5fns_5fcontext',['rpmsg_ns_context',['../group__rpmsg__ns.html#structrpmsg__ns__context',1,'']]],

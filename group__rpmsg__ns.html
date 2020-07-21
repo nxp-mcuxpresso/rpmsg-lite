@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 3.0.0</span>
+   &#160;<span id="projectnumber">Rev. 3.1.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -159,9 +159,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga45c0c23ae36e9798bc5054afe3b47b12"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#ga45c0c23ae36e9798bc5054afe3b47b12">rpmsg_ns_unbind</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, rpmsg_ns_handle handle)</td></tr>
 <tr class="memdesc:ga45c0c23ae36e9798bc5054afe3b47b12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters application nameservice callback and cleans up.  <a href="#ga45c0c23ae36e9798bc5054afe3b47b12">More...</a><br /></td></tr>
 <tr class="separator:ga45c0c23ae36e9798bc5054afe3b47b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2825f8af95d0892a4e692e726ba45702"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#ga2825f8af95d0892a4e692e726ba45702">rpmsg_ns_announce</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *new_ept, char *ept_name, uint32_t flags)</td></tr>
-<tr class="memdesc:ga2825f8af95d0892a4e692e726ba45702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends name service announcement to remote device.  <a href="#ga2825f8af95d0892a4e692e726ba45702">More...</a><br /></td></tr>
-<tr class="separator:ga2825f8af95d0892a4e692e726ba45702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad13f3514cf653b1bcf5de4dd2f629eea"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__ns.html#gad13f3514cf653b1bcf5de4dd2f629eea">rpmsg_ns_announce</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *new_ept, const char *ept_name, uint32_t flags)</td></tr>
+<tr class="memdesc:gad13f3514cf653b1bcf5de4dd2f629eea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends name service announcement to remote device.  <a href="#gad13f3514cf653b1bcf5de4dd2f629eea">More...</a><br /></td></tr>
+<tr class="separator:gad13f3514cf653b1bcf5de4dd2f629eea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
 <a name="structrpmsg__ns__callback__data" id="structrpmsg__ns__callback__data"></a>
@@ -332,7 +332,7 @@ ns_ctxt</td>
 
 </div>
 </div>
-<a class="anchor" id="ga2825f8af95d0892a4e692e726ba45702"></a>
+<a class="anchor" id="gad13f3514cf653b1bcf5de4dd2f629eea"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -351,7 +351,7 @@ ns_ctxt</td>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char *&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>ept_name</em>, </td>
         </tr>
         <tr>
@@ -388,7 +388,7 @@ ns_ctxt</td>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul class="foot">
-    <li class="footer">&copy; 2016 NXP Semiconductors. All rights reserved.
+    <li class="footer">Copyright 2016-2020 NXP Semiconductors. All rights reserved.
     </li>
   </ul>
 </div>
