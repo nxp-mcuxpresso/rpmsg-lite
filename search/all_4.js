@@ -3,6 +3,7 @@ var searchData=
   ['rpmsg_2dlite_20configuration',['RPMsg-Lite Configuration',['../group__config.html',1,'']]],
   ['rpmsg_20component',['RPMsg Component',['../index.html',1,'']]],
   ['rfu',['rfu',['../group__rpmsg__lite.html#adae527c972c102f433354448d3ab05a7',1,'rpmsg_lite_endpoint']]],
+  ['rl_5fallow_5fconsumed_5fbuffers_5fnotification',['RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION',['../group__config.html#ga5997b4fbd7e8cf22b41b75573e91a243',1,'rpmsg_default_config.h']]],
   ['rl_5fapi_5fhas_5fzerocopy',['RL_API_HAS_ZEROCOPY',['../group__config.html#ga931a9f16ee1aa309020c74cfe2eabf1f',1,'rpmsg_default_config.h']]],
   ['rl_5fassert',['RL_ASSERT',['../group__config.html#ga1b73e9943f6d0786eee8e91020cdca29',1,'rpmsg_default_config.h']]],
   ['rl_5fbuffer_5fcount',['RL_BUFFER_COUNT',['../group__config.html#gab9a566c2e720eaa10348e84d35f8dde9',1,'rpmsg_default_config.h']]],

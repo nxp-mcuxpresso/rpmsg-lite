@@ -10,5 +10,6 @@ var group__config =
     [ "RL_USE_MCMGR_IPC_ISR_HANDLER", "group__config.html#ga1b30d0352059e95ffe6075ade6373c16", null ],
     [ "RL_USE_ENVIRONMENT_CONTEXT", "group__config.html#ga20ac412396689025a366af64b0b8d354", null ],
     [ "RL_DEBUG_CHECK_BUFFERS", "group__config.html#ga5c53a7ca40cc6bef546c7fa7c22fd1f6", null ],
+    [ "RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION", "group__config.html#ga5997b4fbd7e8cf22b41b75573e91a243", null ],
     [ "RL_ASSERT", "group__config.html#ga1b73e9943f6d0786eee8e91020cdca29", null ]
 ];
