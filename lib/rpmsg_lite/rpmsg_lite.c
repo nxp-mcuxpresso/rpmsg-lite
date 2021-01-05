@@ -154,6 +154,9 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
     int32_t cb_ret;
     struct llist *node;
     struct rpmsg_lite_instance *rpmsg_lite_dev = (struct rpmsg_lite_instance *)vq->priv;
+#if defined(RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION) && (RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION == 1)
+    uint32_t rx_freed = RL_FALSE;
+#endif
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
 
@@ -182,8 +185,18 @@ static void rpmsg_lite_rx_callback(struct virtqueue *vq)
         else
         {
             rpmsg_lite_dev->vq_ops->vq_rx_free(rpmsg_lite_dev->rvq, rpmsg_msg, len, idx);
+#if defined(RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION) && (RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION == 1)
+            rx_freed = RL_TRUE;
+#endif
         }
         rpmsg_msg = (struct rpmsg_std_msg *)rpmsg_lite_dev->vq_ops->vq_rx(rpmsg_lite_dev->rvq, &len, &idx);
+#if defined(RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION) && (RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION == 1)
+        if ((rpmsg_msg == RL_NULL) && (rx_freed == RL_TRUE))
+        {
+            /* Let the remote device know that some buffers have been freed */
+            virtqueue_kick(rpmsg_lite_dev->rvq);
+        }
+#endif
     }
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
@@ -842,6 +855,11 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
         rpmsg_lite_dev->rvq, rpmsg_msg,
         (uint32_t)virtqueue_get_buffer_length(rpmsg_lite_dev->rvq, rpmsg_msg->hdr.reserved.idx),
         rpmsg_msg->hdr.reserved.idx);
+
+#if defined(RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION) && (RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION == 1)
+    /* Let the remote device know that a buffer has been freed */
+    virtqueue_kick(rpmsg_lite_dev->rvq);
+#endif
 
     env_unlock_mutex(rpmsg_lite_dev->lock);
 

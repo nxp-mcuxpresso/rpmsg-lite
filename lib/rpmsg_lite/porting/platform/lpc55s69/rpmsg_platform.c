@@ -119,8 +119,8 @@ void platform_notify(uint32_t vector_id)
         case RL_PLATFORM_LPC55S69_M33_M33_LINK_ID:
             env_lock_mutex(platform_lock);
 /* Write directly into the Mailbox register, no need to wait until the content is cleared
-   (consumed by the receiver side) because the same walue of the virtqueu ID is written
-   into this register when trigerring the ISR for the receiver side. The whole queue of
+   (consumed by the receiver side) because the same value of the virtqueue ID is written
+   into this register when triggering the ISR for the receiver side. The whole queue of
    received buffers for associated virtqueue is handled in the ISR then. */
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
             MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM33_Core1, (1 << RL_GET_Q_ID(vector_id)));

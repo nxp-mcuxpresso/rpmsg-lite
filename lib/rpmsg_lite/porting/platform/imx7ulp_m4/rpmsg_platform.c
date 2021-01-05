@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  *
@@ -89,7 +89,7 @@ void platform_notify(uint32_t vector_id)
 /*
  * MU Interrrupt RPMsg handler
  */
-int32_t MU_A_IRQHandler()
+int32_t MU_A_IRQHandler(void)
 {
     uint32_t channel;
 
@@ -98,9 +98,12 @@ int32_t MU_A_IRQHandler()
         channel = MU_ReceiveMsgNonBlocking(MUA, RPMSG_MU_CHANNEL); // Read message from RX register.
         env_isr(channel >> 16);
     }
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
     __DSB();
 #endif
 

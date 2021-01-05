@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019-2020 NXP
  * All rights reserved.
  *
  *
@@ -11,13 +11,8 @@
 
 #include <stdint.h>
 
-/* RPMSG MU channel index */
-#define RPMSG_MU_CHANNEL (1)
-
-#define RPMSG_LITE_LINK_ID 0x1
-
 /*
- * No need to align the VRING as defined in Linux because LPCNEXT0 is not intended
+ * No need to align the VRING as defined in Linux because RT600 is not intended
  * to run the Linux
  */
 #ifndef VRING_ALIGN
@@ -36,8 +31,8 @@
 #define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
-#define RL_PLATFORM_LPCNEXT0_LINK_ID (0U)
-#define RL_PLATFORM_HIGHEST_LINK_ID  (1U)
+#define RL_PLATFORM_IMXRT600_LINK_ID (0U)
+#define RL_PLATFORM_HIGHEST_LINK_ID  (0U)
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);

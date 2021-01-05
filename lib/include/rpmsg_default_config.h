@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,6 +122,17 @@
 //! Do not use in RPMsg-Lite to Linux configuration
 #ifndef RL_DEBUG_CHECK_BUFFERS
 #define RL_DEBUG_CHECK_BUFFERS (0)
+#endif
+
+//! @def RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION
+//!
+//! When enabled the opposite side is notified each time received buffers
+//! are consumed and put into the queue of available buffers.
+//! Enable this option in RPMsg-Lite to Linux configuration to allow unblocking
+//! of the Linux blocking send.
+//! The default value is 0 (RPMsg-Lite to RPMsg-Lite communication).
+#ifndef RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION
+#define RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION (0)
 #endif
 
 //! @def RL_HANG

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019-2020 NXP
  * All rights reserved.
  *
  *
@@ -36,36 +36,42 @@ static void mu_isr(MU_Type *base)
 {
     uint32_t flags;
     flags = MU_GetStatusFlags(base);
-    if ((kMU_GenInt0Flag & flags) != 0UL)
+    if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
-        MU_ClearStatusFlags(base, kMU_GenInt0Flag);
+        MU_ClearStatusFlags(base, (uint32_t)kMU_GenInt0Flag);
         env_isr(0);
     }
-    if ((kMU_GenInt1Flag & flags) != 0UL)
+    if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
     {
-        MU_ClearStatusFlags(base, kMU_GenInt1Flag);
+        MU_ClearStatusFlags(base, (uint32_t)kMU_GenInt1Flag);
         env_isr(1);
     }
 }
 
 #if defined(FSL_FEATURE_MU_SIDE_A)
-int32_t MUA_IRQHandler()
+int32_t MUA_IRQHandler(void)
 {
     mu_isr(MUA);
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
     __DSB();
 #endif
     return 0;
 }
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-int32_t MUB_IRQHandler()
+int32_t MUB_IRQHandler(void)
 {
     mu_isr(MUB);
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
     __DSB();
 #endif
     return 0;
@@ -94,9 +100,9 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
     if (isr_counter < 2)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
-        MU_EnableInterrupts(MUA, 1 << (31 - vector_id));
+        MU_EnableInterrupts(MUA, 1UL << (31UL - vector_id));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-        MU_EnableInterrupts(MUB, 1 << (31 - vector_id));
+        MU_EnableInterrupts(MUB, 1UL << (31UL - vector_id));
 #endif
     }
     isr_counter++;
@@ -116,9 +122,9 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
     if (isr_counter < 2)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
-        MU_DisableInterrupts(MUA, 1 << (31 - vector_id));
+        MU_DisableInterrupts(MUA, 1UL << (31UL - vector_id));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-        MU_DisableInterrupts(MUB, 1 << (31 - vector_id));
+        MU_DisableInterrupts(MUB, 1UL << (31UL - vector_id));
 #endif
     }
 
@@ -136,14 +142,15 @@ void platform_notify(uint32_t vector_id)
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
 #else
-/* Write directly into the MU TX register, no need to wait until the content is cleared
-   (consumed by the receiver side) because the same walue of the virtqueu ID is written
-   into this register when trigerring the ISR for the receiver side. The whole queue of
-   received buffers for associated virtqueue is handled in the ISR then. */
+/* Write directly into the MU Control Register to trigger General Purpose Interrupt Request (GIR).
+   No need to wait until the previous interrupt is processed because the same value
+   of the virtqueue ID is used for GIR mask when triggering the ISR for the receiver side.
+   The whole queue of received buffers for associated virtqueue is then handled in the ISR
+   on the receiver side. */
 #if defined(FSL_FEATURE_MU_SIDE_A)
-    MU_TriggerInterrupts(MUA, 1 << (19 - RL_GET_Q_ID(vector_id)));
+    (void)MU_TriggerInterrupts(MUA, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-    MU_TriggerInterrupts(MUB, 1 << (19 - RL_GET_Q_ID(vector_id)));
+    (void)MU_TriggerInterrupts(MUB, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
 #endif
 #endif
     env_unlock_mutex(platform_lock);

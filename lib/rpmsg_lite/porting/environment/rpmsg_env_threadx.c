@@ -1,61 +1,36 @@
 /*
- * Copyright (c) 2014, Mentor Graphics Corporation
- * Copyright (c) 2015 Xilinx, Inc.
- * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2020 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /**************************************************************************
  * FILE NAME
  *
- *       rpmsg_env_freertos.c
+ *       rpmsg_env_threadx.c
  *
  *
  * DESCRIPTION
  *
- *       This file is FreeRTOS Implementation of env layer for OpenAMP.
+ *       This file is ThreadX Implementation of env layer for OpenAMP.
  *
  *
  **************************************************************************/
-
 #include "rpmsg_env.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+#include "tx_api.h"
+#include "tx_event_flags.h"
 #include "rpmsg_platform.h"
-#include "virtqueue.h"
+#include "fsl_common.h"
 #include "rpmsg_compiler.h"
-
+#include "fsl_component_mem_manager.h"
 #include <stdlib.h>
 #include <string.h>
+#include "virtqueue.h"
 
-static int32_t env_init_counter   = 0;
-static SemaphoreHandle_t env_sema = ((void *)0);
+static int32_t env_init_counter = 0;
+static TX_SEMAPHORE env_sema;
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -94,18 +69,19 @@ static int32_t env_in_isr(void)
 /*!
  * env_init
  *
- * Initializes OS/BM environment.
+ * Initializes OS/ThreadX environment.
  *
  */
 int32_t env_init(void)
 {
     int32_t retval;
-    vTaskSuspendAll(); /* stop scheduler */
+    uint32_t regPrimask = DisableGlobalIRQ(); /* stop scheduler */
+
     // verify 'env_init_counter'
     RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
-        (void)xTaskResumeAll(); /* re-enable scheduler */
+        EnableGlobalIRQ(regPrimask); /* re-enable scheduler */
         return -1;
     }
     env_init_counter++;
@@ -113,25 +89,29 @@ int32_t env_init(void)
     if (env_init_counter == 1)
     {
         // first call
-        env_sema = xSemaphoreCreateBinary();
+        if (TX_SUCCESS != _tx_semaphore_create((TX_SEMAPHORE *)&env_sema, NULL, 0))
+        {
+            EnableGlobalIRQ(regPrimask);
+            return -1;
+        }
         (void)memset(isr_table, 0, sizeof(isr_table));
-        (void)xTaskResumeAll();
+        EnableGlobalIRQ(regPrimask);
         retval = platform_init();
-        (void)xSemaphoreGive(env_sema);
+        tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
 
         return retval;
     }
     else
     {
-        (void)xTaskResumeAll();
+        EnableGlobalIRQ(regPrimask);
         /* Get the semaphore and then return it,
          * this allows for platform_init() to block
          * if needed and other tasks to wait for the
          * blocking to be done.
          * This is in ENV layer as this is ENV specific.*/
-        if (pdTRUE == xSemaphoreTake(env_sema, portMAX_DELAY))
+        if (TX_SUCCESS == tx_semaphore_get((TX_SEMAPHORE *)&env_sema, TX_WAIT_FOREVER))
         {
-            (void)xSemaphoreGive(env_sema);
+            tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
         }
         return 0;
     }
@@ -148,12 +128,12 @@ int32_t env_deinit(void)
 {
     int32_t retval;
 
-    vTaskSuspendAll(); /* stop scheduler */
+    uint32_t regPrimask = DisableGlobalIRQ(); /* stop scheduler */
     // verify 'env_init_counter'
     RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
-        (void)xTaskResumeAll(); /* re-enable scheduler */
+        EnableGlobalIRQ(regPrimask);
         return -1;
     }
 
@@ -165,15 +145,14 @@ int32_t env_deinit(void)
         // last call
         (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
-        vSemaphoreDelete(env_sema);
-        env_sema = ((void *)0);
-        (void)xTaskResumeAll();
-
+        (void)_tx_semaphore_delete((TX_SEMAPHORE *)&env_sema);
+        (void)memset(&env_sema, 0, sizeof(env_sema));
+        EnableGlobalIRQ(regPrimask);
         return retval;
     }
     else
     {
-        (void)xTaskResumeAll();
+        EnableGlobalIRQ(regPrimask);
         return 0;
     }
 }
@@ -185,7 +164,7 @@ int32_t env_deinit(void)
  */
 void *env_allocate_memory(uint32_t size)
 {
-    return (pvPortMalloc(size));
+    return (MEM_BufferAlloc(size));
 }
 
 /*!
@@ -197,7 +176,7 @@ void env_free_memory(void *ptr)
 {
     if (ptr != ((void *)0))
     {
-        vPortFree(ptr);
+        MEM_BufferFree(ptr);
     }
 }
 
@@ -320,20 +299,25 @@ void *env_map_patova(uint32_t address)
  */
 int32_t env_create_mutex(void **lock, int32_t count)
 {
+    TX_SEMAPHORE *semaphore_ptr;
+
+    semaphore_ptr = (TX_SEMAPHORE *)env_allocate_memory(sizeof(TX_SEMAPHORE));
+    if (semaphore_ptr == ((void *)0))
+    {
+        return -1;
+    }
+
     if (count > RL_ENV_MAX_MUTEX_COUNT)
     {
         return -1;
     }
 
-    *lock = xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
-    if (*lock != ((void *)0))
-    {
-        return 0;
-    }
-    else
+    if (TX_SUCCESS != _tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
     {
         return -1;
     }
+    *lock = (void *)semaphore_ptr;
+    return 0;
 }
 
 /*!
@@ -344,7 +328,8 @@ int32_t env_create_mutex(void **lock, int32_t count)
  */
 void env_delete_mutex(void *lock)
 {
-    vSemaphoreDelete(lock);
+    (void)_tx_semaphore_delete((TX_SEMAPHORE *)lock);
+    env_free_memory(lock);
 }
 
 /*!
@@ -355,10 +340,9 @@ void env_delete_mutex(void *lock)
  */
 void env_lock_mutex(void *lock)
 {
-    SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
     if (env_in_isr() == 0)
     {
-        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        (void)tx_semaphore_get((TX_SEMAPHORE *)lock, TX_WAIT_FOREVER);
     }
 }
 
@@ -369,10 +353,9 @@ void env_lock_mutex(void *lock)
  */
 void env_unlock_mutex(void *lock)
 {
-    SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
     if (env_in_isr() == 0)
     {
-        (void)xSemaphoreGive(xSemaphore);
+        tx_semaphore_put((TX_SEMAPHORE *)lock);
     }
 }
 
@@ -410,16 +393,9 @@ void env_delete_sync_lock(void *lock)
  */
 void env_acquire_sync_lock(void *lock)
 {
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (env_in_isr() != 0)
+    if (lock != ((void *)0))
     {
-        (void)xSemaphoreTakeFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        env_lock_mutex(lock);
     }
 }
 
@@ -430,16 +406,9 @@ void env_acquire_sync_lock(void *lock)
  */
 void env_release_sync_lock(void *lock)
 {
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (env_in_isr() != 0)
+    if (lock != ((void *)0))
     {
-        (void)xSemaphoreGiveFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreGive(xSemaphore);
+        env_unlock_mutex(lock);
     }
 }
 
@@ -450,7 +419,7 @@ void env_release_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    vTaskDelay(num_msec / portTICK_PERIOD_MS);
+    tx_thread_sleep(num_msec);
 }
 
 /*!
@@ -541,26 +510,6 @@ void env_disable_cache(void)
     platform_cache_disable();
 }
 
-/*!
- *
- * env_get_timestamp
- *
- * Returns a 64 bit time stamp.
- *
- *
- */
-uint64_t env_get_timestamp(void)
-{
-    if (env_in_isr() != 0)
-    {
-        return (uint64_t)xTaskGetTickCountFromISR();
-    }
-    else
-    {
-        return (uint64_t)xTaskGetTickCount();
-    }
-}
-
 /*========================================================= */
 /* Util data / functions  */
 
@@ -588,8 +537,7 @@ void env_isr(uint32_t vector)
  */
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
-    *queue = xQueueCreate((UBaseType_t)length, (UBaseType_t)element_size);
-    if (*queue != ((void *)0))
+    if (TX_SUCCESS == _tx_queue_create((TX_QUEUE *)*queue, NULL, element_size, NULL, length))
     {
         return 0;
     }
@@ -609,7 +557,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 
 void env_delete_queue(void *queue)
 {
-    vQueueDelete(queue);
+    tx_queue_delete(queue);
 }
 
 /*!
@@ -626,24 +574,14 @@ void env_delete_queue(void *queue)
 
 int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (env_in_isr() != 0)
+    if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)queue, msg, timeout_ms))
     {
-        if (xQueueSendFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
-        {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-            return 1;
-        }
+        return 0;
     }
     else
     {
-        if (xQueueSend(queue, msg, ((portMAX_DELAY == timeout_ms) ? portMAX_DELAY : timeout_ms / portTICK_PERIOD_MS)) ==
-            pdPASS)
-        {
-            return 1;
-        }
+        return -1;
     }
-    return 0;
 }
 
 /*!
@@ -660,24 +598,14 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
 
 int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (env_in_isr() != 0)
+    if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)queue, msg, timeout_ms))
     {
-        if (xQueueReceiveFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
-        {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-            return 1;
-        }
+        return 0;
     }
     else
     {
-        if (xQueueReceive(queue, msg,
-                          ((portMAX_DELAY == timeout_ms) ? portMAX_DELAY : timeout_ms / portTICK_PERIOD_MS)) == pdPASS)
-        {
-            return 1;
-        }
+        return -1;
     }
-    return 0;
 }
 
 /*!
@@ -692,12 +620,18 @@ int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
 
 int32_t env_get_current_queue_size(void *queue)
 {
-    if (env_in_isr() != 0)
+    int32_t enqueued;
+    ULONG available_storage;
+    TX_THREAD *first_suspended;
+    ULONG suspended_count;
+    TX_QUEUE *next_queue;
+    if (TX_SUCCESS == tx_queue_info_get((TX_QUEUE *)queue, NULL, (ULONG *)&enqueued, &available_storage,
+                                        &first_suspended, &suspended_count, &next_queue))
     {
-        return ((int32_t)uxQueueMessagesWaitingFromISR(queue));
+        return 0;
     }
     else
     {
-        return ((int32_t)uxQueueMessagesWaiting(queue));
+        return -1;
     }
 }

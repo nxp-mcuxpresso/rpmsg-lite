@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 NXP
+ * Copyright 2017-2020 NXP
  * All rights reserved.
  *
  *
@@ -86,7 +86,7 @@ void platform_notify(uint32_t vector_id)
 /*
  * MU Interrrupt RPMsg handler
  */
-int32_t MU_M4_IRQHandler()
+int32_t MU_M4_IRQHandler(void)
 {
     uint32_t channel;
 

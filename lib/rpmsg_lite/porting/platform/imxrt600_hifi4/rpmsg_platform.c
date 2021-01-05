@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019-2020 NXP
  * All rights reserved.
  *
  *
@@ -12,42 +12,37 @@
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
 #include <xtensa/config/core.h>
+
+#ifndef FSL_RTOS_FREE_RTOS
 #include <xtensa/xos.h>
+#endif
+
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
 
-#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-//@Lei
-//#include "mcmgr.h"
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+#error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
 static int32_t isr_counter     = 0;
 static int32_t disable_counter = 0;
 static void *platform_lock;
 
-#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-static void mcmgr_event_handler(uint16_t vring_idx, void *context)
-{
-    env_isr((uint32_t)vring_idx);
-}
-#else
 void MU_B_IRQHandler(void *arg)
 {
-    uint32_t channel;
-
-    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MUB->SR) != 0UL)
+    uint32_t flags;
+    flags = MU_GetStatusFlags(MUB);
+    if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
-        channel = MUB->RR[RPMSG_MU_CHANNEL]; /* Read message from RX register. */
-        env_isr(RL_GET_VQ_ID(RPMSG_LITE_LINK_ID, RL_GET_Q_ID(channel >> 16)));
+        MU_ClearStatusFlags(MUB, (uint32_t)kMU_GenInt0Flag);
+        env_isr(0);
     }
-
-/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-  exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-#endif
+    if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
+    {
+        MU_ClearStatusFlags(MUB, (uint32_t)kMU_GenInt1Flag);
+        env_isr(1);
+    }
 }
-#endif
 
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 {
@@ -58,34 +53,11 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 
     RL_ASSERT(0 <= isr_counter);
 
-    if (isr_counter == 0)
+    if (isr_counter < 2)
     {
-        /* @Yuan Enable MUB receive interrupt. */
-        uint32_t reg = MUB->CR & ~(0xf0008);
-        MUB->CR      = reg | ((1UL << 27U) >> RPMSG_MU_CHANNEL);
-
-#if defined(__CM4_CMSIS_VERSION)
-        NVIC_SetPriority(MAILBOX_IRQn, 5);
-#elif defined(__XCC__)
-
-        /*
-         * @Lei Register interrupt based on vq_id. It has to be hashed as
-         * 0 is NMI
-         * 1 is SW
-         * 2 & 3 is Timer, Timer.0 & Timer.1
-         * 4 is profiling
-         * 5~15 level 1 interrupts
-         * 16~23 level 2 interrupts
-         * 24~31 level 3 interrupts
-         * Note that different priority interrupts are not nesting in one stack
-         */
-        //_xtos_set_interrupt_handler(6, MU_B_IRQHandler);
-        xos_register_interrupt_handler(6, MU_B_IRQHandler, ((void *)0));
-
-#else
-        NVIC_SetPriority(MAILBOX_IRQn, 2);
-#endif
+        MU_EnableInterrupts(MUB, 1UL << (31UL - vector_id));
     }
+
     isr_counter++;
 
     env_unlock_mutex(platform_lock);
@@ -100,20 +72,10 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 
     RL_ASSERT(0 < isr_counter);
     isr_counter--;
-    if (isr_counter == 0)
+
+    if (isr_counter < 2)
     {
-        /* @Yuan Disable MUB receive interrupt. */
-        uint32_t reg = MUB->CR & ~(0xf0008 | ((1UL << 27U) >> RPMSG_MU_CHANNEL));
-        MUB->CR      = reg;
-#if defined(__XCC__)
-        /*
-         * @Lei Set handler to 0 to cease the interrupt.
-         */
-        //    	_xtos_set_interrupt_handler(6, ((void *)0));
-        xos_register_interrupt_handler(6, ((void *)0), ((void *)0));
-#else
-        NVIC_DisableIRQ(MAILBOX_IRQn);
-#endif
+        MU_DisableInterrupts(MUB, 1UL << (31UL - vector_id));
     }
 
     /* Unregister ISR from environment layer */
@@ -126,31 +88,9 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 
 void platform_notify(uint32_t vector_id)
 {
-    uint32_t msg = (uint32_t)(vector_id << 16);
-//#if defined (__XCC__)
-/*
- * @Lei MCMGR not supported at this moment.
- */
-#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     env_lock_mutex(platform_lock);
-    MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+    (void)MU_TriggerInterrupts(MUB, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
     env_unlock_mutex(platform_lock);
-#else
-    switch (RL_GET_LINK_ID(vector_id))
-    {
-        case RPMSG_LITE_LINK_ID:
-            env_lock_mutex(platform_lock);
-            while (!(MUB->SR & ((1U << 23) >> RPMSG_MU_CHANNEL)))
-            {
-            }
-
-            MUB->TR[RPMSG_MU_CHANNEL] = msg;
-            env_unlock_mutex(platform_lock);
-            return;
-        default:
-            return;
-    }
-#endif
 }
 
 /**
@@ -162,25 +102,19 @@ void platform_notify(uint32_t vector_id)
  */
 void platform_time_delay(uint32_t num_msec)
 {
-/*
- * @Lei Cycle accurate time delay.
- */
-#if defined(__XCC__)
-// 8MHz main clock on FPGA
-#define SystemCoreClock 8000000
+    uint32_t loop;
 
-    uint32_t loop, ccount;
+    /* Recalculate the CPU frequency */
+    SystemCoreClockUpdate();
 
-    /* Get current cycle count */
-    ccount = xthal_get_ccount();
-    /* Calculate cycles to be delayed */
-    loop = SystemCoreClock / 1000U * num_msec;
+    /* Calculate the CPU loops to delay, each loop has approx. 6 cycles */
+    loop = SystemCoreClock / 6U / 1000U * num_msec;
 
-    do
+    while (loop > 0U)
     {
-        loop -= xthal_get_ccount() - ccount;
-    } while (loop > 0);
-#endif
+        asm("nop");
+        loop--;
+    }
 }
 
 /**
@@ -193,15 +127,7 @@ void platform_time_delay(uint32_t num_msec)
  */
 int32_t platform_in_isr(void)
 {
-/*
- * @Lei HIFI doesn't have direct API or a register file to indicate the core in IRQ. TBD.
- * Always return false.
- */
-#if defined(__XCC__)
-    return 0;
-#elif
-    return (((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0UL) ? 1 : 0);
-#endif
+    return (xthal_get_interrupt() & xthal_get_intenable());
 }
 
 /**
@@ -217,26 +143,14 @@ int32_t platform_in_isr(void)
 int32_t platform_interrupt_enable(uint32_t vector_id)
 {
     RL_ASSERT(0 < disable_counter);
-    /*
-     * @Lei Enable the interrupt. Don't forget to hash the ID.
-     * @Yuan Select MUB interrupt as DSP IRQ6 source.
-     *
-     */
 
-#if defined(__XCC__)
-    //    _xtos_ints_on(1<<(6));
+#ifdef FSL_RTOS_FREE_RTOS
+    xt_interrupt_enable(6);
+#else
     xos_interrupt_enable(6);
-    disable_counter--;
-    return ((int32_t)vector_id);
-#elif
-    __asm volatile("cpsid i");
-    disable_counter--;
-
-    if (disable_counter == 0)
-        NVIC_EnableIRQ(MAILBOX_IRQn);
-    __asm volatile("cpsie i");
-    return ((int32_t)vector_id);
 #endif
+    disable_counter--;
+    return ((int32_t)vector_id);
 }
 
 /**
@@ -253,25 +167,13 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
 {
     RL_ASSERT(0 <= disable_counter);
 
-    /*
-     * @Lei Disable the interrupt. Don't forget to hash the ID.
-     */
-#if defined(__XCC__)
-    //    _xtos_ints_off(1<<(6));
+#ifdef FSL_RTOS_FREE_RTOS
+    xt_interrupt_disable(6);
+#else
     xos_interrupt_disable(6);
-    disable_counter++;
-    return ((int32_t)vector_id);
-#elif
-    __asm volatile("cpsid i");
-    // virtqueues use the same NVIC vector
-    // if counter is set - the interrupts are disabled
-    if (disable_counter == 0)
-        NVIC_DisableIRQ(MAILBOX_IRQn);
-
-    disable_counter++;
-    __asm volatile("cpsie i");
-    return ((int32_t)vector_id);
 #endif
+    disable_counter++;
+    return ((int32_t)vector_id);
 }
 
 /**
@@ -333,21 +235,18 @@ void *platform_patova(uint32_t addr)
  */
 int32_t platform_init(void)
 {
-#if defined(__XCC__)
-/*
- * @Lei MCMGR not supported at this moment.
- */
-#elif defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
-#else
-    MAILBOX_Init(MAILBOX);
-#endif
-
     /* Create lock used in multi-instanced RPMsg */
     if (0 != env_create_mutex(&platform_lock, 1))
     {
         return -1;
     }
+
+    /* Register interrupt handler for MU_B on HiFi4 */
+#ifdef FSL_RTOS_FREE_RTOS
+    xt_set_interrupt_handler(6, MU_B_IRQHandler, ((void *)0));
+#else
+    xos_register_interrupt_handler(6, MU_B_IRQHandler, ((void *)0));
+#endif
 
     return 0;
 }
@@ -359,21 +258,11 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
-#if defined(__XCC__)
-/*
- * @Lei MCMGR not supported at this moment.
- */
-/* Import from LPC5411x and keep it here - do not deinit mailbox, if there
-   is a pending ISR on the other core! */
-#elif defined(__CM4_CMSIS_VERSION)
-    while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM0Plus))
-        ;
+#ifdef FSL_RTOS_FREE_RTOS
+    xt_set_interrupt_handler(6, ((void *)0), ((void *)0));
 #else
-    while (0 != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM4))
-        ;
+    xos_register_interrupt_handler(6, ((void *)0), ((void *)0));
 #endif
-
-    //    MAILBOX_Deinit(MAILBOX);
 
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);

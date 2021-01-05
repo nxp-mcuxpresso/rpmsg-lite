@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019-2020 NXP
  * All rights reserved.
  *
  *
@@ -37,22 +37,22 @@ static void mcmgr_event_handler(uint16_t vring_idx, void *context)
 {
     env_isr((uint32_t)vring_idx);
 }
+
 #else
 void MU_A_IRQHandler(void)
 {
-    uint32_t channel;
-
-    if ((((1UL << 27U) >> RPMSG_MU_CHANNEL) & MU_GetStatusFlags(APP_MU)) != 0UL)
+    uint32_t flags;
+    flags = MU_GetStatusFlags(APP_MU);
+    if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
     {
-        channel = MU_ReceiveMsgNonBlocking(APP_MU, RPMSG_MU_CHANNEL); /* Read message from RX register. */
-        env_isr(RL_GET_VQ_ID(RL_PLATFORM_LPC6324_M33_DSP_LINK_ID, RL_GET_Q_ID(channel >> 16)));
+        MU_ClearStatusFlags(APP_MU, (uint32_t)kMU_GenInt0Flag);
+        env_isr(0);
     }
-
-/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-  exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-#endif
+    if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
+    {
+        MU_ClearStatusFlags(APP_MU, (uint32_t)kMU_GenInt1Flag);
+        env_isr(1);
+    }
 }
 #endif
 
@@ -74,9 +74,9 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
     env_lock_mutex(platform_lock);
 
     RL_ASSERT(0 <= isr_counter);
-    if (isr_counter == 0)
+    if (isr_counter < 2)
     {
-        MU_EnableInterrupts(APP_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_EnableInterrupts(APP_MU, 1UL << (31UL - vector_id));
     }
     isr_counter++;
 
@@ -92,9 +92,9 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 
     RL_ASSERT(0 < isr_counter);
     isr_counter--;
-    if (isr_counter == 0)
+    if (isr_counter < 2)
     {
-        MU_DisableInterrupts(APP_MU, (1UL << 27U) >> RPMSG_MU_CHANNEL);
+        MU_DisableInterrupts(APP_MU, 1UL << (31UL - vector_id));
     }
 
     /* Unregister ISR from environment layer */
@@ -107,24 +107,14 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 
 void platform_notify(uint32_t vector_id)
 {
-    uint32_t msg = (uint32_t)(vector_id << 16);
-
-#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     env_lock_mutex(platform_lock);
-    MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    (void)MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, RL_GET_Q_ID(vector_id));
     env_unlock_mutex(platform_lock);
 #else
-    switch (RL_GET_LINK_ID(vector_id))
-    {
-        case 0:
-            env_lock_mutex(platform_lock);
-            MU_SendMsg(APP_MU, RPMSG_MU_CHANNEL, msg);
-            env_unlock_mutex(platform_lock);
-            return;
-        default:
-            return;
-    }
+    (void)MU_TriggerInterrupts(APP_MU, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
 #endif
+    env_unlock_mutex(platform_lock);
 }
 
 /**

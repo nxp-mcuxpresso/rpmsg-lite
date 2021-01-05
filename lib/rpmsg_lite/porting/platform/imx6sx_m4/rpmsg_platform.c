@@ -96,9 +96,12 @@ void rpmsg_handler(void)
         channel = msg >> 16;
         env_isr(channel);
     }
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
     __DSB();
 #endif
 

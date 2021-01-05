@@ -33,7 +33,7 @@
 /**************************************************************************
  * FILE NAME
  *
- *       rpmsg_zephyr_env.c
+ *       rpmsg_env_zephyr.c
  *
  *
  * DESCRIPTION

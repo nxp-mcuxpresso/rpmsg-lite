@@ -55,9 +55,12 @@ void MAILBOX_IRQHandler(void)
         env_isr(1);
     }
 
-    /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
-      exception return operation might vector to incorrect interrupt */
-#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
     __DSB();
 #endif
 }
@@ -130,8 +133,8 @@ void platform_notify(uint32_t vector_id)
         case RL_PLATFORM_LPC5410x_M4_M0_LINK_ID:
             env_lock_mutex(platform_lock);
 /* Write directly into the Mailbox register, no need to wait until the content is cleared
-   (consumed by the receiver side) because the same walue of the virtqueu ID is written
-   into this register when trigerring the ISR for the receiver side. The whole queue of
+   (consumed by the receiver side) because the same value of the virtqueue ID is written
+   into this register when triggering the ISR for the receiver side. The whole queue of
    received buffers for associated virtqueue is handled in the ISR then. */
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
             MAILBOX_SetValueBits(MAILBOX, kMAILBOX_CM0Plus, (1 << RL_GET_Q_ID(vector_id)));
