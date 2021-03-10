@@ -3,6 +3,7 @@
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016-2019 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +57,9 @@
 
 static int32_t env_init_counter   = 0;
 static SemaphoreHandle_t env_sema = ((void *)0);
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+StaticSemaphore_t env_sem_static_semaphore;
+#endif
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -113,7 +117,11 @@ int32_t env_init(void)
     if (env_init_counter == 1)
     {
         // first call
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+        env_sema = xSemaphoreCreateBinaryStatic(&env_sem_static_semaphore);
+#else
         env_sema = xSemaphoreCreateBinary();
+#endif
         (void)memset(isr_table, 0, sizeof(isr_table));
         (void)xTaskResumeAll();
         retval = platform_init();
@@ -318,14 +326,22 @@ void *env_map_patova(uint32_t address)
  * Creates a mutex with the given initial count.
  *
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *stack)
+#else
 int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
     if (count > RL_ENV_MAX_MUTEX_COUNT)
     {
         return -1;
     }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    *lock = xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count, (StaticSemaphore_t*)stack);
+#else
     *lock = xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
+#endif
     if (*lock != ((void *)0))
     {
         return 0;
@@ -383,10 +399,17 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *stack)
+{
+    return env_create_mutex(lock, state, stack); /* state=1 .. initially free */
+}
+#else
 int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
 }
+#endif
 
 /*!
  * env_delete_sync_lock
@@ -583,12 +606,20 @@ void env_isr(uint32_t vector)
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
  * @param element_size - queue element size in bytes
+ * @param queue_stack  Stack for queue
+ * @param static_queue  Context holder for queue
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue, int32_t length, int32_t element_size, uint8_t *queue_stack, StaticQueue_t *staticQueue)
+{
+    *queue = xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_stack, staticQueue);
+#else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
     *queue = xQueueCreate((UBaseType_t)length, (UBaseType_t)element_size);
+#endif
     if (*queue != ((void *)0))
     {
         return 0;

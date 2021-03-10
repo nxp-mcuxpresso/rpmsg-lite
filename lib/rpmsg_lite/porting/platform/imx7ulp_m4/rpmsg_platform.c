@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -25,6 +26,7 @@
 static int32_t isr_counter     = 0;
 static int32_t disable_counter = 0;
 static void *platform_lock;
+static STACK platform_lock_stack;
 
 static void platform_global_isr_disable(void)
 {
@@ -267,7 +269,11 @@ int32_t platform_init(void)
     NVIC_EnableIRQ(MU_A_IRQn);
 
     /* Create lock used in multi-instanced RPMsg */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_stack))
+#else
     if (0 != env_create_mutex(&platform_lock, 1))
+#endif
     {
         return -1;
     }

@@ -3,6 +3,7 @@
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016-2020 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,6 +126,9 @@ struct rpmsg_lite_instance
     struct virtqueue *tvq;              /*!< transmit virtqueue */
     struct llist *rl_endpoints;         /*!< linked list of endpoints */
     LOCK *lock;                         /*!< local RPMsg Lite mutex lock */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    STACK lock_stack;                  /*!< Stack for lock */
+#endif
     uint32_t link_state;                /*!< state of the link, up/down*/
     char *sh_mem_base;                  /*!< base address of the shared memory */
     uint32_t sh_mem_remaining;          /*!< amount of remaining unused buffers in shared memory */
