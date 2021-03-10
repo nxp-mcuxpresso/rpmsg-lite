@@ -30,30 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _RPMSG_NS_H
-#define _RPMSG_NS_H
+#ifndef RPMSG_NS_H_
+#define RPMSG_NS_H_
 
 #include "rpmsg_lite.h"
 
 //! @addtogroup rpmsg_ns
 //! @{
 
-#define RL_NS_EPT_ADDR (0x35)
+#define RL_NS_EPT_ADDR (0x35u)
 
 /* Up to 32 flags available */
 enum rpmsg_ns_flags
 {
-    RL_NS_CREATE = 0,
+    RL_NS_CREATE  = 0,
     RL_NS_DESTROY = 1,
 };
 
 /*! \typedef rpmsg_ns_new_ept_cb
     \brief New endpoint NS callback function type.
 */
-typedef void (*rpmsg_ns_new_ept_cb)(unsigned int new_ept,
-                                    const char *new_ept_name,
-                                    unsigned long flags,
-                                    void *user_data);
+typedef void (*rpmsg_ns_new_ept_cb)(uint32_t new_ept, const char *new_ept_name, uint32_t flags, void *user_data);
 
 struct rpmsg_ns_callback_data
 {
@@ -95,7 +92,7 @@ extern "C" {
  * @param app_cb            Application nameservice callback
  * @param user_data         Application nameservice callback data
  *
- * @return NameService handle, to be kept for unbinding.
+ * @return RL_NULL on error, NameService handle on success.
  *
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -116,7 +113,7 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
  * @return Status of function execution, RL_SUCCESS on success.
  *
  */
-int rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle handle);
+int32_t rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle handle);
 
 /*!
  * @brief Sends name service announcement to remote device
@@ -129,10 +126,10 @@ int rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle 
  * @return Status of function execution, RL_SUCCESS on success
  *
  */
-int rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                      struct rpmsg_lite_endpoint *new_ept,
-                      char *ept_name,
-                      unsigned long flags);
+int32_t rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
+                          struct rpmsg_lite_endpoint *new_ept,
+                          const char *ept_name,
+                          uint32_t flags);
 
 //! @}
 
@@ -140,4 +137,4 @@ int rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
 }
 #endif
 
-#endif /* _RPMSG_NS_H */
+#endif /* RPMSG_NS_H_ */

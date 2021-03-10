@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _RPMSG_QUEUE_H
-#define _RPMSG_QUEUE_H
+#ifndef RPMSG_QUEUE_H_
+#define RPMSG_QUEUE_H_
 
 #include "rpmsg_lite.h"
 
@@ -57,42 +57,42 @@ extern "C" {
 #endif
 
 /*!
-* @brief
-* This callback needs to be registered with an endpoint
-*
-* @param payload Pointer to the buffer containing received data
-* @param payload_len Size of data received, in bytes
-* @param src Pointer to address of the endpoint from which data is received
-* @param priv Private data provided during endpoint creation
-*
-* @return RL_HOLD or RL_RELEASE to release or hold the buffer in payload
-*/
-int rpmsg_queue_rx_cb(void *payload, int payload_len, unsigned long src, void *priv);
+ * @brief
+ * This callback needs to be registered with an endpoint
+ *
+ * @param payload Pointer to the buffer containing received data
+ * @param payload_len Size of data received, in bytes
+ * @param src Pointer to address of the endpoint from which data is received
+ * @param priv Private data provided during endpoint creation
+ *
+ * @return RL_HOLD or RL_RELEASE to release or hold the buffer in payload
+ */
+int32_t rpmsg_queue_rx_cb(void *payload, uint32_t payload_len, uint32_t src, void *priv);
 
 /*!
-* @brief
-* Create a RPMsg queue which can be used
-* for blocking reception.
-*
-* @param rpmsg_lite_dev    RPMsg Lite instance
-*
-* @return RPMsg queue handle or RL_NULL
-*
-*/
+ * @brief
+ * Create a RPMsg queue which can be used
+ * for blocking reception.
+ *
+ * @param rpmsg_lite_dev    RPMsg Lite instance
+ *
+ * @return RPMsg queue handle or RL_NULL
+ *
+ */
 rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
 /*!
-* @brief
-* Destroy a queue and clean up.
-* Do not destroy a queue which is registered with an active endpoint!
-*
-* @param rpmsg_lite_dev    RPMsg-Lite instance
-* @param[in] q             RPMsg queue handle to destroy
-*
-* @return Status of function execution
-*
-*/
-int rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle q);
+ * @brief
+ * Destroy a queue and clean up.
+ * Do not destroy a queue which is registered with an active endpoint!
+ *
+ * @param rpmsg_lite_dev    RPMsg-Lite instance
+ * @param[in] q             RPMsg queue handle to destroy
+ *
+ * @return Status of function execution
+ *
+ */
+int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle q);
 
 /*!
  * @brief
@@ -118,13 +118,13 @@ int rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_
  *
  * @see rpmsg_queue_recv_nocopy
  */
-int rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                     rpmsg_queue_handle q,
-                     unsigned long *src,
-                     char *data,
-                     int maxlen,
-                     int *len,
-                     unsigned long timeout);
+int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
+                         rpmsg_queue_handle q,
+                         uint32_t *src,
+                         char *data,
+                         uint32_t maxlen,
+                         uint32_t *len,
+                         uint32_t timeout);
 
 /*!
  * @brief
@@ -151,12 +151,12 @@ int rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
  * @see rpmsg_queue_nocopy_free
  * @see rpmsg_queue_recv
  */
-int rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                            rpmsg_queue_handle q,
-                            unsigned long *src,
-                            char **data,
-                            int *len,
-                            unsigned long timeout);
+int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
+                                rpmsg_queue_handle q,
+                                uint32_t *src,
+                                char **data,
+                                uint32_t *len,
+                                uint32_t timeout);
 
 /*!
  * @brief This function frees a buffer previously returned by rpmsg_queue_recv_nocopy().
@@ -172,7 +172,7 @@ int rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
  *
  * @see rpmsg_queue_recv_nocopy
  */
-int rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *data);
+int32_t rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *data);
 
 /*!
  * @brief This function returns the number of pending messages in the queue.
@@ -181,7 +181,7 @@ int rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void *da
  *
  * @return Number of pending messages in the queue.
  */
-int rpmsg_queue_get_current_size(rpmsg_queue_handle q);
+int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle q);
 
 //! @}
 
@@ -191,4 +191,4 @@ int rpmsg_queue_get_current_size(rpmsg_queue_handle q);
 
 #endif /* RL_API_HAS_ZEROCOPY */
 
-#endif /* _RPMSG_QUEUE_H */
+#endif /* RPMSG_QUEUE_H_ */

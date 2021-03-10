@@ -80,14 +80,16 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 
 | Configuration option         | Default value | Usage     |
 |------------------------------|---------------|-----------|
-|RL_MS_PER_INTERVAL            | (1)           | Delay in milliseconds used in non-blocking API functions for polling      |
+|RL_MS_PER_INTERVAL            | (1)           | Delay in milliseconds used in non-blocking API functions for polling.      |
 |RL_BUFFER_PAYLOAD_SIZE        | (496)         | Size of the buffer payload, it must be equal to (240, 496, 1008, ...) [2^n - 16]   |
 |RL_BUFFER_COUNT               | (2)           | Number of the buffers, it must be power of two (2, 4, ...)      |
-|RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled          |
-|RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled    |
-|RL_CLEAR_USED_BUFFERS         | (0)           | Clearing used buffers before returning back to the pool of free buffers enabled/disabled   |
-|RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself   |
-|RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation    |
+|RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled.          |
+|RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled.    |
+|RL_CLEAR_USED_BUFFERS         | (0)           | Clearing used buffers before returning back to the pool of free buffers enabled/disabled.   |
+|RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself.   |
+|RL_USE_ENVIRONMENT_CONTEXT    | (0)           | When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM).    |
+|RL_DEBUG_CHECK_BUFFERS        | (0)           | When enabled buffer debug checks in rpmsg_lite_send_nocopy() and rpmsg_lite_release_rx_buffer() functions are disabled. Do not use in RPMsg-Lite to Linux configuration.    |
+|RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation.    |
 
 
 # References {#references}
@@ -105,4 +107,6 @@ This table summarizes revisions of this document.
 |4.0            | 04/2018 | New API rpmsg_queue_get_current_size() <p> Fixed bug in interrupt handling for lpc5411x, lpc5410x <p> Code adjustments based on static analysis tool findings |
 |5.0            | 09/2018 | Align porting layers to the updated MCUXpressoSDK feature files <p> Allow rpmsg-lite build by Keil MDK ArmClangV6 compiler  |
 |6.0            | 04/2019 | Added configuration macro RL_DEBUG_CHECK_BUFFERS <p> Several MISRA violations fixed <p> Added environment layers for QNX and Zephyr <p> Allow environment context required for some environments (controlled by the RL_USE_ENVIRONMENT_CONTEXT configuration macro).  |
+|7.0            | 11/2019 | MISRA C-2012 violations fixed, incl. data types consolidation <p> Code formatted.  |
+|8.0            | 04/2020 | MISRA C-2012 violations fixed (7.4) <p> Fix missing lock in rpmsg_lite_rx_callback() for QNX env <p> Correction of rpmsg_lite_instance structure members description <p> Address -Waddress-of-packed-member warnings in GCC9 <p> Clang update to v10.0.0, code re-formatted.  |
 

@@ -82,19 +82,29 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 
 | Configuration option         | Default value | Usage     |
 |------------------------------|---------------|-----------|
-|RL_MS_PER_INTERVAL            | (1)           | Delay in milliseconds used in non-blocking API functions for polling      |
+|RL_MS_PER_INTERVAL            | (1)           | Delay in milliseconds used in non-blocking API functions for polling.      |
 |RL_BUFFER_PAYLOAD_SIZE        | (496)         | Size of the buffer payload, it must be equal to (240, 496, 1008, ...) [2^n - 16]   |
 |RL_BUFFER_COUNT               | (2)           | Number of the buffers, it must be power of two (2, 4, ...)      |
-|RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled          |
-|RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled    |
-|RL_CLEAR_USED_BUFFERS         | (0)           | Clearing used buffers before returning back to the pool of free buffers enabled/disabled   |
-|RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself   |
-|RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation    |
+|RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled.          |
+|RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled.    |
+|RL_CLEAR_USED_BUFFERS         | (0)           | Clearing used buffers before returning back to the pool of free buffers enabled/disabled.   |
+|RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself.   |
+|RL_USE_ENVIRONMENT_CONTEXT    | (0)           | When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM).    |
+|RL_DEBUG_CHECK_BUFFERS        | (0)           | When enabled buffer debug checks in rpmsg_lite_send_nocopy() and rpmsg_lite_release_rx_buffer() functions are disabled. Do not use in RPMsg-Lite to Linux configuration.    |
+|RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION        | (0)           | When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication).    |
+|RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation.    |
 
+# Contributing to the rpmsg-lite project
+We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.
+
+## How to format rpmsg-lite code
+To format code, use the application developed by Google, named *clang-format*. This tool is part of the [llvm](http://llvm.org/) project. Currently, the clang-format 10.0.0 version is used for rpmsg-lite.
+The set of style settings used for clang-format is defined in the `.clang-format` file, placed in a root of the rpmsg-lite directory where Python script ``run_clang_format.py`` can be executed. 
+This script executes the application named *clang-format.exe*. You need to have the path of this application in the OS's environment path, or you need to change the script.
 
 # References
 [1] M. Novak, M. Cingel, Lockless Shared Memory Based Multicore Communication Protocol
 
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2019 NXP
+Copyright © 2016-2020 NXP

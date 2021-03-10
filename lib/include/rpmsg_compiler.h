@@ -39,8 +39,8 @@
  *       This file defines compiler-specific macros.
  *
  ***************************************************************************/
-#ifndef _RPMSG_COMPILER_H_
-#define _RPMSG_COMPILER_H_
+#ifndef RPMSG_COMPILER_H_
+#define RPMSG_COMPILER_H_
 
 /* IAR ARM build tools */
 #if defined(__ICCARM__)
@@ -58,9 +58,9 @@
 #endif
 
 /* ARM GCC */
-#elif defined(__CC_ARM) || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+#elif defined(__CC_ARM) || (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
 
-#if (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+#if (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
 #include <arm_compat.h>
 #endif
 
@@ -82,7 +82,7 @@
  * For ARM __schedule_barrier, there's no identical intrinsic in HiFi4.
  * A complete synchronization barrier would require initialize and wait ops.
  * Here use NOP instead, similar to ARM __nop.
-*/
+ */
 #define MEM_BARRIER() __asm__ __volatile__("nop" : : : "memory")
 
 #ifndef RL_PACKED_BEGIN
@@ -111,4 +111,4 @@
 #error Please implement the structure packing macros for your compiler here!
 #endif
 
-#endif /* _RPMSG_COMPILER_H_ */
+#endif /* RPMSG_COMPILER_H_ */

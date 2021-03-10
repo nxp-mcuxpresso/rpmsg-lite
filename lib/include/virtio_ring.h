@@ -1,6 +1,6 @@
 /*-
  * Copyright Rusty Russell IBM Corporation 2007.
- *
+ * Copyright 2019 NXP
  * This header is BSD licensed so anyone can use the definitions to implement
  * compatible drivers/servers.
  *
@@ -88,7 +88,7 @@ struct vring_used
 
 struct vring
 {
-    unsigned int num;
+    uint32_t num;
 
     struct vring_desc *desc;
     struct vring_avail *avail;
@@ -99,19 +99,19 @@ struct vring
  * looks like this.  We assume num is a power of 2.
  *
  * struct vring {
- *      // The actual descriptors (16 bytes each)
+ *      # The actual descriptors (16 bytes each)
  *      struct vring_desc desc[num];
  *
- *      // A ring of available descriptor heads with free-running index.
+ *      # A ring of available descriptor heads with free-running index.
  *      __u16 avail_flags;
  *      __u16 avail_idx;
  *      __u16 available[num];
  *      __u16 used_event_idx;
  *
- *      // Padding to the next align boundary.
+ *      # Padding to the next align boundary.
  *      char pad[];
  *
- *      // A ring of used descriptor heads with free-running index.
+ *      # A ring of used descriptor heads with free-running index.
  *      __u16 used_flags;
  *      __u16 used_idx;
  *      struct vring_used_elem used[num];
@@ -125,26 +125,26 @@ struct vring
  * We publish the used event index at the end of the available ring, and vice
  * versa. They are at the end for backwards compatibility.
  */
-#define vring_used_event(vr) ((vr)->avail->ring[(vr)->num])
-#define vring_avail_event(vr) ((uint16_t *)&(vr)->used->ring[(vr)->num])
+#define vring_used_event(vr)  ((vr)->avail->ring[(vr)->num])
+#define vring_avail_event(vr) ((vr)->used->ring[(vr)->num].id)
 
-static inline int vring_size(unsigned int num, unsigned long align)
+static inline int32_t vring_size(uint32_t num, uint32_t align)
 {
-    int size;
+    uint32_t size;
 
     size = num * sizeof(struct vring_desc);
     size += sizeof(struct vring_avail) + (num * sizeof(uint16_t)) + sizeof(uint16_t);
-    size = (size + align - 1) & ~(align - 1);
+    size = (size + align - 1UL) & ~(align - 1UL);
     size += sizeof(struct vring_used) + (num * sizeof(struct vring_used_elem)) + sizeof(uint16_t);
-    return (size);
+    return ((int32_t)size);
 }
 
-static inline void vring_init(struct vring *vr, unsigned int num, uint8_t *p, unsigned long align)
+static inline void vring_init(struct vring *vr, uint32_t num, uint8_t *p, uint32_t align)
 {
-    vr->num = num;
-    vr->desc = (struct vring_desc *)p;
-    vr->avail = (struct vring_avail *)(p + num * sizeof(struct vring_desc));
-    vr->used = (struct vring_used *)(((unsigned long)&vr->avail->ring[num] + align - 1) & ~(align - 1));
+    vr->num   = num;
+    vr->desc  = (struct vring_desc *)(void *)p;
+    vr->avail = (struct vring_avail *)(void *)(p + num * sizeof(struct vring_desc));
+    vr->used  = (struct vring_used *)(((uint32_t)&vr->avail->ring[num] + align - 1UL) & ~(align - 1UL));
 }
 
 /*
@@ -154,8 +154,15 @@ static inline void vring_init(struct vring *vr, unsigned int num, uint8_t *p, un
  * just incremented index from old to new_idx, should we trigger an
  * event?
  */
-static inline int vring_need_event(uint16_t event_idx, uint16_t new_idx, uint16_t old)
+static inline int32_t vring_need_event(uint16_t event_idx, uint16_t new_idx, uint16_t old)
 {
-    return (uint16_t)(new_idx - event_idx - 1) < (uint16_t)(new_idx - old);
+    if ((uint16_t)(new_idx - event_idx - 1U) < (uint16_t)(new_idx - old))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 #endif /* VIRTIO_RING_H */
