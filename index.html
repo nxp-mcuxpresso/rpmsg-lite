@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 3.1.1</span>
+   &#160;<span id="projectnumber">Rev. 3.1.2</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -192,6 +192,8 @@ Configuration options</h1>
 <tr>
 <td>RL_DEBUG_CHECK_BUFFERS </td><td>(0) </td><td>When enabled buffer debug checks in <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> and <a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2" title="Releases the rx buffer for future reuse in vring. This API can be called at process context when the ...">rpmsg_lite_release_rx_buffer()</a> functions are disabled. Do not use in RPMsg-Lite to Linux configuration. </td></tr>
 <tr>
+<td>RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION </td><td>(0) </td><td>When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication). </td></tr>
+<tr>
 <td>RL_ASSERT </td><td>see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> </td><td>Assert implementation. </td></tr>
 </table>
 <h1><a class="anchor" id="references"></a>
@@ -244,6 +246,17 @@ Revision History</h1>
 <p>Correction of <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> structure members description </p>
 <p>Address -Waddress-of-packed-member warnings in GCC9 </p>
 <p class="endtd">Clang update to v10.0.0, code re-formatted. </p>
+</td></tr>
+<tr>
+<td>9.0 </td><td>12/2020 </td><td><p class="starttd">Several MISRA C-2012 violations addressed </p>
+<p>Introduced RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION config option to allow opposite side notification sending each time received buffers are consumed and put into the queue of available buffers </p>
+<p>Added environment layers for Threadx </p>
+<p class="endtd">Added support for i.MX8QM multicore platform </p>
+</td></tr>
+<tr>
+<td>10.0 </td><td>06/2021 </td><td><p class="starttd">Fixed incorrect description of the rpmsg_lite_get_endpoint_from_addr function </p>
+<p>Updated RL_BUFFER_COUNT documentation </p>
+<p class="endtd">env_print macro adjusted to address MISRA 21.6 rule in MCUXpressoSDK projects </p>
 </td></tr>
 </table>
 </div></div><!-- contents -->
