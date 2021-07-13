@@ -491,7 +491,7 @@ void virtqueue_dump(struct virtqueue *vq)
         return;
     }
 
-    (void)env_print(
+    env_print(
         "VQ: %s - size=%d; used=%d; queued=%d; "
         "desc_head_idx=%d; avail.idx=%d; used_cons_idx=%d; "
         "used.idx=%d; avail.flags=0x%x; used.flags=0x%x\r\n",

@@ -89,6 +89,7 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 |RL_USE_MCMGR_IPC_ISR_HANDLER  | (0)           | When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself.   |
 |RL_USE_ENVIRONMENT_CONTEXT    | (0)           | When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM).    |
 |RL_DEBUG_CHECK_BUFFERS        | (0)           | When enabled buffer debug checks in rpmsg_lite_send_nocopy() and rpmsg_lite_release_rx_buffer() functions are disabled. Do not use in RPMsg-Lite to Linux configuration.    |
+|RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION        | (0)           | When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication).    |
 |RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation.    |
 
 
@@ -109,4 +110,6 @@ This table summarizes revisions of this document.
 |6.0            | 04/2019 | Added configuration macro RL_DEBUG_CHECK_BUFFERS <p> Several MISRA violations fixed <p> Added environment layers for QNX and Zephyr <p> Allow environment context required for some environments (controlled by the RL_USE_ENVIRONMENT_CONTEXT configuration macro).  |
 |7.0            | 11/2019 | MISRA C-2012 violations fixed, incl. data types consolidation <p> Code formatted.  |
 |8.0            | 04/2020 | MISRA C-2012 violations fixed (7.4) <p> Fix missing lock in rpmsg_lite_rx_callback() for QNX env <p> Correction of rpmsg_lite_instance structure members description <p> Address -Waddress-of-packed-member warnings in GCC9 <p> Clang update to v10.0.0, code re-formatted.  |
+|9.0            | 12/2020 | Several MISRA C-2012 violations addressed <p> Introduced RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION config option to allow opposite side notification sending each time received buffers are consumed and put into the queue of available buffers <p> Added environment layers for Threadx <p> Added support for i.MX8QM multicore platform  |
+|10.0           | 06/2021 | Fixed incorrect description of the rpmsg_lite_get_endpoint_from_addr function <p> Updated RL_BUFFER_COUNT documentation <p> env_print macro adjusted to address MISRA 21.6 rule in MCUXpressoSDK projects  |
 

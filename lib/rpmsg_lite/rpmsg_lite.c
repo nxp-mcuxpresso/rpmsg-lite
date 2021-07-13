@@ -101,8 +101,7 @@ struct virtqueue_ops
 
 /*!
  * @brief
- * Create a new rpmsg endpoint, which can be used
- * for communication.
+ * Traverse the linked list of endpoints to get the one with defined address.
  *
  * @param rpmsg_lite_dev    RPMsg Lite instance
  * @param addr              Local endpoint address

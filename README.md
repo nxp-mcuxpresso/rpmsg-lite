@@ -107,4 +107,4 @@ This script executes the application named *clang-format.exe*. You need to have 
 
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2020 NXP
+Copyright © 2016-2021 NXP

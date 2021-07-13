@@ -77,7 +77,6 @@
 #ifndef RPMSG_ENV_H_
 #define RPMSG_ENV_H_
 
-#include <stdio.h>
 #include <stdint.h>
 #include "rpmsg_default_config.h"
 #include "rpmsg_platform.h"
@@ -155,7 +154,20 @@ void env_memcpy(void *dst, void const *src, uint32_t len);
 int32_t env_strcmp(const char *dst, const char *src);
 void env_strncpy(char *dest, const char *src, uint32_t len);
 int32_t env_strncmp(char *dest, const char *src, uint32_t len);
+#ifdef MCUXPRESSO_SDK
+/* MCUXpresso_SDK's PRINTF used in SDK examples */
+#include "fsl_debug_console.h"
+#if defined SDK_DEBUGCONSOLE && (SDK_DEBUGCONSOLE != DEBUGCONSOLE_DISABLE)
+#define env_print(...) (void)PRINTF(__VA_ARGS__)
+#else
+#define env_print(...)
+#endif
+#else
+/* When RPMsg_Lite being used outside of MCUXpresso_SDK use your own env_print
+   implemenetation to avoid conflict with Misra 21.6 rule */
+#include <stdio.h>
 #define env_print(...) printf(__VA_ARGS__)
+#endif /* MCUXPRESSO_SDK */
 
 /*!
  *-----------------------------------------------------------------------------

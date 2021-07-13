@@ -51,7 +51,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "3.1.1" /*!< Current RPMsg Lite version */
+#define RL_VERSION "3.1.2" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
