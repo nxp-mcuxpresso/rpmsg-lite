@@ -19,7 +19,15 @@
 #ifndef RPMSG_ENV_SPECIFIC_H_
 #define RPMSG_ENV_SPECIFIC_H_
 
+#include <stdint.h>
 #include "rpmsg_default_config.h"
+
+typedef struct
+{
+    uint32_t src;
+    void *data;
+    uint32_t len;
+} rpmsg_queue_rx_cb_data_t;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 #include "tx_api.h"

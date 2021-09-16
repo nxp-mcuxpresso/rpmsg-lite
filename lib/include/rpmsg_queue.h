@@ -44,13 +44,6 @@
 */
 typedef void *rpmsg_queue_handle;
 
-typedef struct
-{
-    uint32_t src;
-    void *data;
-    uint32_t len;
-} rpmsg_queue_rx_cb_data_t;
-
 /* RL_API_HAS_ZEROCOPY has to be enabled for RPMsg Queue to work */
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 
