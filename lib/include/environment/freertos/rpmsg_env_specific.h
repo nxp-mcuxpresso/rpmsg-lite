@@ -20,12 +20,11 @@
 #define RPMSG_ENV_SPECIFIC_H_
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+#include "FreeRTOS.h"
+
 #if (configSUPPORT_STATIC_ALLOCATION == 0)
 #warning You have configured RPMsg_Lite to use static API but FreeRTOS is not configured for static allocations! Please switch the configSUPPORT_STATIC_ALLOCATION to 1 in your FreeRTOSConfig.h file.
 #endif
-
-#include "FreeRTOS.h"
-
 typedef StaticSemaphore_t LOCK_STATIC_CONTEXT;
 typedef StaticQueue_t rpmsg_static_queue_ctxt;
 
