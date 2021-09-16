@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2021 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -33,13 +33,6 @@
 #include "rpmsg_lite.h"
 #include "rpmsg_queue.h"
 
-typedef struct
-{
-    uint32_t src;
-    void *data;
-    uint32_t len;
-} rpmsg_queue_rx_cb_data_t;
-
 int32_t rpmsg_queue_rx_cb(void *payload, uint32_t payload_len, uint32_t src, void *priv)
 {
     rpmsg_queue_rx_cb_data_t msg;
@@ -61,7 +54,9 @@ int32_t rpmsg_queue_rx_cb(void *payload, uint32_t payload_len, uint32_t src, voi
 }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev, uint8_t *queue_stack, rpmsg_static_queue *rpmsg_queue)
+rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev,
+                                      uint8_t *queue_storage,
+                                      rpmsg_static_queue_ctxt *queue_ctxt)
 #else
 rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev)
 #endif
@@ -76,7 +71,8 @@ rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev
 
     /* create message queue for channel default endpoint */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    status = env_create_queue(&q, (int32_t)rpmsg_lite_dev->rvq->vq_nentries, (int32_t)sizeof(rpmsg_queue_rx_cb_data_t), queue_stack, rpmsg_queue);
+    status = env_create_queue(&q, (int32_t)rpmsg_lite_dev->rvq->vq_nentries, (int32_t)sizeof(rpmsg_queue_rx_cb_data_t),
+                              queue_storage, queue_ctxt);
 #else
     status = env_create_queue(&q, (int32_t)rpmsg_lite_dev->rvq->vq_nentries, (int32_t)sizeof(rpmsg_queue_rx_cb_data_t));
 #endif

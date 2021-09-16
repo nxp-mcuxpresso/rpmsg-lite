@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2021 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -122,12 +122,12 @@ struct rpmsg_lite_ept_static_context
  */
 struct rpmsg_lite_instance
 {
-    struct virtqueue *rvq;              /*!< receive virtqueue */
-    struct virtqueue *tvq;              /*!< transmit virtqueue */
-    struct llist *rl_endpoints;         /*!< linked list of endpoints */
-    LOCK *lock;                         /*!< local RPMsg Lite mutex lock */
+    struct virtqueue *rvq;      /*!< receive virtqueue */
+    struct virtqueue *tvq;      /*!< transmit virtqueue */
+    struct llist *rl_endpoints; /*!< linked list of endpoints */
+    LOCK *lock;                 /*!< local RPMsg Lite mutex lock */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    STACK lock_stack;                  /*!< Stack for lock */
+    LOCK_STATIC_CONTEXT lock_static_ctxt; /*!< Static context for lock object creation */
 #endif
     uint32_t link_state;                /*!< state of the link, up/down*/
     char *sh_mem_base;                  /*!< base address of the shared memory */

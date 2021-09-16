@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2021 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,8 @@
 //! @def RL_BUFFER_PAYLOAD_SIZE
 //!
 //! Size of the buffer payload, it must be equal to (240, 496, 1008, ...)
-//! [2^n - 16].
-//! The default value is 496U.
+//! [2^n - 16]. Ensure the same value is defined on both sides of rpmsg
+//! communication. The default value is 496U.
 #ifndef RL_BUFFER_PAYLOAD_SIZE
 #define RL_BUFFER_PAYLOAD_SIZE (496U)
 #endif
@@ -69,6 +69,10 @@
 //!
 //! Number of the buffers, it must be power of two (2, 4, ...).
 //! The default value is 2U.
+//! Note this value defines the buffer count for one direction of the rpmsg
+//! communication only, i.e. if the default value of 2 is used
+//! in rpmsg_config.h files for the master and the remote side, 4 buffers
+//! in total are created in the shared memory.
 #ifndef RL_BUFFER_COUNT
 #define RL_BUFFER_COUNT (2U)
 #endif

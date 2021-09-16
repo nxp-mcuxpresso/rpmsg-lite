@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2021 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -58,7 +58,7 @@
 static int32_t env_init_counter   = 0;
 static SemaphoreHandle_t env_sema = ((void *)0);
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-StaticSemaphore_t env_sem_static_semaphore;
+LOCK_STATIC_CONTEXT env_sem_static_context;
 #endif
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
@@ -118,7 +118,7 @@ int32_t env_init(void)
     {
         // first call
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-        env_sema = xSemaphoreCreateBinaryStatic(&env_sem_static_semaphore);
+        env_sema = xSemaphoreCreateBinaryStatic(&env_sem_static_context);
 #else
         env_sema = xSemaphoreCreateBinary();
 #endif
@@ -327,7 +327,7 @@ void *env_map_patova(uint32_t address)
  *
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_mutex(void **lock, int32_t count, void *stack)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
 #else
 int32_t env_create_mutex(void **lock, int32_t count)
 #endif
@@ -338,7 +338,8 @@ int32_t env_create_mutex(void **lock, int32_t count)
     }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    *lock = xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count, (StaticSemaphore_t*)stack);
+    *lock = xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count,
+                                           (StaticSemaphore_t *)context);
 #else
     *lock = xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
 #endif
@@ -400,9 +401,9 @@ void env_unlock_mutex(void *lock)
  * thread context.
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_sync_lock(void **lock, int32_t state, void *stack)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context)
 {
-    return env_create_mutex(lock, state, stack); /* state=1 .. initially free */
+    return env_create_mutex(lock, state, context); /* state=1 .. initially free */
 }
 #else
 int32_t env_create_sync_lock(void **lock, int32_t state)
@@ -606,15 +607,20 @@ void env_isr(uint32_t vector)
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
  * @param element_size - queue element size in bytes
- * @param queue_stack  Stack for queue
- * @param static_queue  Context holder for queue
+ * @param queue_static_storage - pointer to queue static storage buffer
+ * @param queue_static_context - pointer to queue static context
  *
  * @return - status of function execution
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_queue(void **queue, int32_t length, int32_t element_size, uint8_t *queue_stack, StaticQueue_t *staticQueue)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context)
 {
-    *queue = xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_stack, staticQueue);
+    *queue =
+        xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_static_storage, queue_static_context);
 #else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {

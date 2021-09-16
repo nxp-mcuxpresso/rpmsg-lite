@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2021 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -78,11 +78,10 @@
 #ifndef RPMSG_ENV_H_
 #define RPMSG_ENV_H_
 
-#include <stdio.h>
 #include <stdint.h>
 #include "rpmsg_default_config.h"
+#include "rpmsg_env_specific.h"
 #include "rpmsg_platform.h"
-#include "FreeRTOS.h"
 
 /*!
  * env_init
@@ -157,7 +156,16 @@ void env_memcpy(void *dst, void const *src, uint32_t len);
 int32_t env_strcmp(const char *dst, const char *src);
 void env_strncpy(char *dest, const char *src, uint32_t len);
 int32_t env_strncmp(char *dest, const char *src, uint32_t len);
+#ifdef MCUXPRESSO_SDK
+/* MCUXpresso_SDK's PRINTF used in SDK examples */
+#include "fsl_debug_console.h"
+#define env_print(...) PRINTF(__VA_ARGS__)
+#else
+/* When RPMsg_Lite being used outside of MCUXpresso_SDK use your own env_print
+   implemenetation to avoid conflict with Misra 21.6 rule */
+#include <stdio.h>
 #define env_print(...) printf(__VA_ARGS__)
+#endif /* MCUXPRESSO_SDK */
 
 /*!
  *-----------------------------------------------------------------------------
@@ -247,12 +255,12 @@ void env_wmb(void);
  *
  * @param lock -  pointer to created mutex
  * @param count - initial count 0 or 1
- * @param stack - stack for mutex
+ * @param context - context for mutex
  *
  * @return - status of function execution
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_mutex(void **lock, int32_t count, void *stack);
+int32_t env_create_mutex(void **lock, int32_t count, void *context);
 #else
 int32_t env_create_mutex(void **lock, int32_t count);
 #endif
@@ -298,7 +306,7 @@ void env_unlock_mutex(void *lock);
  *
  * @param lock  - pointer to created sync lock object
  * @param state - initial state , lock or unlocked
- * @param stack - stack for lock
+ * @param context - context for lock
  *
  * @returns - status of function execution
  */
@@ -306,7 +314,7 @@ void env_unlock_mutex(void *lock);
 #define UNLOCKED 1
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_sync_lock(void **lock, int32_t state, void *stack);
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context);
 #else
 int32_t env_create_sync_lock(void **lock, int32_t state);
 #endif
@@ -465,10 +473,6 @@ void env_disable_cache(void);
 
 typedef void LOCK;
 
-typedef StaticSemaphore_t STACK;
-
-typedef StaticQueue_t rpmsg_static_queue;
-
 /*!
  * env_create_queue
  *
@@ -477,13 +481,17 @@ typedef StaticQueue_t rpmsg_static_queue;
  * @param queue      Pointer to created queue
  * @param length     Maximum number of elements in the queue
  * @param item_size  Queue element size in bytes
- * @param queue_stack  Stack for queue
- * @param static_queue  Context holder for queue
+ * @param queue_static_storage Pointer to queue static storage buffer
+ * @param queue_static_context Pointer to queue static context
  *
  * @return - status of function execution
  */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-int32_t env_create_queue(void **queue, int32_t length, int32_t element_size, uint8_t *queue_stack, StaticQueue_t *static_queue);
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context);
 #else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size);
 #endif
