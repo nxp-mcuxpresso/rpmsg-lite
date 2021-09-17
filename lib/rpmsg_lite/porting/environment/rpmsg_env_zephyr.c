@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2021 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -313,22 +313,33 @@ void *env_map_patova(uint32_t address)
  * Creates a mutex with the given initial count.
  *
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
+#else
 int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
     struct k_sem *semaphore_ptr;
-
-    semaphore_ptr = (struct k_sem *)env_allocate_memory(sizeof(struct k_sem));
-    if (semaphore_ptr == ((void *)0))
-    {
-        return -1;
-    }
 
     if (count > RL_ENV_MAX_MUTEX_COUNT)
     {
         return -1;
     }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    semaphore_ptr = (struct k_sem *)context;
+#else
+    semaphore_ptr = (struct k_sem *)env_allocate_memory(sizeof(struct k_sem));
+#endif
+    if (semaphore_ptr == ((void *)0))
+    {
+        return -1;
+    }
+
     k_sem_init(semaphore_ptr, count, RL_ENV_MAX_MUTEX_COUNT);
+    /* Becasue k_sem_init() does not return any status, we do not know if all is OK or not.
+       If something would not be OK dynamically allocated memory has to be freed here. */
+
     *lock = (void *)semaphore_ptr;
     return 0;
 }
@@ -342,7 +353,9 @@ int32_t env_create_mutex(void **lock, int32_t count)
 void env_delete_mutex(void *lock)
 {
     k_sem_reset(lock);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(lock);
+#endif
 }
 
 /*!
@@ -379,10 +392,17 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context)
+{
+    return env_create_mutex(lock, state, context); /* state=1 .. initially free */
+}
+#else
 int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
 }
+#endif
 
 /*!
  * env_delete_sync_lock
@@ -545,21 +565,38 @@ void env_isr(uint32_t vector)
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
  * @param element_size - queue element size in bytes
+ * @param queue_static_storage - pointer to queue static storage buffer
+ * @param queue_static_context - pointer to queue static context
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context)
+#else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
+#endif
 {
     struct k_msgq *queue_ptr = ((void *)0);
     char *msgq_buffer_ptr    = ((void *)0);
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    queue_ptr       = (struct k_msgq *)queue_static_context;
+    msgq_buffer_ptr = (char *)queue_static_storage;
+#else
     queue_ptr       = (struct k_msgq *)env_allocate_memory(sizeof(struct k_msgq));
     msgq_buffer_ptr = (char *)env_allocate_memory(length * element_size);
+#endif
     if ((queue_ptr == ((void *)0)) || (msgq_buffer_ptr == ((void *)0)))
     {
         return -1;
     }
     k_msgq_init(queue_ptr, msgq_buffer_ptr, element_size, length);
+    /* Becasue k_msgq_init() does not return any status, we do not know if all is OK or not.
+       If something would not be OK dynamically allocated memory has to be freed here. */
 
     *queue = (void *)queue_ptr;
     return 0;
@@ -576,8 +613,10 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 void env_delete_queue(void *queue)
 {
     k_msgq_purge((struct k_msgq *)queue);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(((struct k_msgq *)queue)->buffer_start);
     env_free_memory(queue);
+#endif
 }
 
 /*!

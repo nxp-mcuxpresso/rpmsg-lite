@@ -2,7 +2,8 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2021 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +80,7 @@
 
 #include <stdint.h>
 #include "rpmsg_default_config.h"
+#include "rpmsg_env_specific.h"
 #include "rpmsg_platform.h"
 
 /*!
@@ -257,10 +259,15 @@ void env_wmb(void);
  *
  * @param lock -  pointer to created mutex
  * @param count - initial count 0 or 1
+ * @param context - context for mutex
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context);
+#else
 int32_t env_create_mutex(void **lock, int32_t count);
+#endif
 
 /*!
  * env_delete_mutex
@@ -303,13 +310,18 @@ void env_unlock_mutex(void *lock);
  *
  * @param lock  - pointer to created sync lock object
  * @param state - initial state , lock or unlocked
+ * @param context - context for lock
  *
  * @returns - status of function execution
  */
 #define LOCKED   0
 #define UNLOCKED 1
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context);
+#else
 int32_t env_create_sync_lock(void **lock, int32_t state);
+#endif
 
 /*!
  * env_create_sync_lock
@@ -473,10 +485,20 @@ typedef void LOCK;
  * @param queue      Pointer to created queue
  * @param length     Maximum number of elements in the queue
  * @param item_size  Queue element size in bytes
+ * @param queue_static_storage Pointer to queue static storage buffer
+ * @param queue_static_context Pointer to queue static context
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context);
+#else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size);
+#endif
 
 /*!
  * env_delete_queue
