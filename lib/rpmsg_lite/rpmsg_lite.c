@@ -2,7 +2,8 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2021 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1005,7 +1006,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #endif
     }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1, &rpmsg_lite_dev->lock_static_ctxt);
+#else
     status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1);
+#endif
     if (status != RL_SUCCESS)
     {
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
@@ -1185,7 +1190,11 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 #endif
     }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1, &rpmsg_lite_dev->lock_static_ctxt);
+#else
     status = env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1);
+#endif
     if (status != RL_SUCCESS)
     {
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))

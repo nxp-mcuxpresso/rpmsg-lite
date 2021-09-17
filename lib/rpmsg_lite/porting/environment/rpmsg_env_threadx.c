@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 NXP
+ * Copyright 2020-2021 NXP
  * All rights reserved.
  *
  *
@@ -297,27 +297,41 @@ void *env_map_patova(uint32_t address)
  * Creates a mutex with the given initial count.
  *
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
+#else
 int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
     TX_SEMAPHORE *semaphore_ptr;
-
-    semaphore_ptr = (TX_SEMAPHORE *)env_allocate_memory(sizeof(TX_SEMAPHORE));
-    if (semaphore_ptr == ((void *)0))
-    {
-        return -1;
-    }
 
     if (count > RL_ENV_MAX_MUTEX_COUNT)
     {
         return -1;
     }
 
-    if (TX_SUCCESS != _tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    semaphore_ptr = (TX_SEMAPHORE *)context;
+#else
+    semaphore_ptr = (TX_SEMAPHORE *)env_allocate_memory(sizeof(TX_SEMAPHORE));
+#endif
+    if (semaphore_ptr == ((void *)0))
     {
         return -1;
     }
-    *lock = (void *)semaphore_ptr;
-    return 0;
+
+    if (TX_SUCCESS == _tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
+    {
+        *lock = (void *)semaphore_ptr;
+        return 0;
+    }
+    else
+    {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(semaphore_ptr);
+#endif
+        return -1;
+    }
 }
 
 /*!
@@ -329,7 +343,9 @@ int32_t env_create_mutex(void **lock, int32_t count)
 void env_delete_mutex(void *lock)
 {
     (void)_tx_semaphore_delete((TX_SEMAPHORE *)lock);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(lock);
+#endif
 }
 
 /*!
@@ -366,10 +382,17 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context)
+{
+    return env_create_mutex(lock, state, context); /* state=1 .. initially free */
+}
+#else
 int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
 }
+#endif
 
 /*!
  * env_delete_sync_lock
@@ -532,17 +555,48 @@ void env_isr(uint32_t vector)
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
  * @param element_size - queue element size in bytes
+ * @param queue_static_storage - pointer to queue static storage buffer
+ * @param queue_static_context - pointer to queue static context
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context)
+#else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
+#endif
 {
-    if (TX_SUCCESS == _tx_queue_create((TX_QUEUE *)*queue, NULL, element_size, NULL, length))
+    struct TX_QUEUE *queue_ptr = ((void *)0);
+    char *msgq_buffer_ptr      = ((void *)0);
+
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    queue_ptr       = (struct k_msgq *)queue_static_context;
+    msgq_buffer_ptr = (char *)queue_static_storage;
+#else
+    queue_ptr       = (struct k_msgq *)env_allocate_memory(sizeof(struct TX_QUEUE));
+    msgq_buffer_ptr = (char *)env_allocate_memory(length * element_size);
+#endif
+    if ((queue_ptr == ((void *)0)) || (msgq_buffer_ptr == ((void *)0)))
     {
+        return -1;
+    }
+
+    if (TX_SUCCESS ==
+        _tx_queue_create((TX_QUEUE *)queue_ptr, NULL, element_size, (VOID *)msgq_buffer_ptr, (length * element_size)))
+    {
+        *queue = (void *)queue_ptr;
         return 0;
     }
     else
     {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+        env_free_memory(queue_ptr);
+        env_free_memory(msgq_buffer_ptr);
+#endif
         return -1;
     }
 }
@@ -558,6 +612,9 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 void env_delete_queue(void *queue)
 {
     tx_queue_delete(queue);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+    env_free_memory(queue);
+#endif
 }
 
 /*!
