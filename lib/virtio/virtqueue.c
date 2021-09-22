@@ -63,7 +63,7 @@ int32_t virtqueue_create(uint16_t id,
 {
     struct virtqueue *vq    = VQ_NULL;
     volatile int32_t status = VQUEUE_SUCCESS;
-    uint32_t vq_size;
+    uint32_t vq_size        = 0U;
 
     VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
     VQ_PARAM_CHK(ring->num_descs == 0U, status, ERROR_VQUEUE_INVLD_PARAM);
@@ -125,7 +125,7 @@ int32_t virtqueue_create_static(uint16_t id,
 {
     struct virtqueue *vq    = VQ_NULL;
     volatile int32_t status = VQUEUE_SUCCESS;
-    uint32_t vq_size        = 0;
+    uint32_t vq_size        = 0U;
 
     VQ_PARAM_CHK(vq_ctxt == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
     VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);

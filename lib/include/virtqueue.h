@@ -41,16 +41,16 @@ typedef uint8_t boolean;
 
 /*Error Codes*/
 #define VQ_ERROR_BASE            (-3000)
-#define ERROR_VRING_FULL         (VQ_ERROR_BASE - 1U)
-#define ERROR_INVLD_DESC_IDX     (VQ_ERROR_BASE - 2U)
-#define ERROR_EMPTY_RING         (VQ_ERROR_BASE - 3U)
-#define ERROR_NO_MEM             (VQ_ERROR_BASE - 4U)
-#define ERROR_VRING_MAX_DESC     (VQ_ERROR_BASE - 5U)
-#define ERROR_VRING_ALIGN        (VQ_ERROR_BASE - 6U)
-#define ERROR_VRING_NO_BUFF      (VQ_ERROR_BASE - 7U)
-#define ERROR_VQUEUE_INVLD_PARAM (VQ_ERROR_BASE - 8U)
+#define ERROR_VRING_FULL         (VQ_ERROR_BASE - 1)
+#define ERROR_INVLD_DESC_IDX     (VQ_ERROR_BASE - 2)
+#define ERROR_EMPTY_RING         (VQ_ERROR_BASE - 3)
+#define ERROR_NO_MEM             (VQ_ERROR_BASE - 4)
+#define ERROR_VRING_MAX_DESC     (VQ_ERROR_BASE - 5)
+#define ERROR_VRING_ALIGN        (VQ_ERROR_BASE - 6)
+#define ERROR_VRING_NO_BUFF      (VQ_ERROR_BASE - 7)
+#define ERROR_VQUEUE_INVLD_PARAM (VQ_ERROR_BASE - 8)
 
-#define VQUEUE_SUCCESS (0U)
+#define VQUEUE_SUCCESS (0)
 #define VQUEUE_DEBUG   (false)
 
 /* This is temporary macro to replace C NULL support.
@@ -178,11 +178,15 @@ typedef void vq_notify(struct virtqueue *vq);
         status_var = status_err;                        \
     }
 
-#define VQUEUE_BUSY(vq, dir) \
-    if ((vq)->dir == false)  \
-        (vq)->dir = true;    \
-    else                     \
-        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use")
+#define VQUEUE_BUSY(vq, dir)                                         \
+    if ((vq)->dir == false)                                          \
+    {                                                                \
+        (vq)->dir = true;                                            \
+    }                                                                \
+    else                                                             \
+    {                                                                \
+        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use") \
+    }
 
 #define VQUEUE_IDLE(vq, dir) ((vq)->dir = false)
 
