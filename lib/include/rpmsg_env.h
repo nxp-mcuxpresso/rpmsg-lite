@@ -168,7 +168,7 @@ int32_t env_strncmp(char *dest, const char *src, uint32_t len);
 /* When RPMsg_Lite being used outside of MCUXpresso_SDK use your own env_print
    implemenetation to avoid conflict with Misra 21.6 rule */
 #include <stdio.h>
-#define env_print(...) printf(__VA_ARGS__)
+#define env_print(...) (void)printf(__VA_ARGS__)
 #endif /* MCUXPRESSO_SDK */
 
 /*!
