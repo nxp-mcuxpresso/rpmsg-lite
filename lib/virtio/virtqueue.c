@@ -63,11 +63,11 @@ int32_t virtqueue_create(uint16_t id,
 {
     struct virtqueue *vq    = VQ_NULL;
     volatile int32_t status = VQUEUE_SUCCESS;
-    uint32_t vq_size        = 0;
+    uint32_t vq_size        = 0U;
 
     VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
-    VQ_PARAM_CHK(ring->num_descs == 0, status, ERROR_VQUEUE_INVLD_PARAM);
-    VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1), status, ERROR_VRING_ALIGN);
+    VQ_PARAM_CHK(ring->num_descs == 0U, status, ERROR_VQUEUE_INVLD_PARAM);
+    VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1U), status, ERROR_VRING_ALIGN);
 
     if (status == VQUEUE_SUCCESS)
     {
@@ -125,7 +125,7 @@ int32_t virtqueue_create_static(uint16_t id,
 {
     struct virtqueue *vq    = VQ_NULL;
     volatile int32_t status = VQUEUE_SUCCESS;
-    uint32_t vq_size        = 0;
+    uint32_t vq_size        = 0U;
 
     VQ_PARAM_CHK(vq_ctxt == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
     VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
@@ -359,7 +359,7 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
 
     env_rmb();
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-    buffer = env_map_patova(vq->env, ((uint32_t)(vq->vq_ring.desc[*avail_idx].addr));
+    buffer = env_map_patova(vq->env, ((uint32_t)(vq->vq_ring.desc[*avail_idx].addr)));
 #else
     buffer = env_map_patova((uint32_t)(vq->vq_ring.desc[*avail_idx].addr));
 #endif

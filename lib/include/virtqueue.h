@@ -158,15 +158,15 @@ typedef void vq_callback(struct virtqueue *vq);
 typedef void vq_notify(struct virtqueue *vq);
 
 #if (VQUEUE_DEBUG == true)
-#define VQASSERT_BOOL(_vq, _exp, _msg)                             \
-    do                                                             \
-    {                                                              \
-        if (!(_exp))                                               \
-        {                                                          \
-            env_print("%s: %s - " _msg, __func__, (_vq)->vq_name); \
-            while (1)                                              \
-                ;                                                  \
-        }                                                          \
+#define VQASSERT_BOOL(_vq, _exp, _msg)                               \
+    do                                                               \
+    {                                                                \
+        if (!(_exp))                                                 \
+        {                                                            \
+            env_print("%s: %s - " (_msg), __func__, (_vq)->vq_name); \
+            while (1) {}                                             \
+                ;                                                    \
+        }                                                            \
     } while (0)
 #define VQASSERT(_vq, _exp, _msg) VQASSERT_BOOL(_vq, (_exp) != 0, _msg)
 
@@ -178,11 +178,15 @@ typedef void vq_notify(struct virtqueue *vq);
         status_var = status_err;                        \
     }
 
-#define VQUEUE_BUSY(vq, dir) \
-    if ((vq)->dir == false)  \
-        (vq)->dir = true;    \
-    else                     \
-        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use")
+#define VQUEUE_BUSY(vq, dir)                                         \
+    if ((vq)->dir == false)                                          \
+    {                                                                \
+        (vq)->dir = true;                                            \
+    }                                                                \
+    else                                                             \
+    {                                                                \
+        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use") \
+    }
 
 #define VQUEUE_IDLE(vq, dir) ((vq)->dir = false)
 
