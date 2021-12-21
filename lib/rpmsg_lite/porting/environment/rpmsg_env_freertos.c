@@ -51,15 +51,21 @@
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
 #include "rpmsg_compiler.h"
+#include "event_groups.h"
+#include "rpmsg_lite.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 static int32_t env_init_counter   = 0;
 static SemaphoreHandle_t env_sema = ((void *)0);
+EventGroupHandle_t event_group;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 LOCK_STATIC_CONTEXT env_sem_static_context;
+StaticEventGroup_t event_group_static_context;
 #endif
+
+#define RPMSG_EVENT_LINK_UP (1<<0U)
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -95,6 +101,28 @@ static int32_t env_in_isr(void)
     return platform_in_isr();
 }
 
+void rpmsg_lite_is_link_up_wait(struct rpmsg_lite_instance *rpmsg_lite_dev){
+    while(rpmsg_lite_is_link_up(rpmsg_lite_dev)==0)
+    {
+        (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
+        while((xEventGroupWaitBits(event_group, RPMSG_EVENT_LINK_UP, pdFALSE, pdTRUE, portMAX_DELAY) & (RPMSG_EVENT_LINK_UP)) == 0){}
+    }
+}
+
+void rpmsg_lite_env_tx_callback(void)
+{
+    BaseType_t     xHigherPriorityTaskWoken = pdFALSE;
+    if (xPortIsInsideInterrupt())
+    {
+        (void)xEventGroupSetBitsFromISR(event_group, RPMSG_EVENT_LINK_UP,&xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
+    else
+    {
+        (void)xEventGroupSetBits(event_group, RPMSG_EVENT_LINK_UP);
+    }
+}
+
 /*!
  * env_init
  *
@@ -119,9 +147,12 @@ int32_t env_init(void)
         // first call
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
         env_sema = xSemaphoreCreateBinaryStatic(&env_sem_static_context);
+        event_group = xEventGroupCreateStatic(&event_group_static_context);
 #else
         env_sema = xSemaphoreCreateBinary();
+        event_group = xEventGroupCreate()
 #endif
+        (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
         (void)memset(isr_table, 0, sizeof(isr_table));
         (void)xTaskResumeAll();
         retval = platform_init();

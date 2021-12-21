@@ -218,6 +218,7 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
     rpmsg_lite_dev->link_state = 1U;
+    rpmsg_lite_env_tx_callback();
 }
 
 /****************************************************************************

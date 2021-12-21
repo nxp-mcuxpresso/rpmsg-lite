@@ -292,6 +292,9 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
  */
 int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
+void rpmsg_lite_is_link_up_wait(struct rpmsg_lite_instance *rpmsg_lite_dev);
+void rpmsg_lite_env_tx_callback();
+
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 
 /*!
