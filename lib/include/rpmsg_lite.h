@@ -52,12 +52,13 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "3.1.2" /*!< Current RPMsg Lite version */
+#define RL_VERSION "3.2.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
-#define RL_WORD_ALIGN_UP(a) \
-    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : ((uint32_t)(a)))
+#define RL_WORD_ALIGN_UP(a)                                                                                \
+    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
+                                                       ((uint32_t)(a)))
 #define RL_WORD_ALIGN_DOWN(a) \
     (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uint32_t)(a)))
 

@@ -316,7 +316,11 @@ void *env_map_patova(uint32_t address)
  * Creates a mutex with the given initial count.
  *
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
+#else
 int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
     struct XosSem *semaphore_ptr;
 
@@ -325,7 +329,11 @@ int32_t env_create_mutex(void **lock, int32_t count)
         return -1;
     }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    semaphore_ptr = (struct XosSem *)context;
+#else
     semaphore_ptr = (struct XosSem *)env_allocate_memory(sizeof(struct XosSem));
+#endif
     if (semaphore_ptr == ((void *)0))
     {
         return -1;
@@ -338,7 +346,9 @@ int32_t env_create_mutex(void **lock, int32_t count)
     }
     else
     {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
         env_free_memory(semaphore_ptr);
+#endif
         return -1;
     }
 }
@@ -352,7 +362,9 @@ int32_t env_create_mutex(void **lock, int32_t count)
 void env_delete_mutex(void *lock)
 {
     xos_sem_delete(lock);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(lock);
+#endif
 }
 
 /*!
@@ -389,10 +401,17 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context)
+{
+    return env_create_mutex(lock, state, context); /* state=1 .. initially free */
+}
+#else
 int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
 }
+#endif
 
 /*!
  * env_delete_sync_lock
@@ -555,14 +574,28 @@ void env_isr(uint32_t vector)
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
  * @param element_size - queue element size in bytes
+ * @param queue_static_storage - pointer to queue static storage buffer
+ * @param queue_static_context - pointer to queue static context
  *
  * @return - status of function execution
  */
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context)
+#else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
+#endif
 {
     char *queue_ptr = ((void *)0);
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    queue_ptr = (char *)queue_static_storage;
+#else
     queue_ptr = (char *)env_allocate_memory(XOS_MSGQ_SIZE(length, element_size));
+#endif
     if (queue_ptr != ((void *)0))
     {
         if (XOS_OK ==
@@ -573,7 +606,9 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
         }
         else
         {
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
             env_free_memory(queue_ptr);
+#endif
             return -1;
         }
     }
@@ -591,7 +626,9 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 void env_delete_queue(void *queue)
 {
     xos_msgq_delete(queue);
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(queue);
+#endif
 }
 
 /*!

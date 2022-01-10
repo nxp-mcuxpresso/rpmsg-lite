@@ -112,4 +112,5 @@ This table summarizes revisions of this document.
 |8.0            | 04/2020 | MISRA C-2012 violations fixed (7.4) <p> Fix missing lock in rpmsg_lite_rx_callback() for QNX env <p> Correction of rpmsg_lite_instance structure members description <p> Address -Waddress-of-packed-member warnings in GCC9 <p> Clang update to v10.0.0, code re-formatted.  |
 |9.0            | 12/2020 | Several MISRA C-2012 violations addressed <p> Introduced RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION config option to allow opposite side notification sending each time received buffers are consumed and put into the queue of available buffers <p> Added environment layers for Threadx <p> Added support for i.MX8QM multicore platform  |
 |10.0           | 06/2021 | Fixed incorrect description of the rpmsg_lite_get_endpoint_from_addr function <p> Updated RL_BUFFER_COUNT documentation <p> env_print macro adjusted to address MISRA 21.6 rule in MCUXpressoSDK projects  |
+|11.0           | 12/2021 | Improve static allocations - allow OS-specific objects being allocated statically, GitHub PR #14 <p> RPMsg-Lite: Minor Misra and typo corrections, GitHub PR #19, #20.  |
 
