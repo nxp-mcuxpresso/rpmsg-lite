@@ -1,3 +1,8 @@
+[![Version](https://img.shields.io/github/v/release/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/releases/latest)
+[![Contributors](https://img.shields.io/github/contributors/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/NXPmicro/rpmsg-lite/pulls)
+
 RPMsg Component
 ===============
 
