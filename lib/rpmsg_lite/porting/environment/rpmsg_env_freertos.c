@@ -52,14 +52,13 @@
 #include "virtqueue.h"
 #include "rpmsg_compiler.h"
 #include "event_groups.h"
-#include "rpmsg_lite.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 static int32_t env_init_counter   = 0;
 static SemaphoreHandle_t env_sema = ((void *)0);
-EventGroupHandle_t event_group;
+static EventGroupHandle_t event_group = ((void *)0);
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 LOCK_STATIC_CONTEXT env_sem_static_context;
 StaticEventGroup_t event_group_static_context;
@@ -101,20 +100,34 @@ static int32_t env_in_isr(void)
     return platform_in_isr();
 }
 
-void rpmsg_lite_is_link_up_wait(struct rpmsg_lite_instance *rpmsg_lite_dev){
-    while(rpmsg_lite_is_link_up(rpmsg_lite_dev)==0)
+/*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Utilize events to avoid busy loop implementation.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state)
+{
+    (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
+    if (*link_state != 1U)
     {
-        (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
-        while((xEventGroupWaitBits(event_group, RPMSG_EVENT_LINK_UP, pdFALSE, pdTRUE, portMAX_DELAY) & (RPMSG_EVENT_LINK_UP)) == 0){}
+        xEventGroupWaitBits(event_group, RPMSG_EVENT_LINK_UP, pdFALSE, pdTRUE, portMAX_DELAY);
     }
 }
 
-void rpmsg_lite_env_tx_callback(void)
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(void)
 {
-    BaseType_t     xHigherPriorityTaskWoken = pdFALSE;
-    if (xPortIsInsideInterrupt())
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (env_in_isr() != 0)
     {
-        (void)xEventGroupSetBitsFromISR(event_group, RPMSG_EVENT_LINK_UP,&xHigherPriorityTaskWoken);
+        (void)xEventGroupSetBitsFromISR(event_group, RPMSG_EVENT_LINK_UP, &xHigherPriorityTaskWoken);
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
     else
@@ -150,7 +163,7 @@ int32_t env_init(void)
         event_group = xEventGroupCreateStatic(&event_group_static_context);
 #else
         env_sema = xSemaphoreCreateBinary();
-        event_group = xEventGroupCreate()
+        event_group = xEventGroupCreate();
 #endif
         (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
         (void)memset(isr_table, 0, sizeof(isr_table));
@@ -204,6 +217,8 @@ int32_t env_deinit(void)
         // last call
         (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
+        vEventGroupDelete(event_group);
+        event_group = ((void *)0);
         vSemaphoreDelete(env_sema);
         env_sema = ((void *)0);
         (void)xTaskResumeAll();

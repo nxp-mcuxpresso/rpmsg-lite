@@ -218,7 +218,7 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
     rpmsg_lite_dev->link_state = 1U;
-    rpmsg_lite_env_tx_callback();
+    env_tx_callback();
 }
 
 /****************************************************************************
@@ -583,6 +583,16 @@ int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
     }
 
     return (int32_t)(rpmsg_lite_dev->link_state);
+}
+
+void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
+{
+    if (rpmsg_lite_dev == RL_NULL)
+    {
+        return;
+    }
+
+    env_wait_for_link_up(&rpmsg_lite_dev->link_state);
 }
 
 /*!

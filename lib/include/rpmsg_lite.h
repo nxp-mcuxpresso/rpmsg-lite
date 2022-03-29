@@ -292,8 +292,13 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
  */
 int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
-void rpmsg_lite_is_link_up_wait(struct rpmsg_lite_instance *rpmsg_lite_dev);
-void rpmsg_lite_env_tx_callback();
+/*!
+ * @brief Function to wait until the link is up. Returns
+ * once the link_state is set.
+ *
+ * @param rpmsg_lite_dev    RPMsg-Lite instance pointer
+ */
+void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 
