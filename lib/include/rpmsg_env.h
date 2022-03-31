@@ -611,14 +611,17 @@ int32_t env_deinit_interrupt(void *env, int32_t vq_id);
  * of RTOS sync. primitives to avoid busy loop. Returns once the link is up.
  *
  * @param link_state  Pointer to the link_state parameter of the rpmsg_lite_instance structure
+ * @param link_id     Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  */
-void env_wait_for_link_up(volatile uint32_t *link_state);
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id);
 
 /*!
  * env_tx_callback
  *
  * Called from rpmsg_lite_tx_callback() to allow unblocking of env_wait_for_link_up()
+ *
+ * @param link_id     Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  */
-void env_tx_callback(void);
+void env_tx_callback(uint32_t link_id);
 
 #endif /* RPMSG_ENV_H_ */

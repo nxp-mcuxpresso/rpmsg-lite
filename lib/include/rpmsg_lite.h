@@ -141,6 +141,7 @@ struct rpmsg_lite_instance
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     struct vq_static_context vq_ctxt[2];
 #endif
+    uint32_t link_id; /*!< linkID of this rpmsg_lite instance */
 };
 
 /*******************************************************************************

@@ -75,7 +75,7 @@ static struct isr_info isr_table[ISR_COUNT];
  * Busy loop implementation for BM.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state)
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
 {
     while (*link_state != 1U)
     {
@@ -89,7 +89,7 @@ void env_wait_for_link_up(volatile uint32_t *link_state)
  * Empty implementation for BM.
  *
  */
-void env_tx_callback(void)
+void env_tx_callback(uint32_t link_id)
 {
 }
 

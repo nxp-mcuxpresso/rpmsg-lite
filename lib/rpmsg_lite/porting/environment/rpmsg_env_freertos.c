@@ -64,8 +64,6 @@ LOCK_STATIC_CONTEXT env_sem_static_context;
 StaticEventGroup_t event_group_static_context;
 #endif
 
-#define RPMSG_EVENT_LINK_UP (1<<0U)
-
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
    if it is greater than 1, it acts as a "resource allocator" with
@@ -107,12 +105,12 @@ static int32_t env_in_isr(void)
  * Utilize events to avoid busy loop implementation.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state)
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
 {
-    (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
+    (void)xEventGroupClearBits(event_group, (1 << link_id));
     if (*link_state != 1U)
     {
-        xEventGroupWaitBits(event_group, RPMSG_EVENT_LINK_UP, pdFALSE, pdTRUE, portMAX_DELAY);
+        xEventGroupWaitBits(event_group, (1 << link_id), pdFALSE, pdTRUE, portMAX_DELAY);
     }
 }
 
@@ -122,17 +120,17 @@ void env_wait_for_link_up(volatile uint32_t *link_state)
  * Set event to notify task waiting in env_wait_for_link_up().
  *
  */
-void env_tx_callback(void)
+void env_tx_callback(uint32_t link_id)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr() != 0)
     {
-        (void)xEventGroupSetBitsFromISR(event_group, RPMSG_EVENT_LINK_UP, &xHigherPriorityTaskWoken);
+        (void)xEventGroupSetBitsFromISR(event_group, (1 << link_id), &xHigherPriorityTaskWoken);
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
     else
     {
-        (void)xEventGroupSetBits(event_group, RPMSG_EVENT_LINK_UP);
+        (void)xEventGroupSetBits(event_group, (1 << link_id));
     }
 }
 
@@ -165,7 +163,11 @@ int32_t env_init(void)
         env_sema = xSemaphoreCreateBinary();
         event_group = xEventGroupCreate();
 #endif
-        (void)xEventGroupClearBits(event_group, RPMSG_EVENT_LINK_UP);
+#if (configUSE_16_BIT_TICKS == 1)
+        (void)xEventGroupClearBits(event_group, 0xFFu);
+#else
+        (void)xEventGroupClearBits(event_group, 0xFFFFFFu);
+#endif
         (void)memset(isr_table, 0, sizeof(isr_table));
         (void)xTaskResumeAll();
         retval = platform_init();
