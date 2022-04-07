@@ -142,6 +142,7 @@ struct rpmsg_lite_instance
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     struct vq_static_context vq_ctxt[2];
 #endif
+    uint32_t link_id; /*!< linkID of this rpmsg_lite instance */
 };
 
 /*******************************************************************************
@@ -292,6 +293,14 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
  *
  */
 int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
+
+/*!
+ * @brief Function to wait until the link is up. Returns
+ * once the link_state is set.
+ *
+ * @param rpmsg_lite_dev    RPMsg-Lite instance pointer
+ */
+void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 

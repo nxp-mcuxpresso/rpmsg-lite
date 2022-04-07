@@ -69,6 +69,31 @@ static struct isr_info isr_table[ISR_COUNT];
 #endif
 
 /*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Busy loop implementation for BM.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    while (*link_state != 1U)
+    {
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ * Empty implementation for BM.
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
+}
+
+/*!
  * env_init
  *
  * Initializes OS/BM environment.

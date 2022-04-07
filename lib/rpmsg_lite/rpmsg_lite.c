@@ -218,6 +218,7 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
 
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
     rpmsg_lite_dev->link_state = 1U;
+    env_tx_callback(rpmsg_lite_dev->link_id);
 }
 
 /****************************************************************************
@@ -584,6 +585,16 @@ int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
     return (int32_t)(rpmsg_lite_dev->link_state);
 }
 
+void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
+{
+    if (rpmsg_lite_dev == RL_NULL)
+    {
+        return;
+    }
+
+    env_wait_for_link_up(&rpmsg_lite_dev->link_state, rpmsg_lite_dev->link_id);
+}
+
 /*!
  * @brief
  * Internal function to format a RPMsg compatible
@@ -946,6 +957,8 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         return RL_NULL;
     }
 
+    rpmsg_lite_dev->link_id = link_id;
+
     /*
      * Since device is RPMSG Remote so we need to manage the
      * shared buffers. Create shared memory pool to handle buffers.
@@ -1151,6 +1164,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
         return RL_NULL;
     }
 
+    rpmsg_lite_dev->link_id = link_id;
     vq_names[0]                 = "tx_vq"; /* swapped in case of remote */
     vq_names[1]                 = "rx_vq";
     callback[0]                 = rpmsg_lite_tx_callback;

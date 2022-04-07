@@ -73,6 +73,8 @@
  *       env_delete_queue
  *       env_put_queue
  *       env_get_queue
+ *       env_wait_for_link_up
+ *       env_tx_callback
  *
  **************************************************************************/
 #ifndef RPMSG_ENV_H_
@@ -601,5 +603,25 @@ int32_t env_init_interrupt(void *env, int32_t vq_id, void *isr_data);
  */
 int32_t env_deinit_interrupt(void *env, int32_t vq_id);
 #endif
+
+/*!
+ * env_wait_for_link_up
+ *
+ * Env. specific implementation of rpmsg_lite_wait_for_link_up function with the usage
+ * of RTOS sync. primitives to avoid busy loop. Returns once the link is up.
+ *
+ * @param link_state  Pointer to the link_state parameter of the rpmsg_lite_instance structure
+ * @param link_id     Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id);
+
+/*!
+ * env_tx_callback
+ *
+ * Called from rpmsg_lite_tx_callback() to allow unblocking of env_wait_for_link_up()
+ *
+ * @param link_id     Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
+ */
+void env_tx_callback(uint32_t link_id);
 
 #endif /* RPMSG_ENV_H_ */
