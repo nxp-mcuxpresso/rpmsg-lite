@@ -90,6 +90,7 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 |RL_USE_ENVIRONMENT_CONTEXT    | (0)           | When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM).    |
 |RL_DEBUG_CHECK_BUFFERS        | (0)           | When enabled buffer debug checks in rpmsg_lite_send_nocopy() and rpmsg_lite_release_rx_buffer() functions are disabled. Do not use in RPMsg-Lite to Linux configuration.    |
 |RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION        | (0)           | When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication).    |
+|RL_ALLOW_CUSTOM_SHMEM_CONFIG  | (0)           | It allows to define custom shared memory configuration and replacing the shared memory related global settings from rpmsg_config.h This is useful when multiple instances are running in parallel but different shared memory arrangement (vring size & alignment, buffers size & count) is required. The default value is 0 (all RPMsg_Lite instances use the same shared memory arrangement as defined by common config macros). |
 |RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation.    |
 
 
@@ -113,4 +114,6 @@ This table summarizes revisions of this document.
 |9.0            | 12/2020 | Several MISRA C-2012 violations addressed <p> Introduced RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION config option to allow opposite side notification sending each time received buffers are consumed and put into the queue of available buffers <p> Added environment layers for Threadx <p> Added support for i.MX8QM multicore platform  |
 |10.0           | 06/2021 | Fixed incorrect description of the rpmsg_lite_get_endpoint_from_addr function <p> Updated RL_BUFFER_COUNT documentation <p> env_print macro adjusted to address MISRA 21.6 rule in MCUXpressoSDK projects  |
 |11.0           | 12/2021 | Improve static allocations - allow OS-specific objects being allocated statically, GitHub PR #14 <p> RPMsg-Lite: Minor Misra and typo corrections, GitHub PR #19, #20.  |
+|12.0           | 01/2022 | Introduce RL_ALLOW_CUSTOM_SHMEM_CONFIG configuration option to support custom shared memory arangement per the RPMsg_Lite instance.  |
+|13.0           | 04/2022 | Introduced new rpmsg_lite_wait_for_link_up() API function - this allows to avoid using busy loops in rtos environments, GitHub PR #21. <p> Adjust rpmsg_lite_is_link_up() to return RL_TRUE/RL_FALSE.  |
 

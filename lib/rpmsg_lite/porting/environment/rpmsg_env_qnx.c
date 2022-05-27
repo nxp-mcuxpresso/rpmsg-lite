@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,30 @@ void *env_get_platform_context(void *env_context)
 {
     env_context_t *env = env_context;
     return env->platform_context;
+}
+
+/*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Busy loop implementation for now, to be replaced by events.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    while (*link_state != 1U)
+    {
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
 }
 
 /*!

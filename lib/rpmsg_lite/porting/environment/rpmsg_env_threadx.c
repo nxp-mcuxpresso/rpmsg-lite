@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020-2022 NXP
  * All rights reserved.
  *
  *
@@ -18,12 +18,12 @@
  *
  *
  **************************************************************************/
+#include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
 #include "tx_api.h"
 #include "tx_event_flags.h"
 #include "rpmsg_platform.h"
 #include "fsl_common.h"
-#include "rpmsg_compiler.h"
 #include "fsl_component_mem_manager.h"
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +31,7 @@
 
 static int32_t env_init_counter = 0;
 static TX_SEMAPHORE env_sema;
+static TX_EVENT_FLAGS_GROUP event_group;
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -67,6 +68,32 @@ static int32_t env_in_isr(void)
 }
 
 /*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Utilize events to avoid busy loop implementation.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    if (*link_state != 1U)
+    {
+        tx_event_flags_get(&event_group, (1UL << link_id), TX_AND, NULL, TX_WAIT_FOREVER);
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
+    tx_event_flags_set(&event_group, (1UL << link_id), TX_OR);
+}
+
+/*!
  * env_init
  *
  * Initializes OS/ThreadX environment.
@@ -77,7 +104,7 @@ int32_t env_init(void)
     int32_t retval;
     uint32_t regPrimask = DisableGlobalIRQ(); /* stop scheduler */
 
-    // verify 'env_init_counter'
+    /* verify 'env_init_counter' */
     RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
@@ -85,15 +112,16 @@ int32_t env_init(void)
         return -1;
     }
     env_init_counter++;
-    // multiple call of 'env_init' - return ok
+    /* multiple call of 'env_init' - return ok */
     if (env_init_counter == 1)
     {
-        // first call
+        /* first call */
         if (TX_SUCCESS != _tx_semaphore_create((TX_SEMAPHORE *)&env_sema, NULL, 0))
         {
             EnableGlobalIRQ(regPrimask);
             return -1;
         }
+        (void)tx_event_flags_create(&event_group, NULL);
         (void)memset(isr_table, 0, sizeof(isr_table));
         EnableGlobalIRQ(regPrimask);
         retval = platform_init();
@@ -129,7 +157,7 @@ int32_t env_deinit(void)
     int32_t retval;
 
     uint32_t regPrimask = DisableGlobalIRQ(); /* stop scheduler */
-    // verify 'env_init_counter'
+    /* verify 'env_init_counter' */
     RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
@@ -137,14 +165,16 @@ int32_t env_deinit(void)
         return -1;
     }
 
-    // counter on zero - call platform deinit
+    /* counter on zero - call platform deinit */
     env_init_counter--;
-    // multiple call of 'env_deinit' - return ok
+    /* multiple call of 'env_deinit' - return ok */
     if (env_init_counter <= 0)
     {
-        // last call
+        /* last call */
         (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
+        (void)tx_event_flags_delete(&event_group);
+        (void)memset(&event_group, 0, sizeof(event_group));
         (void)_tx_semaphore_delete((TX_SEMAPHORE *)&env_sema);
         (void)memset(&env_sema, 0, sizeof(env_sema));
         EnableGlobalIRQ(regPrimask);

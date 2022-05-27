@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,10 @@
  *
  **************************************************************************/
 
+#include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,10 +54,10 @@
 static int32_t env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (12U) /* Change for multiple remote cores */
-                        /*!
-                         * Structure to keep track of registered ISR's.
-                         */
+#define ISR_COUNT (12U)
+/*!
+ * Structure to keep track of registered ISR's.
+ */
 struct isr_info
 {
     void *data;

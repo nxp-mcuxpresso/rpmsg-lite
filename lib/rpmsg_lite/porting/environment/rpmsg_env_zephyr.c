@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,11 +43,11 @@
  *
  **************************************************************************/
 
+#include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
 #include <zephyr.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -66,6 +66,7 @@
 
 static int32_t env_init_counter = 0;
 static struct k_sem env_sema    = {0};
+static struct k_event env_event = {0};
 
 /* Max supported ISR counts */
 #define ISR_COUNT (32U)
@@ -87,6 +88,32 @@ static struct isr_info isr_table[ISR_COUNT];
 static int32_t env_in_isr(void)
 {
     return platform_in_isr();
+}
+
+/*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Utilize events to avoid busy loop implementation.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    if (*link_state != 1U)
+    {
+        k_event_wait_all(&env_event, (1UL << link_id), false, K_FOREVER);
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
+    k_event_post(&env_event, (1UL << link_id));
 }
 
 /*!
@@ -112,6 +139,7 @@ int32_t env_init(void)
     {
         /* first call */
         k_sem_init(&env_sema, 0, 1);
+        k_event_init(&env_event);
         (void)memset(isr_table, 0, sizeof(isr_table));
         k_sched_unlock();
         retval = platform_init();
@@ -239,26 +267,26 @@ int32_t env_strcmp(const char *dst, const char *src)
  *
  * env_strncpy - implementation
  *
- * @param dst
+ * @param dest
  * @param src
  * @param len
  */
-void env_strncpy(char *dst, const char *src, uint32_t len)
+void env_strncpy(char *dest, const char *src, uint32_t len)
 {
-    (void)strncpy(dst, src, len);
+    (void)strncpy(dest, src, len);
 }
 
 /*!
  *
  * env_strncmp - implementation
  *
- * @param dst
+ * @param dest
  * @param src
  * @param len
  */
-int32_t env_strncmp(char *dst, const char *src, uint32_t len)
+int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 {
-    return (strncmp(dst, src, len));
+    return (strncmp(dest, src, len));
 }
 
 /*!
@@ -493,7 +521,7 @@ void env_unregister_isr(uint32_t vector_id)
  *
  * Enables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_enable_interrupt(uint32_t vector_id)
@@ -506,7 +534,7 @@ void env_enable_interrupt(uint32_t vector_id)
  *
  * Disables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
 void env_disable_interrupt(uint32_t vector_id)

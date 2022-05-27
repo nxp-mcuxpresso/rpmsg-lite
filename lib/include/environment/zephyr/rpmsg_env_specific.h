@@ -26,7 +26,9 @@
 
 typedef k_sem LOCK_STATIC_CONTEXT;
 typedef k_msgq rpmsg_static_queue_ctxt;
-/* Queue object static storage size in bytes, should be defined as (RL_BUFFER_COUNT*sizeof(rpmsg_queue_rx_cb_data_t)) */
+/* Queue object static storage size in bytes, should be defined as (RL_BUFFER_COUNT*sizeof(rpmsg_queue_rx_cb_data_t))
+   This macro helps the application to statically allocate the queue object static storage memory. Note, the
+   RL_BUFFER_COUNT is not applied for all instances when RL_ALLOW_CUSTOM_SHMEM_CONFIG is set to 1 ! */
 #define RL_ENV_QUEUE_STATIC_STORAGE_SIZE (RL_BUFFER_COUNT * sizeof(rpmsg_queue_rx_cb_data_t))
 #endif
 

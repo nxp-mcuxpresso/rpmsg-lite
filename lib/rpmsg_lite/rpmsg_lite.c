@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -87,6 +87,8 @@ struct virtqueue_ops
 /* Zero-Copy extension macros */
 #define RPMSG_STD_MSG_FROM_BUF(buf) (struct rpmsg_std_msg *)(void *)((char *)(buf)-offsetof(struct rpmsg_std_msg, data))
 
+#if !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1))
+/* Check RL_BUFFER_COUNT and RL_BUFFER_SIZE only when RL_ALLOW_CUSTOM_SHMEM_CONFIG is not set to 1 */
 #if (!RL_BUFFER_COUNT) || (RL_BUFFER_COUNT & (RL_BUFFER_COUNT - 1))
 #error "RL_BUFFER_COUNT must be power of two (2, 4, ...)"
 #endif
@@ -99,6 +101,7 @@ struct virtqueue_ops
     "RL_BUFFER_SIZE must be power of two (256, 512, ...)"\
        "RL_BUFFER_PAYLOAD_SIZE must be equal to (240, 496, 1008, ...) [2^n - 16]."
 #endif
+#endif /* !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)) */
 
 /*!
  * @brief
@@ -575,14 +578,14 @@ mmmmmmm m    m          mm   mmmmm  mmmmm
 
 *******************************************/
 
-int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
+uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
 {
     if (rpmsg_lite_dev == RL_NULL)
     {
-        return 0;
+        return 0U;
     }
 
-    return (int32_t)(rpmsg_lite_dev->link_state);
+    return (RL_TRUE == rpmsg_lite_dev->link_state ? RL_TRUE : RL_FALSE);
 }
 
 void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
@@ -698,7 +701,11 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
     }
 
     // FIXME : may be just copy the data size equal to buffer length and Tx it.
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE(rpmsg_lite_dev->link_id))
+#else
     if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE)
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
     {
         return RL_ERR_BUFF_SIZE;
     }
@@ -777,7 +784,11 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
         return RL_ERR_PARAM;
     }
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE(rpmsg_lite_dev->link_id))
+#else
     if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE)
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
     {
         return RL_ERR_BUFF_SIZE;
     }
@@ -793,12 +804,15 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     RL_ASSERT(
         /* master check */
         ((rpmsg_lite_dev->vq_ops == &master_vq_ops) &&
-         (data >= (void *)(rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT * RL_BUFFER_SIZE))) &&
-         (data <= (void *)(rpmsg_lite_dev->sh_mem_base + (2 * RL_BUFFER_COUNT * RL_BUFFER_SIZE)))) ||
+         (data >= (void *)(rpmsg_lite_dev->sh_mem_base +
+                           (rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len))) &&
+         (data <= (void *)(rpmsg_lite_dev->sh_mem_base +
+                           (2 * rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len)))) ||
 
         /* remote check */
         ((rpmsg_lite_dev->vq_ops == &remote_vq_ops) && (data >= (void *)rpmsg_lite_dev->sh_mem_base) &&
-         (data <= (void *)(rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT * RL_BUFFER_SIZE)))))
+         (data <= (void *)(rpmsg_lite_dev->sh_mem_base +
+                           (rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len)))))
 #endif
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(data);
@@ -849,12 +863,15 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
     RL_ASSERT(
         /* master check */
         ((rpmsg_lite_dev->vq_ops == &master_vq_ops) && (rxbuf >= (void *)rpmsg_lite_dev->sh_mem_base) &&
-         (rxbuf <= (void *)(rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT * RL_BUFFER_SIZE)))) ||
+         (rxbuf <= (void *)(rpmsg_lite_dev->sh_mem_base +
+                            (rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len)))) ||
 
         /* remote check */
         ((rpmsg_lite_dev->vq_ops == &remote_vq_ops) &&
-         (rxbuf >= (void *)(rpmsg_lite_dev->sh_mem_base + (RL_BUFFER_COUNT * RL_BUFFER_SIZE))) &&
-         (rxbuf <= (void *)(rpmsg_lite_dev->sh_mem_base + (2 * RL_BUFFER_COUNT * RL_BUFFER_SIZE)))))
+         (rxbuf >= (void *)(rpmsg_lite_dev->sh_mem_base +
+                            (rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len))) &&
+         (rxbuf <= (void *)(rpmsg_lite_dev->sh_mem_base +
+                            (2 * rpmsg_lite_dev->rvq->vq_nentries * rpmsg_lite_dev->rvq->vq_ring.desc->len)))))
 #endif
 
     rpmsg_msg = RPMSG_STD_MSG_FROM_BUF(rxbuf);
@@ -913,12 +930,6 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     uint32_t idx, j;
     struct rpmsg_lite_instance *rpmsg_lite_dev = RL_NULL;
 
-    if ((2U * (uint32_t)RL_BUFFER_COUNT) >
-        ((RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE))
-    {
-        return RL_NULL;
-    }
-
     if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
     {
         return RL_NULL;
@@ -928,6 +939,42 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         return RL_NULL;
     }
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    /* Get the custom shmem configuration defined per each rpmsg_lite instance
+       (i.e. per each link id) from the platform layer */
+    rpmsg_platform_shmem_config_t shmem_config = {0};
+    if (RL_SUCCESS != platform_get_custom_shmem_config(link_id, &shmem_config))
+    {
+        return RL_NULL;
+    }
+
+    /* shmem_config.buffer_count must be power of two (2, 4, ...) */
+    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)))
+    {
+        return RL_NULL;
+    }
+
+    /* buffer size must be power of two (256, 512, ...) */
+    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))
+    {
+        return RL_NULL;
+    }
+
+    if ((2U * (uint32_t)shmem_config.buffer_count) >
+        ((RL_WORD_ALIGN_DOWN(shmem_length - 2U * shmem_config.vring_size)) /
+         (uint32_t)(shmem_config.buffer_payload_size + 16UL)))
+    {
+        return RL_NULL;
+    }
+#else
+    if ((2U * (uint32_t)RL_BUFFER_COUNT) >
+        ((RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE))
+    {
+        return RL_NULL;
+    }
+
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (static_context == RL_NULL)
@@ -963,9 +1010,15 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
      * Since device is RPMSG Remote so we need to manage the
      * shared buffers. Create shared memory pool to handle buffers.
      */
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
+    rpmsg_lite_dev->sh_mem_remaining = (RL_WORD_ALIGN_DOWN(shmem_length - 2U * shmem_config.vring_size)) /
+                                       (uint32_t)(shmem_config.buffer_payload_size + 16UL);
+#else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
     rpmsg_lite_dev->sh_mem_remaining =
         (RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE;
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
     rpmsg_lite_dev->sh_mem_total = rpmsg_lite_dev->sh_mem_remaining;
 
     /* Initialize names and callbacks*/
@@ -978,10 +1031,17 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     /* Create virtqueue for each vring. */
     for (idx = 0U; idx < 2U; idx++)
     {
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+        ring_info.phy_addr =
+            (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (shmem_config.vring_size)));
+        ring_info.align     = shmem_config.vring_align;
+        ring_info.num_descs = shmem_config.buffer_count;
+#else
         ring_info.phy_addr =
             (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
-        ring_info.align     = VRING_ALIGN;
+        ring_info.align = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
         env_memset((void *)ring_info.phy_addr, 0x00, (uint32_t)vring_size(ring_info.num_descs, ring_info.align));
 
@@ -1041,22 +1101,41 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         for (idx = 0U; ((idx < vqs[j]->vq_nentries) && (idx < rpmsg_lite_dev->sh_mem_total)); idx++)
         {
             /* Initialize TX virtqueue buffers for remote device */
-            buffer =
-                (rpmsg_lite_dev->sh_mem_remaining > 0U) ?
-                    (rpmsg_lite_dev->sh_mem_base +
-                     (uint32_t)RL_BUFFER_SIZE * (rpmsg_lite_dev->sh_mem_total - rpmsg_lite_dev->sh_mem_remaining--)) :
-                    (RL_NULL);
+            buffer = (rpmsg_lite_dev->sh_mem_remaining > 0U) ?
+                         (rpmsg_lite_dev->sh_mem_base +
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+                          (uint32_t)(shmem_config.buffer_payload_size + 16UL) *
+                              (rpmsg_lite_dev->sh_mem_total - rpmsg_lite_dev->sh_mem_remaining--)) :
+#else
+                          (uint32_t)RL_BUFFER_SIZE *
+                              (rpmsg_lite_dev->sh_mem_total - rpmsg_lite_dev->sh_mem_remaining--)) :
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
+                         (RL_NULL);
 
             RL_ASSERT(buffer != RL_NULL);
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+            env_memset(buffer, 0x00, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+#else
             env_memset(buffer, 0x00, (uint32_t)RL_BUFFER_SIZE);
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
             if (vqs[j] == rpmsg_lite_dev->rvq)
             {
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+                status =
+                    virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+#else
                 status = virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)RL_BUFFER_SIZE);
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
             }
             else if (vqs[j] == rpmsg_lite_dev->tvq)
             {
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+                status =
+                    virtqueue_fill_used_buffers(vqs[j], buffer, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+#else
                 status = virtqueue_fill_used_buffers(vqs[j], buffer, (uint32_t)RL_BUFFER_SIZE);
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
             }
             else
             {
@@ -1135,6 +1214,28 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
         return RL_NULL;
     }
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    /* Get the custom shmem configuration defined per each rpmsg_lite instance
+       (i.e. per each link id) from the platform layer */
+    rpmsg_platform_shmem_config_t shmem_config = {0};
+    if (RL_SUCCESS != platform_get_custom_shmem_config(link_id, &shmem_config))
+    {
+        return RL_NULL;
+    }
+
+    /* shmem_config.buffer_count must be power of two (2, 4, ...) */
+    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)))
+    {
+        return RL_NULL;
+    }
+
+    /* buffer size must be power of two (256, 512, ...) */
+    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))
+    {
+        return RL_NULL;
+    }
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
+
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (static_context == RL_NULL)
     {
@@ -1165,20 +1266,32 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     }
 
     rpmsg_lite_dev->link_id = link_id;
-    vq_names[0]                 = "tx_vq"; /* swapped in case of remote */
-    vq_names[1]                 = "rx_vq";
-    callback[0]                 = rpmsg_lite_tx_callback;
-    callback[1]                 = rpmsg_lite_rx_callback;
-    rpmsg_lite_dev->vq_ops      = &remote_vq_ops;
+
+    vq_names[0]            = "tx_vq"; /* swapped in case of remote */
+    vq_names[1]            = "rx_vq";
+    callback[0]            = rpmsg_lite_tx_callback;
+    callback[1]            = rpmsg_lite_rx_callback;
+    rpmsg_lite_dev->vq_ops = &remote_vq_ops;
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
+#else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
+#endif /* defined(RL_ALLOW_CUSTOM_VRING_CONFIG) && (RL_ALLOW_CUSTOM_VRING_CONFIG == 1) */
 
     /* Create virtqueue for each vring. */
     for (idx = 0U; idx < 2U; idx++)
     {
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+        ring_info.phy_addr =
+            (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (shmem_config.vring_size)));
+        ring_info.align     = shmem_config.vring_align;
+        ring_info.num_descs = shmem_config.buffer_count;
+#else
         ring_info.phy_addr =
             (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
-        ring_info.align     = VRING_ALIGN;
+        ring_info.align = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
+#endif /* defined(RL_ALLOW_CUSTOM_VRING_CONFIG) && (RL_ALLOW_CUSTOM_VRING_CONFIG == 1) */
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
         status = virtqueue_create_static((uint16_t)(RL_GET_VQ_ID(link_id, idx)), vq_names[idx], &ring_info,

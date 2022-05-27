@@ -56,6 +56,20 @@
 #define RL_MS_PER_INTERVAL (1)
 #endif
 
+//! @def RL_ALLOW_CUSTOM_SHMEM_CONFIG
+//!
+//! This option allows to define custom shared memory configuration and replacing
+//! the shared memory related global settings from rpmsg_config.h This is useful
+//! when multiple instances are running in parallel but different shared memory
+//! arrangement (vring size & alignment, buffers size & count) is required. Note,
+//! that once enabled the platform_get_custom_shmem_config() function needs
+//! to be implemented in platform layer. The default value is 0 (all RPMsg_Lite
+//! instances use the same shared memory arrangement as defined by common config macros).
+#ifndef RL_ALLOW_CUSTOM_SHMEM_CONFIG
+#define RL_ALLOW_CUSTOM_SHMEM_CONFIG (0)
+#endif
+
+#if !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1))
 //! @def RL_BUFFER_PAYLOAD_SIZE
 //!
 //! Size of the buffer payload, it must be equal to (240, 496, 1008, ...)
@@ -76,6 +90,19 @@
 #ifndef RL_BUFFER_COUNT
 #define RL_BUFFER_COUNT (2U)
 #endif
+
+#else
+//! Define the buffer payload and count per different link IDs (rpmsg_lite instance) when RL_ALLOW_CUSTOM_SHMEM_CONFIG
+//! is set.
+//! Refer to the rpmsg_plaform.h for the used link IDs.
+#ifndef RL_BUFFER_PAYLOAD_SIZE
+#define RL_BUFFER_PAYLOAD_SIZE(link_id) (496U)
+#endif
+
+#ifndef RL_BUFFER_COUNT
+#define RL_BUFFER_COUNT(link_id) (((link_id) == 0U) ? 256U : 2U)
+#endif
+#endif /* !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1))*/
 
 //! @def RL_API_HAS_ZEROCOPY
 //!

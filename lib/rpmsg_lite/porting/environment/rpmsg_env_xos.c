@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2021 NXP
+ * Copyright 2022 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,18 +43,19 @@
  *
  **************************************************************************/
 
+#include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
 #include "rpmsg_lite.h"
 #include <xtensa/xos.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-static int32_t env_init_counter = 0;
-static struct XosSem env_sema   = {0};
+static int32_t env_init_counter  = 0;
+static struct XosSem env_sema    = {0};
+static struct XosEvent env_event = {0};
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -91,6 +92,32 @@ static int32_t env_in_isr(void)
 }
 
 /*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Utilize events to avoid busy loop implementation.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    if (*link_state != 1U)
+    {
+        xos_event_wait_all(&env_event, (1UL << link_id));
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
+    xos_event_set(&env_event, (1UL << link_id));
+}
+
+/*!
  * env_init
  *
  * Initializes XOS environment.
@@ -113,6 +140,7 @@ int32_t env_init(void)
     {
         /* first call */
         (void)xos_sem_create(&env_sema, XOS_SEM_WAIT_PRIORITY, 1);
+        (void)xos_event_create(&env_event, 0xFFFFFFFFu, XOS_EVENT_AUTO_CLEAR);
         (void)memset(isr_table, 0, sizeof(isr_table));
         xos_restore_interrupts(regPrimask);
         retval = platform_init();
@@ -164,6 +192,7 @@ int32_t env_deinit(void)
         /* last call */
         (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
+        (void)xos_event_delete(&env_event);
         (void)xos_sem_delete(&env_sema);
         xos_restore_interrupts(regPrimask);
 

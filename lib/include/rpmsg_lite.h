@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -39,10 +39,10 @@ extern "C" {
 #endif
 
 #include <stddef.h>
+#include "rpmsg_compiler.h"
 #include "virtqueue.h"
 #include "rpmsg_env.h"
 #include "llist.h"
-#include "rpmsg_compiler.h"
 #include "rpmsg_default_config.h"
 
 //! @addtogroup rpmsg_lite
@@ -52,7 +52,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "3.2.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "4.0.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
@@ -67,8 +67,8 @@ extern "C" {
 #define RL_NULL       ((void *)0)
 #define RL_REMOTE     (0)
 #define RL_MASTER     (1)
-#define RL_TRUE       (1U)
-#define RL_FALSE      (0U)
+#define RL_TRUE       (1UL)
+#define RL_FALSE      (0UL)
 #define RL_ADDR_ANY   (0xFFFFFFFFU)
 #define RL_RELEASE    (0)
 #define RL_HOLD       (1)
@@ -287,12 +287,12 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 /*!
  * @brief Function to get the link state
  *
- * @param rpmsg_lite_dev    RPMsg-Lite instance
+ * @param rpmsg_lite_dev    RPMsg-Lite instance pointer
  *
- * @return True when link up, false when down.
+ * @return RL_TRUE when link up, RL_FALSE when down.
  *
  */
-int32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
+uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
 /*!
  * @brief Function to wait until the link is up. Returns
