@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2021 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 /**************************************************************************
  * FILE NAME
  *
- *       bm_env.c
+ *       rpmsg_env_bm.c
  *
  *
  * DESCRIPTION
@@ -43,37 +43,54 @@
  *
  **************************************************************************/
 
-#include "env.h"
-#include "platform.h"
+#include "rpmsg_env.h"
+#include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "compiler.h"
+#include "rpmsg_compiler.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
-static int env_init_counter = 0;
+static int32_t env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (10) /* Change for multiple remote cores */
-                      /*!
-                       * Structure to keep track of registered ISR's.
-                       */
+#define ISR_COUNT (12U) /* Change for multiple remote cores */
+                        /*!
+                         * Structure to keep track of registered ISR's.
+                         */
 struct isr_info
 {
     void *data;
 };
 static struct isr_info isr_table[ISR_COUNT];
 
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+#error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
+#endif
+
 /*!
- * env_in_isr
+ * env_wait_for_link_up
  *
- * @returns True, if currently in ISR
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Busy loop implementation for BM.
  *
  */
-inline int env_in_isr(void)
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
 {
-    return platform_in_isr();
+    while (*link_state != 1U)
+    {
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ * Empty implementation for BM.
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
 }
 
 /*!
@@ -82,18 +99,22 @@ inline int env_in_isr(void)
  * Initializes OS/BM environment.
  *
  */
-int env_init()
+int32_t env_init(void)
 {
     // verify 'env_init_counter'
-    assert(env_init_counter >= 0);
+    RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
+    {
         return -1;
+    }
     env_init_counter++;
     // multiple call of 'env_init' - return ok
     if (1 < env_init_counter)
+    {
         return 0;
+    }
     // first call
-    memset(isr_table, 0, sizeof(isr_table));
+    (void)memset(isr_table, 0, sizeof(isr_table));
     return platform_init();
 }
 
@@ -104,17 +125,21 @@ int env_init()
  *
  * @returns Execution status
  */
-int env_deinit()
+int32_t env_deinit(void)
 {
     // verify 'env_init_counter'
-    assert(env_init_counter > 0);
+    RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
+    {
         return -1;
+    }
     // counter on zero - call platform deinit
     env_init_counter--;
     // multiple call of 'env_deinit' - return ok
     if (0 < env_init_counter)
+    {
         return 0;
+    }
     // last call
     return platform_deinit();
 }
@@ -124,7 +149,7 @@ int env_deinit()
  *
  * @param size
  */
-void *env_allocate_memory(unsigned int size)
+void *env_allocate_memory(uint32_t size)
 {
     return (malloc(size));
 }
@@ -136,7 +161,7 @@ void *env_allocate_memory(unsigned int size)
  */
 void env_free_memory(void *ptr)
 {
-    if (ptr != NULL)
+    if (ptr != ((void *)0))
     {
         free(ptr);
     }
@@ -150,9 +175,9 @@ void env_free_memory(void *ptr)
  * @param value
  * @param size
  */
-void env_memset(void *ptr, int value, unsigned long size)
+void env_memset(void *ptr, int32_t value, uint32_t size)
 {
-    memset(ptr, value, size);
+    (void)memset(ptr, value, size);
 }
 
 /*!
@@ -163,9 +188,9 @@ void env_memset(void *ptr, int value, unsigned long size)
  * @param src
  * @param len
  */
-void env_memcpy(void *dst, void const *src, unsigned long len)
+void env_memcpy(void *dst, void const *src, uint32_t len)
 {
-    memcpy(dst, src, len);
+    (void)memcpy(dst, src, len);
 }
 
 /*!
@@ -176,7 +201,7 @@ void env_memcpy(void *dst, void const *src, unsigned long len)
  * @param src
  */
 
-int env_strcmp(const char *dst, const char *src)
+int32_t env_strcmp(const char *dst, const char *src)
 {
     return (strcmp(dst, src));
 }
@@ -189,9 +214,9 @@ int env_strcmp(const char *dst, const char *src)
  * @param src
  * @param len
  */
-void env_strncpy(char *dest, const char *src, unsigned long len)
+void env_strncpy(char *dest, const char *src, uint32_t len)
 {
-    strncpy(dest, src, len);
+    (void)strncpy(dest, src, len);
 }
 
 /*!
@@ -202,7 +227,7 @@ void env_strncpy(char *dest, const char *src, unsigned long len)
  * @param src
  * @param len
  */
-int env_strncmp(char *dest, const char *src, unsigned long len)
+int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 {
     return (strncmp(dest, src, len));
 }
@@ -212,15 +237,15 @@ int env_strncmp(char *dest, const char *src, unsigned long len)
  * env_mb - implementation
  *
  */
-void env_mb()
+void env_mb(void)
 {
     MEM_BARRIER();
 }
 
 /*!
- * osalr_mb - implementation
+ * env_rmb - implementation
  */
-void env_rmb()
+void env_rmb(void)
 {
     MEM_BARRIER();
 }
@@ -228,7 +253,7 @@ void env_rmb()
 /*!
  * env_wmb - implementation
  */
-void env_wmb()
+void env_wmb(void)
 {
     MEM_BARRIER();
 }
@@ -238,7 +263,7 @@ void env_wmb()
  *
  * @param address
  */
-unsigned long env_map_vatopa(void *address)
+uint32_t env_map_vatopa(void *address)
 {
     return platform_vatopa(address);
 }
@@ -248,7 +273,7 @@ unsigned long env_map_vatopa(void *address)
  *
  * @param address
  */
-void *env_map_patova(unsigned long address)
+void *env_map_patova(uint32_t address)
 {
     return platform_patova(address);
 }
@@ -259,7 +284,11 @@ void *env_map_patova(unsigned long address)
  * Creates a mutex with the given initial count.
  *
  */
-int env_create_mutex(void **lock, int count)
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
+#else
+int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
     /* make the mutex pointer point to itself
      * this marks the mutex handle as initialized.
@@ -306,7 +335,7 @@ void env_unlock_mutex(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(int num_msec)
+void env_sleep_msec(uint32_t num_msec)
 {
     platform_time_delay(num_msec);
 }
@@ -316,15 +345,15 @@ void env_sleep_msec(int num_msec)
  *
  * Registers interrupt handler data for the given interrupt vector.
  *
- * @param vq_id Virtual interrupt vector number
- * @param data Interrupt handler data (virtqueue)
+ * @param vector_id - virtual interrupt vector number
+ * @param data      - interrupt handler data (virtqueue)
  */
-void env_register_isr(int vq_id, void *data)
+void env_register_isr(uint32_t vector_id, void *data)
 {
-    assert(vq_id < ISR_COUNT);
-    if (vq_id < ISR_COUNT)
+    RL_ASSERT(vector_id < ISR_COUNT);
+    if (vector_id < ISR_COUNT)
     {
-        isr_table[vq_id].data = data;
+        isr_table[vector_id].data = data;
     }
 }
 
@@ -335,12 +364,12 @@ void env_register_isr(int vq_id, void *data)
  *
  * @param vector_id - virtual interrupt vector number
  */
-void env_unregister_isr(int vector_id)
+void env_unregister_isr(uint32_t vector_id)
 {
-    assert(vector_id < ISR_COUNT);
+    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
-        isr_table[vector_id].data = NULL;
+        isr_table[vector_id].data = ((void *)0);
     }
 }
 
@@ -349,12 +378,12 @@ void env_unregister_isr(int vector_id)
  *
  * Enables the given interrupt
  *
- * @param vq_id Interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
-void env_enable_interrupt(unsigned int vq_id)
+void env_enable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_enable(vq_id);
+    (void)platform_interrupt_enable(vector_id);
 }
 
 /*!
@@ -362,12 +391,12 @@ void env_enable_interrupt(unsigned int vq_id)
  *
  * Disables the given interrupt
  *
- * @param vq_id Interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
-void env_disable_interrupt(unsigned int vq_id)
+void env_disable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_disable(vq_id);
+    (void)platform_interrupt_disable(vector_id);
 }
 
 /*!
@@ -381,7 +410,7 @@ void env_disable_interrupt(unsigned int vq_id)
  * param flags - flags for cache/uncached  and access type
  */
 
-void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigned int flags)
+void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags)
 {
     platform_map_mem_region(va, pa, size, flags);
 }
@@ -393,7 +422,7 @@ void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigne
  *
  */
 
-void env_disable_cache()
+void env_disable_cache(void)
 {
     platform_cache_all_flush_invalidate();
     platform_cache_disable();
@@ -402,10 +431,10 @@ void env_disable_cache()
 /*========================================================= */
 /* Util data / functions for BM */
 
-void env_isr(int vector)
+void env_isr(uint32_t vector)
 {
     struct isr_info *info;
-    assert(vector < ISR_COUNT);
+    RL_ASSERT(vector < ISR_COUNT);
     if (vector < ISR_COUNT)
     {
         info = &isr_table[vector];

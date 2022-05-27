@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "rpmsg_ns.h"
 
-/* from rpmsg_lite.c { */
-extern volatile struct rpmsg_lite_instance rpmsg_lite_dev;
-int rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                              unsigned long src,
-                              unsigned long dst,
-                              char *data,
-                              unsigned long size,
-                              int flags,
-                              unsigned long timeout);
-/* } from rpmsg_lite.c*/
+#include "rpmsg_lite.h"
+#include "rpmsg_ns.h"
+#include <stdint.h>
 
 #define RL_NS_NAME_SIZE (32)
 
@@ -60,8 +52,8 @@ RL_PACKED_BEGIN
 struct rpmsg_ns_msg
 {
     char name[RL_NS_NAME_SIZE];
-    unsigned long addr;
-    unsigned long flags;
+    uint32_t addr;
+    uint32_t flags;
 } RL_PACKED_END;
 
 /*!
@@ -76,16 +68,18 @@ struct rpmsg_ns_msg
  * @return  RL_RELEASE, message is always freed
  *
  */
-int rpmsg_ns_rx_cb(void *payload, int payload_len, unsigned long src, void *priv)
+static int32_t rpmsg_ns_rx_cb(void *payload, uint32_t payload_len, uint32_t src, void *priv)
 {
-    struct rpmsg_ns_msg *ns_msg_ptr = payload;
+    struct rpmsg_ns_msg *ns_msg_ptr        = payload;
     struct rpmsg_ns_callback_data *cb_ctxt = priv;
-    RL_ASSERT(priv);
-    RL_ASSERT(cb_ctxt->cb);
+    RL_ASSERT(priv != RL_NULL);
+    RL_ASSERT(cb_ctxt->cb != RL_NULL);
 
     /* Drop likely bad messages received at nameservice address */
     if (payload_len == sizeof(struct rpmsg_ns_msg))
+    {
         cb_ctxt->cb(ns_msg_ptr->addr, ns_msg_ptr->name, ns_msg_ptr->flags, cb_ctxt->user_data);
+    }
 
     return RL_RELEASE;
 }
@@ -101,18 +95,22 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
 {
     struct rpmsg_ns_context *ns_ctxt;
 
-    if (app_cb == NULL)
-        return NULL;
+    if (app_cb == RL_NULL)
+    {
+        return RL_NULL;
+    }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    if (ns_ept_ctxt == NULL)
-        return NULL;
+    if (ns_ept_ctxt == RL_NULL)
+    {
+        return RL_NULL;
+    }
 
     ns_ctxt = &ns_ept_ctxt->ns_ctxt;
 
     /* Set-up the nameservice callback context */
     ns_ept_ctxt->cb_ctxt.user_data = user_data;
-    ns_ept_ctxt->cb_ctxt.cb = app_cb;
+    ns_ept_ctxt->cb_ctxt.cb        = app_cb;
 
     ns_ctxt->cb_ctxt = &ns_ept_ctxt->cb_ctxt;
 
@@ -123,18 +121,20 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
         struct rpmsg_ns_callback_data *cb_ctxt;
 
         cb_ctxt = env_allocate_memory(sizeof(struct rpmsg_ns_callback_data));
-        if (cb_ctxt == NULL)
-            return NULL;
+        if (cb_ctxt == RL_NULL)
+        {
+            return RL_NULL;
+        }
         ns_ctxt = env_allocate_memory(sizeof(struct rpmsg_ns_context));
-        if (ns_ctxt == NULL)
+        if (ns_ctxt == RL_NULL)
         {
             env_free_memory(cb_ctxt);
-            return NULL;
+            return RL_NULL;
         }
 
         /* Set-up the nameservice callback context */
         cb_ctxt->user_data = user_data;
-        cb_ctxt->cb = app_cb;
+        cb_ctxt->cb        = app_cb;
 
         ns_ctxt->cb_ctxt = cb_ctxt;
 
@@ -145,7 +145,7 @@ rpmsg_ns_handle rpmsg_ns_bind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_
     return (rpmsg_ns_handle)ns_ctxt;
 }
 
-int rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle handle)
+int32_t rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle handle)
 {
     struct rpmsg_ns_context *ns_ctxt = (struct rpmsg_ns_context *)handle;
 
@@ -153,7 +153,7 @@ int rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle 
     return rpmsg_lite_destroy_ept(rpmsg_lite_dev, ns_ctxt->ept);
 #else
     {
-        int retval;
+        int32_t retval;
 
         retval = rpmsg_lite_destroy_ept(rpmsg_lite_dev, ns_ctxt->ept);
         env_free_memory(ns_ctxt->cb_ctxt);
@@ -163,23 +163,27 @@ int rpmsg_ns_unbind(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_ns_handle 
 #endif
 }
 
-int rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                      struct rpmsg_lite_endpoint *new_ept,
-                      char *ept_name,
-                      unsigned long flags)
+int32_t rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
+                          struct rpmsg_lite_endpoint *new_ept,
+                          const char *ept_name,
+                          uint32_t flags)
 {
     struct rpmsg_ns_msg ns_msg;
 
-    if (!ept_name)
+    if (ept_name == RL_NULL)
+    {
         return RL_ERR_PARAM;
+    }
 
-    if (!new_ept)
+    if (new_ept == RL_NULL)
+    {
         return RL_ERR_PARAM;
+    }
 
     env_strncpy(ns_msg.name, ept_name, RL_NS_NAME_SIZE);
     ns_msg.flags = flags;
-    ns_msg.addr = new_ept->addr;
+    ns_msg.addr  = new_ept->addr;
 
-    return rpmsg_lite_format_message(rpmsg_lite_dev, new_ept->addr, RL_NS_EPT_ADDR, (char *)&ns_msg,
-                                     sizeof(struct rpmsg_ns_msg), 0, RL_BLOCK);
+    return rpmsg_lite_send(rpmsg_lite_dev, new_ept, RL_NS_EPT_ADDR, (char *)&ns_msg, sizeof(struct rpmsg_ns_msg),
+                           RL_BLOCK);
 }

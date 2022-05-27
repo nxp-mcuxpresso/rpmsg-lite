@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
+ * Copyright 2019 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +46,12 @@
 #ifndef LLIST_H_
 #define LLIST_H_
 
+#include <stdint.h>
+
 struct llist
 {
     void *data;
-    unsigned int attr;
+    uint32_t attr;
     struct llist *next;
     struct llist *prev;
 };

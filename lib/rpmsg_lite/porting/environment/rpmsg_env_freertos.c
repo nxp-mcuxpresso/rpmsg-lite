@@ -2,7 +2,8 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2016-2021 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +34,7 @@
 /**************************************************************************
  * FILE NAME
  *
- *       freertos_env.c
+ *       rpmsg_env_freertos.c
  *
  *
  * DESCRIPTION
@@ -43,23 +44,36 @@
  *
  **************************************************************************/
 
-#include "env.h"
+#include "rpmsg_env.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-#include "platform.h"
+#include "rpmsg_platform.h"
 #include "virtqueue.h"
-#include "compiler.h"
+#include "rpmsg_compiler.h"
+#include "event_groups.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
-static int env_init_counter = 0;
-SemaphoreHandle_t env_sema = NULL;
+static int32_t env_init_counter   = 0;
+static SemaphoreHandle_t env_sema = ((void *)0);
+static EventGroupHandle_t event_group = ((void *)0);
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+LOCK_STATIC_CONTEXT env_sem_static_context;
+StaticEventGroup_t event_group_static_context;
+#endif
+
+/* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
+   if the inital count is 1, this function behaves as a mutex
+   if it is greater than 1, it acts as a "resource allocator" with
+   the maximum of 'count' resources available.
+   Currently, only the first use-case is applicable/applied in RPMsg-Lite.
+ */
+#define RL_ENV_MAX_MUTEX_COUNT (10)
 
 /* Max supported ISR counts */
-#define ISR_COUNT (10)
+#define ISR_COUNT (32U)
 /*!
  * Structure to keep track of registered ISR's.
  */
@@ -69,15 +83,55 @@ struct isr_info
 };
 static struct isr_info isr_table[ISR_COUNT];
 
+#if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
+#error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
+#endif
+
 /*!
  * env_in_isr
  *
  * @returns - true, if currently in ISR
  *
  */
-int env_in_isr(void)
+static int32_t env_in_isr(void)
 {
     return platform_in_isr();
+}
+
+/*!
+ * env_wait_for_link_up
+ *
+ * Wait until the link_state parameter of the rpmsg_lite_instance is set.
+ * Utilize events to avoid busy loop implementation.
+ *
+ */
+void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+{
+    (void)xEventGroupClearBits(event_group, (1 << link_id));
+    if (*link_state != 1U)
+    {
+        xEventGroupWaitBits(event_group, (1 << link_id), pdFALSE, pdTRUE, portMAX_DELAY);
+    }
+}
+
+/*!
+ * env_tx_callback
+ *
+ * Set event to notify task waiting in env_wait_for_link_up().
+ *
+ */
+void env_tx_callback(uint32_t link_id)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (env_in_isr() != 0)
+    {
+        (void)xEventGroupSetBitsFromISR(event_group, (1 << link_id), &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
+    else
+    {
+        (void)xEventGroupSetBits(event_group, (1 << link_id));
+    }
 }
 
 /*!
@@ -86,40 +140,53 @@ int env_in_isr(void)
  * Initializes OS/BM environment.
  *
  */
-int env_init(void)
+int32_t env_init(void)
 {
-    int retval;
+    int32_t retval;
     vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
-    assert(env_init_counter >= 0);
+    RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
-        xTaskResumeAll(); /* re-enable scheduler */
+        (void)xTaskResumeAll(); /* re-enable scheduler */
         return -1;
     }
     env_init_counter++;
     // multiple call of 'env_init' - return ok
-    if (env_init_counter <= 1)
+    if (env_init_counter == 1)
     {
         // first call
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+        env_sema = xSemaphoreCreateBinaryStatic(&env_sem_static_context);
+        event_group = xEventGroupCreateStatic(&event_group_static_context);
+#else
         env_sema = xSemaphoreCreateBinary();
-        memset(isr_table, 0, sizeof(isr_table));
-        xTaskResumeAll();
+        event_group = xEventGroupCreate();
+#endif
+#if (configUSE_16_BIT_TICKS == 1)
+        (void)xEventGroupClearBits(event_group, 0xFFu);
+#else
+        (void)xEventGroupClearBits(event_group, 0xFFFFFFu);
+#endif
+        (void)memset(isr_table, 0, sizeof(isr_table));
+        (void)xTaskResumeAll();
         retval = platform_init();
-        xSemaphoreGive(env_sema);
+        (void)xSemaphoreGive(env_sema);
 
         return retval;
     }
     else
     {
-        xTaskResumeAll();
+        (void)xTaskResumeAll();
         /* Get the semaphore and then return it,
          * this allows for platform_init() to block
          * if needed and other tasks to wait for the
          * blocking to be done.
          * This is in ENV layer as this is ENV specific.*/
-        xSemaphoreTake(env_sema, portMAX_DELAY);
-        xSemaphoreGive(env_sema);
+        if (pdTRUE == xSemaphoreTake(env_sema, portMAX_DELAY))
+        {
+            (void)xSemaphoreGive(env_sema);
+        }
         return 0;
     }
 }
@@ -131,16 +198,16 @@ int env_init(void)
  *
  * @returns - execution status
  */
-int env_deinit(void)
+int32_t env_deinit(void)
 {
-    int retval;
+    int32_t retval;
 
     vTaskSuspendAll(); /* stop scheduler */
     // verify 'env_init_counter'
-    assert(env_init_counter > 0);
+    RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
-        xTaskResumeAll(); /* re-enable scheduler */
+        (void)xTaskResumeAll(); /* re-enable scheduler */
         return -1;
     }
 
@@ -150,17 +217,19 @@ int env_deinit(void)
     if (env_init_counter <= 0)
     {
         // last call
-        memset(isr_table, 0, sizeof(isr_table));
+        (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
+        vEventGroupDelete(event_group);
+        event_group = ((void *)0);
         vSemaphoreDelete(env_sema);
-        env_sema = NULL;
-        xTaskResumeAll();
+        env_sema = ((void *)0);
+        (void)xTaskResumeAll();
 
         return retval;
     }
     else
     {
-        xTaskResumeAll();
+        (void)xTaskResumeAll();
         return 0;
     }
 }
@@ -170,7 +239,7 @@ int env_deinit(void)
  *
  * @param size
  */
-void *env_allocate_memory(unsigned int size)
+void *env_allocate_memory(uint32_t size)
 {
     return (pvPortMalloc(size));
 }
@@ -182,7 +251,10 @@ void *env_allocate_memory(unsigned int size)
  */
 void env_free_memory(void *ptr)
 {
-    vPortFree(ptr);
+    if (ptr != ((void *)0))
+    {
+        vPortFree(ptr);
+    }
 }
 
 /*!
@@ -193,9 +265,9 @@ void env_free_memory(void *ptr)
  * @param value
  * @param size
  */
-void env_memset(void *ptr, int value, unsigned long size)
+void env_memset(void *ptr, int32_t value, uint32_t size)
 {
-    memset(ptr, value, size);
+    (void)memset(ptr, value, size);
 }
 
 /*!
@@ -206,9 +278,9 @@ void env_memset(void *ptr, int value, unsigned long size)
  * @param src
  * @param len
  */
-void env_memcpy(void *dst, void const *src, unsigned long len)
+void env_memcpy(void *dst, void const *src, uint32_t len)
 {
-    memcpy(dst, src, len);
+    (void)memcpy(dst, src, len);
 }
 
 /*!
@@ -219,7 +291,7 @@ void env_memcpy(void *dst, void const *src, unsigned long len)
  * @param src
  */
 
-int env_strcmp(const char *dst, const char *src)
+int32_t env_strcmp(const char *dst, const char *src)
 {
     return (strcmp(dst, src));
 }
@@ -232,9 +304,9 @@ int env_strcmp(const char *dst, const char *src)
  * @param src
  * @param len
  */
-void env_strncpy(char *dest, const char *src, unsigned long len)
+void env_strncpy(char *dest, const char *src, uint32_t len)
 {
-    strncpy(dest, src, len);
+    (void)strncpy(dest, src, len);
 }
 
 /*!
@@ -245,7 +317,7 @@ void env_strncpy(char *dest, const char *src, unsigned long len)
  * @param src
  * @param len
  */
-int env_strncmp(char *dest, const char *src, unsigned long len)
+int32_t env_strncmp(char *dest, const char *src, uint32_t len)
 {
     return (strncmp(dest, src, len));
 }
@@ -255,15 +327,15 @@ int env_strncmp(char *dest, const char *src, unsigned long len)
  * env_mb - implementation
  *
  */
-void env_mb()
+void env_mb(void)
 {
     MEM_BARRIER();
 }
 
 /*!
- * osalr_mb - implementation
+ * env_rmb - implementation
  */
-void env_rmb()
+void env_rmb(void)
 {
     MEM_BARRIER();
 }
@@ -271,7 +343,7 @@ void env_rmb()
 /*!
  * env_wmb - implementation
  */
-void env_wmb()
+void env_wmb(void)
 {
     MEM_BARRIER();
 }
@@ -281,7 +353,7 @@ void env_wmb()
  *
  * @param address
  */
-unsigned long env_map_vatopa(void *address)
+uint32_t env_map_vatopa(void *address)
 {
     return platform_vatopa(address);
 }
@@ -291,7 +363,7 @@ unsigned long env_map_vatopa(void *address)
  *
  * @param address
  */
-void *env_map_patova(unsigned long address)
+void *env_map_patova(uint32_t address)
 {
     return platform_patova(address);
 }
@@ -302,10 +374,24 @@ void *env_map_patova(unsigned long address)
  * Creates a mutex with the given initial count.
  *
  */
-int env_create_mutex(void **lock, int count)
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_mutex(void **lock, int32_t count, void *context)
+#else
+int32_t env_create_mutex(void **lock, int32_t count)
+#endif
 {
-    *lock = xSemaphoreCreateCounting(10, count);
-    if (*lock)
+    if (count > RL_ENV_MAX_MUTEX_COUNT)
+    {
+        return -1;
+    }
+
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    *lock = xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count,
+                                           (StaticSemaphore_t *)context);
+#else
+    *lock = xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
+#endif
+    if (*lock != ((void *)0))
     {
         return 0;
     }
@@ -335,9 +421,9 @@ void env_delete_mutex(void *lock)
 void env_lock_mutex(void *lock)
 {
     SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
-    if (!env_in_isr())
+    if (env_in_isr() == 0)
     {
-        xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
     }
 }
 
@@ -349,9 +435,9 @@ void env_lock_mutex(void *lock)
 void env_unlock_mutex(void *lock)
 {
     SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
-    if (!env_in_isr())
+    if (env_in_isr() == 0)
     {
-        xSemaphoreGive(xSemaphore);
+        (void)xSemaphoreGive(xSemaphore);
     }
 }
 
@@ -362,10 +448,17 @@ void env_unlock_mutex(void *lock)
  * when signal has to be sent from the interrupt context to main
  * thread context.
  */
-int env_create_sync_lock(void **lock, int state)
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_sync_lock(void **lock, int32_t state, void *context)
+{
+    return env_create_mutex(lock, state, context); /* state=1 .. initially free */
+}
+#else
+int32_t env_create_sync_lock(void **lock, int32_t state)
 {
     return env_create_mutex(lock, state); /* state=1 .. initially free */
 }
+#endif
 
 /*!
  * env_delete_sync_lock
@@ -375,8 +468,10 @@ int env_create_sync_lock(void **lock, int state)
  */
 void env_delete_sync_lock(void *lock)
 {
-    if (lock)
+    if (lock != ((void *)0))
+    {
         env_delete_mutex(lock);
+    }
 }
 
 /*!
@@ -388,15 +483,15 @@ void env_delete_sync_lock(void *lock)
 void env_acquire_sync_lock(void *lock)
 {
     BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
-    if (env_in_isr())
+    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
+    if (env_in_isr() != 0)
     {
-        xSemaphoreTakeFromISR(xSemaphore, &xTaskWokenByReceive);
+        (void)xSemaphoreTakeFromISR(xSemaphore, &xTaskWokenByReceive);
         portEND_SWITCHING_ISR(xTaskWokenByReceive);
     }
     else
     {
-        xSemaphoreTake(xSemaphore, portMAX_DELAY);
+        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
     }
 }
 
@@ -408,15 +503,15 @@ void env_acquire_sync_lock(void *lock)
 void env_release_sync_lock(void *lock)
 {
     BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore = (SemaphoreHandle_t)lock;
-    if (env_in_isr())
+    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
+    if (env_in_isr() != 0)
     {
-        xSemaphoreGiveFromISR(xSemaphore, &xTaskWokenByReceive);
+        (void)xSemaphoreGiveFromISR(xSemaphore, &xTaskWokenByReceive);
         portEND_SWITCHING_ISR(xTaskWokenByReceive);
     }
     else
     {
-        xSemaphoreGive(xSemaphore);
+        (void)xSemaphoreGive(xSemaphore);
     }
 }
 
@@ -425,7 +520,7 @@ void env_release_sync_lock(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(int num_msec)
+void env_sleep_msec(uint32_t num_msec)
 {
     vTaskDelay(num_msec / portTICK_PERIOD_MS);
 }
@@ -438,9 +533,9 @@ void env_sleep_msec(int num_msec)
  * @param vector_id - virtual interrupt vector number
  * @param data      - interrupt handler data (virtqueue)
  */
-void env_register_isr(int vector_id, void *data)
+void env_register_isr(uint32_t vector_id, void *data)
 {
-    assert(vector_id < ISR_COUNT);
+    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = data;
@@ -454,12 +549,12 @@ void env_register_isr(int vector_id, void *data)
  *
  * @param vector_id - virtual interrupt vector number
  */
-void env_unregister_isr(int vector_id)
+void env_unregister_isr(uint32_t vector_id)
 {
-    assert(vector_id < ISR_COUNT);
+    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
-        isr_table[vector_id].data = NULL;
+        isr_table[vector_id].data = ((void *)0);
     }
 }
 
@@ -468,12 +563,12 @@ void env_unregister_isr(int vector_id)
  *
  * Enables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
-void env_enable_interrupt(unsigned int vector_id)
+void env_enable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_enable(vector_id);
+    (void)platform_interrupt_enable(vector_id);
 }
 
 /*!
@@ -481,12 +576,12 @@ void env_enable_interrupt(unsigned int vector_id)
  *
  * Disables the given interrupt
  *
- * @param vector_id   - interrupt vector number
+ * @param vector_id   - virtual interrupt vector number
  */
 
-void env_disable_interrupt(unsigned int vector_id)
+void env_disable_interrupt(uint32_t vector_id)
 {
-    platform_interrupt_disable(vector_id);
+    (void)platform_interrupt_disable(vector_id);
 }
 
 /*!
@@ -500,7 +595,7 @@ void env_disable_interrupt(unsigned int vector_id)
  * param flags - flags for cache/uncached  and access type
  */
 
-void env_map_memory(unsigned int pa, unsigned int va, unsigned int size, unsigned int flags)
+void env_map_memory(uint32_t pa, uint32_t va, uint32_t size, uint32_t flags)
 {
     platform_map_mem_region(va, pa, size, flags);
 }
@@ -526,25 +621,25 @@ void env_disable_cache(void)
  *
  *
  */
-unsigned long long env_get_timestamp(void)
+uint64_t env_get_timestamp(void)
 {
-    if (env_in_isr())
+    if (env_in_isr() != 0)
     {
-        return (unsigned long long)xTaskGetTickCountFromISR();
+        return (uint64_t)xTaskGetTickCountFromISR();
     }
     else
     {
-        return (unsigned long long)xTaskGetTickCount();
+        return (uint64_t)xTaskGetTickCount();
     }
 }
 
 /*========================================================= */
 /* Util data / functions  */
 
-void env_isr(int vector)
+void env_isr(uint32_t vector)
 {
     struct isr_info *info;
-    assert(vector < ISR_COUNT);
+    RL_ASSERT(vector < ISR_COUNT);
     if (vector < ISR_COUNT)
     {
         info = &isr_table[vector];
@@ -559,14 +654,27 @@ void env_isr(int vector)
  *
  * @param queue -  pointer to created queue
  * @param length -  maximum number of elements in the queue
- * @param item_size - queue element size in bytes
+ * @param element_size - queue element size in bytes
+ * @param queue_static_storage - pointer to queue static storage buffer
+ * @param queue_static_context - pointer to queue static context
  *
  * @return - status of function execution
  */
-int env_create_queue(void **queue, int length, int element_size)
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+int32_t env_create_queue(void **queue,
+                         int32_t length,
+                         int32_t element_size,
+                         uint8_t *queue_static_storage,
+                         rpmsg_static_queue_ctxt *queue_static_context)
 {
-    *queue = xQueueCreate(length, element_size);
-    if (*queue)
+    *queue =
+        xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_static_storage, queue_static_context);
+#else
+int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
+{
+    *queue = xQueueCreate((UBaseType_t)length, (UBaseType_t)element_size);
+#endif
+    if (*queue != ((void *)0))
     {
         return 0;
     }
@@ -601,10 +709,10 @@ void env_delete_queue(void *queue)
  * @return - status of function execution
  */
 
-int env_put_queue(void *queue, void *msg, int timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (env_in_isr())
+    if (env_in_isr() != 0)
     {
         if (xQueueSendFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
@@ -635,10 +743,10 @@ int env_put_queue(void *queue, void *msg, int timeout_ms)
  * @return - status of function execution
  */
 
-int env_get_queue(void *queue, void *msg, int timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (env_in_isr())
+    if (env_in_isr() != 0)
     {
         if (xQueueReceiveFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
@@ -655,4 +763,26 @@ int env_get_queue(void *queue, void *msg, int timeout_ms)
         }
     }
     return 0;
+}
+
+/*!
+ * env_get_current_queue_size
+ *
+ * Get current queue size.
+ *
+ * @param queue - queue pointer
+ *
+ * @return - Number of queued items in the queue
+ */
+
+int32_t env_get_current_queue_size(void *queue)
+{
+    if (env_in_isr() != 0)
+    {
+        return ((int32_t)uxQueueMessagesWaitingFromISR(queue));
+    }
+    else
+    {
+        return ((int32_t)uxQueueMessagesWaiting(queue));
+    }
 }
