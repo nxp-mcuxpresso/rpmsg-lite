@@ -89,6 +89,46 @@ extern "C" {
 /* Init flags */
 #define RL_NO_FLAGS (0)
 
+
+/* rpmsg_std_hdr contains a reserved field,
+ * this implementation of RPMSG uses this reserved
+ * field to hold the idx and totlen of the buffer
+ * not being returned to the vring in the receive
+ * callback function. This way, the no-copy API
+ * can use this field to return the buffer later.
+ */
+struct rpmsg_hdr_reserved
+{
+    uint16_t rfu; /* reserved for future usage */
+    uint16_t idx;
+};
+
+RL_PACKED_BEGIN
+/*!
+ * Common header for all rpmsg messages.
+ * Every message sent/received on the rpmsg bus begins with this header.
+ */
+struct rpmsg_std_hdr
+{
+    uint32_t src;                       /*!< source endpoint address */
+    uint32_t dst;                       /*!< destination endpoint address */
+    struct rpmsg_hdr_reserved reserved; /*!< reserved for future use */
+    uint16_t len;                       /*!< length of payload (in bytes) */
+    uint16_t flags;                     /*!< message flags */
+} RL_PACKED_END;
+
+RL_PACKED_BEGIN
+/*!
+ * Common message structure.
+ * Contains the header and the payload.
+ */
+struct rpmsg_std_msg
+{
+    struct rpmsg_std_hdr hdr; /*!< RPMsg message header */
+    uint8_t data[1];          /*!< bytes of message payload data */
+} RL_PACKED_END;
+
+
 /*! \typedef rl_ept_rx_cb_t
     \brief Receive callback function type.
 */
