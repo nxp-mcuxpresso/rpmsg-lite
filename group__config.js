@@ -2,6 +2,7 @@ var group__config =
 [
     [ "rpmsg_default_config.h", "rpmsg__default__config_8h.html", null ],
     [ "RL_MS_PER_INTERVAL", "group__config.html#gab1d9d807155917143be3785751c67f79", null ],
+    [ "RL_ALLOW_CUSTOM_SHMEM_CONFIG", "group__config.html#gabcd6816af179a4381bb90c9b32d8acc7", null ],
     [ "RL_BUFFER_PAYLOAD_SIZE", "group__config.html#ga4e0599085aeaa1fc8824015826c1e56b", null ],
     [ "RL_BUFFER_COUNT", "group__config.html#gab9a566c2e720eaa10348e84d35f8dde9", null ],
     [ "RL_API_HAS_ZEROCOPY", "group__config.html#ga931a9f16ee1aa309020c74cfe2eabf1f", null ],

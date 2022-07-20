@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 3.2.0</span>
+   &#160;<span id="projectnumber">Rev. 4.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -232,9 +232,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4">rpmsg_lite_send</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__endpoint">rpmsg_lite_endpoint</a> *ept, uint32_t dst, char *data, uint32_t size, uint32_t timeout)</td></tr>
 <tr class="memdesc:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a message contained in data field of length size to the remote endpoint with address dst. ept-&gt;addr is used as source address in the rpmsg header of the message being sent.  <a href="#ga7c1d8c5ef33a89244cf272089c9332e4">More...</a><br /></td></tr>
 <tr class="separator:ga7c1d8c5ef33a89244cf272089c9332e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa65387e23d815ffae7079158ee34f48b"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gaa65387e23d815ffae7079158ee34f48b">rpmsg_lite_is_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
-<tr class="memdesc:gaa65387e23d815ffae7079158ee34f48b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to get the link state.  <a href="#gaa65387e23d815ffae7079158ee34f48b">More...</a><br /></td></tr>
-<tr class="separator:gaa65387e23d815ffae7079158ee34f48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae67bcdddcfa5826d3dc328fd1237c91d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d">rpmsg_lite_is_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
+<tr class="memdesc:gae67bcdddcfa5826d3dc328fd1237c91d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to get the link state.  <a href="#gae67bcdddcfa5826d3dc328fd1237c91d">More...</a><br /></td></tr>
+<tr class="separator:gae67bcdddcfa5826d3dc328fd1237c91d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadbf68bba9879107743bb6ff59e0c1af0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gadbf68bba9879107743bb6ff59e0c1af0">rpmsg_lite_wait_for_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
+<tr class="memdesc:gadbf68bba9879107743bb6ff59e0c1af0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to wait until the link is up. Returns once the link_state is set.  <a href="#gadbf68bba9879107743bb6ff59e0c1af0">More...</a><br /></td></tr>
+<tr class="separator:gadbf68bba9879107743bb6ff59e0c1af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2">rpmsg_lite_release_rx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, void *rxbuf)</td></tr>
 <tr class="memdesc:ga847cb39c655a6068107ac9840cfd7bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases the rx buffer for future reuse in vring. This API can be called at process context when the message in rx buffer is processed.  <a href="#ga847cb39c655a6068107ac9840cfd7bf2">More...</a><br /></td></tr>
 <tr class="separator:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -394,6 +397,13 @@ sh_mem_total</td>
 vq_ops</td>
 <td class="fielddoc">
 <p>ops functions table pointer </p>
+</td></tr>
+<tr><td class="fieldtype">
+<a class="anchor" id="a5fe45ceaad9bb289e2efa45b0204be41"></a>uint32_t</td>
+<td class="fieldname">
+link_id</td>
+<td class="fielddoc">
+<p>linkID of this rpmsg_lite instance </p>
 </td></tr>
 </table>
 
@@ -686,12 +696,12 @@ vq_ops</td>
 
 </div>
 </div>
-<a class="anchor" id="gaa65387e23d815ffae7079158ee34f48b"></a>
+<a class="anchor" id="gae67bcdddcfa5826d3dc328fd1237c91d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t rpmsg_lite_is_link_up </td>
+          <td class="memname">uint32_t rpmsg_lite_is_link_up </td>
           <td>(</td>
           <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
           <td class="paramname"><em>rpmsg_lite_dev</em></td><td>)</td>
@@ -703,11 +713,35 @@ vq_ops</td>
 <p>Function to get the link state. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance</td></tr>
+    <tr><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance pointer</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True when link up, false when down. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>RL_TRUE when link up, RL_FALSE when down. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gadbf68bba9879107743bb6ff59e0c1af0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rpmsg_lite_wait_for_link_up </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
+          <td class="paramname"><em>rpmsg_lite_dev</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function to wait until the link is up. Returns once the link_state is set. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance pointer </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

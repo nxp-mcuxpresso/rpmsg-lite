@@ -19,7 +19,8 @@ var group__rpmsg__lite =
       [ "sh_mem_base", "group__rpmsg__lite.html#a79ea96087bf1897ccfd3eb2bccf2d78b", null ],
       [ "sh_mem_remaining", "group__rpmsg__lite.html#ac224a28fb8923c5ea0368dce3673f9cc", null ],
       [ "sh_mem_total", "group__rpmsg__lite.html#ae135c73c797cbbdbbb3cb61131d3a667", null ],
-      [ "vq_ops", "group__rpmsg__lite.html#a0004491e023ed2e999182ba302fa32e5", null ]
+      [ "vq_ops", "group__rpmsg__lite.html#a0004491e023ed2e999182ba302fa32e5", null ],
+      [ "link_id", "group__rpmsg__lite.html#a5fe45ceaad9bb289e2efa45b0204be41", null ]
     ] ],
     [ "RL_VERSION", "group__rpmsg__lite.html#ga96a544c91ab6dd353867256e1deb9917", null ],
     [ "rl_ept_rx_cb_t", "group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd", null ],
@@ -29,7 +30,8 @@ var group__rpmsg__lite =
     [ "rpmsg_lite_create_ept", "group__rpmsg__lite.html#gad9b5d23e549a4f2adce7a79fd932568d", null ],
     [ "rpmsg_lite_destroy_ept", "group__rpmsg__lite.html#gabd04a23b464f1ba3360d9970b0d09c94", null ],
     [ "rpmsg_lite_send", "group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4", null ],
-    [ "rpmsg_lite_is_link_up", "group__rpmsg__lite.html#gaa65387e23d815ffae7079158ee34f48b", null ],
+    [ "rpmsg_lite_is_link_up", "group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d", null ],
+    [ "rpmsg_lite_wait_for_link_up", "group__rpmsg__lite.html#gadbf68bba9879107743bb6ff59e0c1af0", null ],
     [ "rpmsg_lite_release_rx_buffer", "group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2", null ],
     [ "rpmsg_lite_alloc_tx_buffer", "group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4", null ],
     [ "rpmsg_lite_send_nocopy", "group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31", null ]

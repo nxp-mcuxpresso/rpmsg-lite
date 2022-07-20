@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 3.2.0</span>
+   &#160;<span id="projectnumber">Rev. 4.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -194,6 +194,8 @@ Configuration options</h1>
 <tr>
 <td>RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION </td><td>(0) </td><td>When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication). </td></tr>
 <tr>
+<td>RL_ALLOW_CUSTOM_SHMEM_CONFIG </td><td>(0) </td><td>It allows to define custom shared memory configuration and replacing the shared memory related global settings from rpmsg_config.h This is useful when multiple instances are running in parallel but different shared memory arrangement (vring size &amp; alignment, buffers size &amp; count) is required. The default value is 0 (all RPMsg_Lite instances use the same shared memory arrangement as defined by common config macros). </td></tr>
+<tr>
 <td>RL_ASSERT </td><td>see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> </td><td>Assert implementation. </td></tr>
 </table>
 <h1><a class="anchor" id="references"></a>
@@ -261,6 +263,12 @@ Revision History</h1>
 <tr>
 <td>11.0 </td><td>12/2021 </td><td><p class="starttd">Improve static allocations - allow OS-specific objects being allocated statically, GitHub PR #14 </p>
 <p class="endtd">RPMsg-Lite: Minor Misra and typo corrections, GitHub PR #19, #20. </p>
+</td></tr>
+<tr>
+<td>12.0 </td><td>01/2022 </td><td>Introduce RL_ALLOW_CUSTOM_SHMEM_CONFIG configuration option to support custom shared memory arangement per the RPMsg_Lite instance. </td></tr>
+<tr>
+<td>13.0 </td><td>04/2022 </td><td><p class="starttd">Introduced new <a class="el" href="group__rpmsg__lite.html#gadbf68bba9879107743bb6ff59e0c1af0" title="Function to wait until the link is up. Returns once the link_state is set. ">rpmsg_lite_wait_for_link_up()</a> API function - this allows to avoid using busy loops in rtos environments, GitHub PR #21. </p>
+<p class="endtd">Adjust <a class="el" href="group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d" title="Function to get the link state. ">rpmsg_lite_is_link_up()</a> to return RL_TRUE/RL_FALSE. </p>
 </td></tr>
 </table>
 </div></div><!-- contents -->
