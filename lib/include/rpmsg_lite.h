@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -57,10 +57,10 @@ extern "C" {
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
 #define RL_WORD_ALIGN_UP(a)                                                                                \
-    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
-                                                       ((uint32_t)(a)))
+    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
+                                                       ((uintptr_t)(a)))
 #define RL_WORD_ALIGN_DOWN(a) \
-    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uint32_t)(a)))
+    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uintptr_t)(a)))
 
 /* Definitions for device types , null pointer, etc.*/
 #define RL_SUCCESS    (0)
@@ -73,7 +73,7 @@ extern "C" {
 #define RL_RELEASE    (0)
 #define RL_HOLD       (1)
 #define RL_DONT_BLOCK (0)
-#define RL_BLOCK      (0xFFFFFFFFU)
+#define RL_BLOCK      (~0UL)
 
 /* Error macros. */
 #define RL_ERRORS_BASE   (-5000)
@@ -322,7 +322,7 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                         uint32_t dst,
                         char *data,
                         uint32_t size,
-                        uint32_t timeout);
+                        uintptr_t timeout);
 
 /*!
  * @brief Function to get the link state
@@ -372,7 +372,7 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
  *
  * @see rpmsg_lite_send_nocopy
  */
-void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uint32_t timeout);
+void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uintptr_t timeout);
 
 /*!
  * @brief Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer()

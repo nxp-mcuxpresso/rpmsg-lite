@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -709,7 +709,7 @@ void env_delete_queue(void *queue)
  * @return - status of function execution
  */
 
-int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr() != 0)
@@ -743,7 +743,7 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
  * @return - status of function execution
  */
 
-int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr() != 0)

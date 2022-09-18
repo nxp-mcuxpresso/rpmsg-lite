@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -652,7 +652,7 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                         uint32_t dst,
                         char *data,
                         uint32_t size,
-                        uint32_t timeout)
+                        uintptr_t timeout)
 {
     if (ept == RL_NULL)
     {
@@ -670,7 +670,7 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 
-void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uint32_t timeout)
+void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uintptr_t timeout)
 {
     struct rpmsg_std_msg *rpmsg_msg;
     void *buffer;
@@ -925,7 +925,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
      * Since device is RPMSG Remote so we need to manage the
      * shared buffers. Create shared memory pool to handle buffers.
      */
-    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
+    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
     rpmsg_lite_dev->sh_mem_remaining =
         (RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE;
     rpmsg_lite_dev->sh_mem_total = rpmsg_lite_dev->sh_mem_remaining;
@@ -941,7 +941,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     for (idx = 0U; idx < 2U; idx++)
     {
         ring_info.phy_addr =
-            (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
+            (void *)(char *)((uintptr_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
         ring_info.align     = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
 
@@ -1132,13 +1132,13 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     callback[0]                 = rpmsg_lite_tx_callback;
     callback[1]                 = rpmsg_lite_rx_callback;
     rpmsg_lite_dev->vq_ops      = &remote_vq_ops;
-    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uint32_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
+    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
 
     /* Create virtqueue for each vring. */
     for (idx = 0U; idx < 2U; idx++)
     {
         ring_info.phy_addr =
-            (void *)(char *)((uint32_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
+            (void *)(char *)((uintptr_t)(char *)shmem_addr + (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
         ring_info.align     = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
 
