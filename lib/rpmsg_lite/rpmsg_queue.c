@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -105,7 +105,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
                          char *data,
                          uint32_t maxlen,
                          uint32_t *len,
-                         uint32_t timeout)
+                         uintptr_t timeout)
 {
     rpmsg_queue_rx_cb_data_t msg = {0};
     int32_t retval               = RL_SUCCESS;
@@ -158,7 +158,7 @@ int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
                                 uint32_t *src,
                                 char **data,
                                 uint32_t *len,
-                                uint32_t timeout)
+                                uintptr_t timeout)
 {
     rpmsg_queue_rx_cb_data_t msg = {0};
 
