@@ -107,7 +107,7 @@ static void sgi_mbox_sendmsg(struct sgi_mbox *base, uint32_t ch, uint32_t msg)
     __DSB();
 
     /* trigger SGI to core 0 */
-    gic_send_sgi(0, TARGET_CORE, RL_SGIMBOX_IRQ);
+    GIC_SendSGI(RL_SGIMBOX_IRQ, 0, TARGET_CORE);
 }
 
 static void platform_global_isr_disable(void)
