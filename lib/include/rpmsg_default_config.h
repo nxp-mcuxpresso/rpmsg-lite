@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,10 @@
 
 //! @def RL_DEBUG_CHECK_BUFFERS
 //!
-//! Do not use in RPMsg-Lite to Linux configuration
+//! When enabled buffer pointers passed to rpmsg_lite_send_nocopy() and
+//! rpmsg_lite_release_rx_buffer() functions (enabled by RL_API_HAS_ZEROCOPY config)
+//! are checked to avoid passing invalid buffer pointer.
+//! The default value is 0 (disabled). Do not use in RPMsg-Lite to Linux configuration.
 #ifndef RL_DEBUG_CHECK_BUFFERS
 #define RL_DEBUG_CHECK_BUFFERS (0)
 #endif
@@ -171,10 +174,12 @@
 //! Default implementation of hang assert function
 static inline void RL_HANG(void)
 {
+    /* coco begin validated: RL_HANG not reachable in unit tests when own RL_ASSERT implementation used */
     for (;;)
     {
     }
 }
+/* coco end */
 
 //! @def RL_ASSERT
 //!

@@ -98,11 +98,29 @@ static int32_t env_in_isr(void)
  * Utilize events to avoid busy loop implementation.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
     if (*link_state != 1U)
     {
-        xos_event_wait_all(&env_event, (1UL << link_id));
+        if (RL_BLOCK == timeout_ms)
+        {
+            if (XOS_OK == xos_event_wait_all(&env_event, (1UL << link_id)))
+            {
+                return 1U;
+            }
+        }
+        else
+        {
+            if (XOS_OK == xos_event_wait_all_timeout(&env_event, (1UL << link_id), xos_msecs_to_cycles(timeout_ms)))
+            {
+                return 1U;
+            }
+        }
+        return 0U;
+    }
+    else
+    {
+        return 1U;
     }
 }
 
@@ -579,6 +597,19 @@ void env_disable_cache(void)
 {
     platform_cache_all_flush_invalidate();
     platform_cache_disable();
+}
+
+/*!
+ *
+ * env_get_timestamp
+ *
+ * Returns a 64 bit time stamp.
+ *
+ *
+ */
+uint64_t env_get_timestamp(void)
+{
+    return xos_get_system_cycles();
 }
 
 /*========================================================= */

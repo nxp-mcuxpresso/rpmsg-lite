@@ -94,49 +94,61 @@ static void platform_global_isr_enable(void)
 
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 {
-    /* Register ISR to environment layer */
-    env_register_isr(vector_id, isr_data);
-
-    env_lock_mutex(platform_lock);
-
-    RL_ASSERT(0 <= isr_counter);
-    if (isr_counter < 2)
+    if (platform_lock != ((void *)0))
     {
+        /* Register ISR to environment layer */
+        env_register_isr(vector_id, isr_data);
+
+        env_lock_mutex(platform_lock);
+
+        RL_ASSERT(0 <= isr_counter);
+        if (isr_counter < 2)
+        {
 #if defined(FSL_FEATURE_MU_SIDE_A)
-        MU_EnableInterrupts(MUA, 1UL << (31UL - vector_id));
+            MU_EnableInterrupts(MUA, 1UL << (31UL - vector_id));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-        MU_EnableInterrupts(MUB, 1UL << (31UL - vector_id));
+            MU_EnableInterrupts(MUB, 1UL << (31UL - vector_id));
 #endif
+        }
+        isr_counter++;
+
+        env_unlock_mutex(platform_lock);
+        return 0;
     }
-    isr_counter++;
-
-    env_unlock_mutex(platform_lock);
-
-    return 0;
+    else
+    {
+        return -1;
+    }
 }
 
 int32_t platform_deinit_interrupt(uint32_t vector_id)
 {
-    /* Prepare the MU Hardware */
-    env_lock_mutex(platform_lock);
-
-    RL_ASSERT(0 < isr_counter);
-    isr_counter--;
-    if (isr_counter < 2)
+    if (platform_lock != ((void *)0))
     {
+        env_lock_mutex(platform_lock);
+
+        RL_ASSERT(0 < isr_counter);
+        isr_counter--;
+        if (isr_counter < 2)
+        {
 #if defined(FSL_FEATURE_MU_SIDE_A)
-        MU_DisableInterrupts(MUA, 1UL << (31UL - vector_id));
+            MU_DisableInterrupts(MUA, 1UL << (31UL - vector_id));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-        MU_DisableInterrupts(MUB, 1UL << (31UL - vector_id));
+            MU_DisableInterrupts(MUB, 1UL << (31UL - vector_id));
 #endif
+        }
+
+        /* Unregister ISR from environment layer */
+        env_unregister_isr(vector_id);
+
+        env_unlock_mutex(platform_lock);
+
+        return 0;
     }
-
-    /* Unregister ISR from environment layer */
-    env_unregister_isr(vector_id);
-
-    env_unlock_mutex(platform_lock);
-
-    return 0;
+    else
+    {
+        return -1;
+    }
 }
 
 void platform_notify(uint32_t vector_id)

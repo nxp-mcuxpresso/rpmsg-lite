@@ -97,11 +97,24 @@ static int32_t env_in_isr(void)
  * Utilize events to avoid busy loop implementation.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
     if (*link_state != 1U)
     {
-        k_event_wait_all(&env_event, (1UL << link_id), false, K_FOREVER);
+        if (env_in_isr() != 0)
+        {
+            timeout_ms = 0; /* force timeout == 0 when in ISR */
+        }
+
+        if (0 != k_event_wait_all(&env_event, (1UL << link_id), false, timeout_ms))
+        {
+            return 1U;
+        }
+        return 0U;
+    }
+    else
+    {
+        return 1U;
     }
 }
 

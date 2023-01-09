@@ -1,11 +1,10 @@
 /*
- * Copyright 2019-2020 NXP
+ * Copyright 2019-2022 NXP
  * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
 #ifndef RPMSG_PLATFORM_H_
 #define RPMSG_PLATFORM_H_
 
@@ -19,12 +18,21 @@
 #define VRING_ALIGN (0x10U)
 #endif
 
-/* contains pool of descriptos and two circular buffers */
+/* contains pool of descriptors and two circular buffers */
 #ifndef VRING_SIZE
-#define VRING_SIZE (0x400UL)
+/* set VRING_SIZE based on number of used buffers as calculated in vring_init */
+#define VRING_DESC_SIZE (((RL_BUFFER_COUNT * sizeof(struct vring_desc)) + VRING_ALIGN - 1UL) & ~(VRING_ALIGN - 1UL))
+#define VRING_AVAIL_SIZE                                                                                            \
+    (((sizeof(struct vring_avail) + (RL_BUFFER_COUNT * sizeof(uint16_t)) + sizeof(uint16_t)) + VRING_ALIGN - 1UL) & \
+     ~(VRING_ALIGN - 1UL))
+#define VRING_USED_SIZE                                                                                     \
+    (((sizeof(struct vring_used) + (RL_BUFFER_COUNT * sizeof(struct vring_used_elem)) + sizeof(uint16_t)) + \
+      VRING_ALIGN - 1UL) &                                                                                  \
+     ~(VRING_ALIGN - 1UL))
+#define VRING_SIZE (VRING_DESC_SIZE + VRING_AVAIL_SIZE + VRING_USED_SIZE)
 #endif
 
-/* size of shared memory + 2*VRING size */
+/* define shared memory space for VRINGS per one channel */
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
 #define RL_GET_VQ_ID(link_id, queue_id) (((queue_id)&0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))

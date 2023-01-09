@@ -149,10 +149,12 @@ struct vring_alloc_info
     uint16_t pad;
 };
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 struct vq_static_context
 {
     struct virtqueue vq;
 };
+#endif
 
 typedef void vq_callback(struct virtqueue *vq);
 typedef void vq_notify(struct virtqueue *vq);
@@ -202,13 +204,7 @@ typedef void vq_notify(struct virtqueue *vq);
 
 #endif
 
-int32_t virtqueue_create(uint16_t id,
-                         const char *name,
-                         struct vring_alloc_info *ring,
-                         void (*callback_fc)(struct virtqueue *vq),
-                         void (*notify_fc)(struct virtqueue *vq),
-                         struct virtqueue **v_queue);
-
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 int32_t virtqueue_create_static(uint16_t id,
                                 const char *name,
                                 struct vring_alloc_info *ring,
@@ -216,6 +212,14 @@ int32_t virtqueue_create_static(uint16_t id,
                                 void (*notify_fc)(struct virtqueue *vq),
                                 struct virtqueue **v_queue,
                                 struct vq_static_context *vq_ctxt);
+#else
+int32_t virtqueue_create(uint16_t id,
+                         const char *name,
+                         struct vring_alloc_info *ring,
+                         void (*callback_fc)(struct virtqueue *vq),
+                         void (*notify_fc)(struct virtqueue *vq),
+                         struct virtqueue **v_queue);
+#endif
 
 int32_t virtqueue_add_buffer(struct virtqueue *vq, uint16_t head_idx);
 
@@ -235,9 +239,11 @@ int32_t virtqueue_enable_cb(struct virtqueue *vq);
 
 void virtqueue_kick(struct virtqueue *vq);
 
-void virtqueue_free(struct virtqueue *vq);
-
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 void virtqueue_free_static(struct virtqueue *vq);
+#else
+void virtqueue_free(struct virtqueue *vq);
+#endif
 
 void virtqueue_dump(struct virtqueue *vq);
 
