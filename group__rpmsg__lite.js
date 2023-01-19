@@ -31,7 +31,7 @@ var group__rpmsg__lite =
     [ "rpmsg_lite_destroy_ept", "group__rpmsg__lite.html#gabd04a23b464f1ba3360d9970b0d09c94", null ],
     [ "rpmsg_lite_send", "group__rpmsg__lite.html#ga7c1d8c5ef33a89244cf272089c9332e4", null ],
     [ "rpmsg_lite_is_link_up", "group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d", null ],
-    [ "rpmsg_lite_wait_for_link_up", "group__rpmsg__lite.html#gadbf68bba9879107743bb6ff59e0c1af0", null ],
+    [ "rpmsg_lite_wait_for_link_up", "group__rpmsg__lite.html#gad692e103ca4220e224f65f2f18c77569", null ],
     [ "rpmsg_lite_release_rx_buffer", "group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2", null ],
     [ "rpmsg_lite_alloc_tx_buffer", "group__rpmsg__lite.html#ga5b7a2aee9f3824a3297b6db5ef19a1f4", null ],
     [ "rpmsg_lite_send_nocopy", "group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31", null ]

@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 4.0.0</span>
+   &#160;<span id="projectnumber">Rev. 5.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -190,7 +190,7 @@ Configuration options</h1>
 <tr>
 <td>RL_USE_ENVIRONMENT_CONTEXT </td><td>(0) </td><td>When enabled the environment layer uses its own context. Required for some environments (QNX). The default value is 0 (no context, saves some RAM). </td></tr>
 <tr>
-<td>RL_DEBUG_CHECK_BUFFERS </td><td>(0) </td><td>When enabled buffer debug checks in <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> and <a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2" title="Releases the rx buffer for future reuse in vring. This API can be called at process context when the ...">rpmsg_lite_release_rx_buffer()</a> functions are disabled. Do not use in RPMsg-Lite to Linux configuration. </td></tr>
+<td>RL_DEBUG_CHECK_BUFFERS </td><td>(0) </td><td>When enabled buffer pointers passed to <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> and <a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2" title="Releases the rx buffer for future reuse in vring. This API can be called at process context when the ...">rpmsg_lite_release_rx_buffer()</a> functions (enabled by RL_API_HAS_ZEROCOPY config) are checked to avoid passing invalid buffer pointer. The default value is 0 (disabled). Do not use in RPMsg-Lite to Linux configuration. </td></tr>
 <tr>
 <td>RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION </td><td>(0) </td><td>When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication). </td></tr>
 <tr>
@@ -267,8 +267,13 @@ Revision History</h1>
 <tr>
 <td>12.0 </td><td>01/2022 </td><td>Introduce RL_ALLOW_CUSTOM_SHMEM_CONFIG configuration option to support custom shared memory arangement per the RPMsg_Lite instance. </td></tr>
 <tr>
-<td>13.0 </td><td>04/2022 </td><td><p class="starttd">Introduced new <a class="el" href="group__rpmsg__lite.html#gadbf68bba9879107743bb6ff59e0c1af0" title="Function to wait until the link is up. Returns once the link_state is set. ">rpmsg_lite_wait_for_link_up()</a> API function - this allows to avoid using busy loops in rtos environments, GitHub PR #21. </p>
+<td>13.0 </td><td>04/2022 </td><td><p class="starttd">Introduced new <a class="el" href="group__rpmsg__lite.html#gad692e103ca4220e224f65f2f18c77569" title="Function to wait until the link is up. Returns RL_TRUE once the link_state is set or RL_FALSE in case...">rpmsg_lite_wait_for_link_up()</a> API function - this allows to avoid using busy loops in rtos environments, GitHub PR #21. </p>
 <p class="endtd">Adjust <a class="el" href="group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d" title="Function to get the link state. ">rpmsg_lite_is_link_up()</a> to return RL_TRUE/RL_FALSE. </p>
+</td></tr>
+<tr>
+<td>14.0 </td><td>10/2022 </td><td><p class="starttd">Timeout parameter added to rpmsg_lite_wait_for_link_up API function. </p>
+<p>VRING_SIZE is set based on number of used buffers now (as calculated in vring_init) - updated for all platforms that are not communicating to Linux rpmsg counterpart. </p>
+<p class="endtd">Improveed debug check buffers implementation - instead of checking the pointer fits into shared memory check the presence in the VirtIO ring descriptors list. </p>
 </td></tr>
 </table>
 </div></div><!-- contents -->

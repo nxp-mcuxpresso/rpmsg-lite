@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 4.0.0</span>
+   &#160;<span id="projectnumber">Rev. 5.0.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -273,7 +273,7 @@ Configuration options</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Do not use in RPMsg-Lite to Linux configuration </p>
+<p>When enabled buffer pointers passed to <a class="el" href="group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31" title="Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer() ">rpmsg_lite_send_nocopy()</a> and <a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2" title="Releases the rx buffer for future reuse in vring. This API can be called at process context when the ...">rpmsg_lite_release_rx_buffer()</a> functions (enabled by RL_API_HAS_ZEROCOPY config) are checked to avoid passing invalid buffer pointer. The default value is 0 (disabled). Do not use in RPMsg-Lite to Linux configuration. </p>
 
 </div>
 </div>
