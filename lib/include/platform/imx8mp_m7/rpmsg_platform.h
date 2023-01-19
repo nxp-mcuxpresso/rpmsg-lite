@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2019,2022 NXP
  * All rights reserved.
  *
  *
@@ -25,7 +25,7 @@
 #define VRING_SIZE (0x8000UL)
 #endif
 
-/* size of shared memory + 2*VRING size */
+/* define shared memory space for VRINGS per one channel */
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
 #define RL_GET_VQ_ID(link_id, queue_id) (((queue_id)&0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))

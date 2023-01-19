@@ -72,14 +72,15 @@ static struct isr_info isr_table[ISR_COUNT];
  * env_wait_for_link_up
  *
  * Wait until the link_state parameter of the rpmsg_lite_instance is set.
- * Busy loop implementation for BM.
+ * Busy loop implementation for BM, timeout_ms parameter ignored for now.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
     while (*link_state != 1U)
     {
     }
+    return 1U;
 }
 
 /*!
@@ -105,7 +106,9 @@ int32_t env_init(void)
     RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
+        /* coco begin validated: (env_init_counter < 0) condition will never met unless RAM is corrupted */
         return -1;
+        /* coco end */
     }
     env_init_counter++;
     // multiple call of 'env_init' - return ok

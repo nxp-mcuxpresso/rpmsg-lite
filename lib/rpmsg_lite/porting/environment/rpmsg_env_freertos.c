@@ -106,12 +106,27 @@ static int32_t env_in_isr(void)
  * Utilize events to avoid busy loop implementation.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
     (void)xEventGroupClearBits(event_group, (EventBits_t)(1UL << link_id));
     if (*link_state != 1U)
     {
-        (void)xEventGroupWaitBits(event_group, (EventBits_t)(1UL << link_id), pdFALSE, pdTRUE, portMAX_DELAY);
+        EventBits_t uxBits;
+        uxBits = xEventGroupWaitBits(event_group, (EventBits_t)(1UL << link_id), pdFALSE, pdTRUE,
+                                     ((portMAX_DELAY == timeout_ms) ? portMAX_DELAY : timeout_ms / portTICK_PERIOD_MS));
+        if (uxBits == (EventBits_t)(1UL << link_id))
+        {
+            return 1U;
+        }
+        else
+        {
+            /* timeout */
+            return 0U;
+        }
+    }
+    else
+    {
+        return 1U;
     }
 }
 
@@ -149,8 +164,10 @@ int32_t env_init(void)
     RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
+        /* coco begin validated: (env_init_counter < 0) condition will never met unless RAM is corrupted */
         (void)xTaskResumeAll(); /* re-enable scheduler */
         return -1;
+        /* coco end */
     }
     env_init_counter++;
     /* multiple call of 'env_init' - return ok */
@@ -184,10 +201,8 @@ int32_t env_init(void)
          * if needed and other tasks to wait for the
          * blocking to be done.
          * This is in ENV layer as this is ENV specific.*/
-        if (pdTRUE == xSemaphoreTake(env_sema, portMAX_DELAY))
-        {
-            (void)xSemaphoreGive(env_sema);
-        }
+        (void)xSemaphoreTake(env_sema, portMAX_DELAY);
+        (void)xSemaphoreGive(env_sema);
         return 0;
     }
 }

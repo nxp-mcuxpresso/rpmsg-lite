@@ -52,7 +52,7 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "4.0.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "5.0.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
@@ -87,7 +87,7 @@ extern "C" {
 #define RL_ALREADY_DONE  (RL_ERRORS_BASE - 8)
 
 /* Init flags */
-#define RL_NO_FLAGS (0)
+#define RL_NO_FLAGS (0U)
 
 /*! \typedef rl_ept_rx_cb_t
     \brief Receive callback function type.
@@ -295,12 +295,16 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
 
 /*!
- * @brief Function to wait until the link is up. Returns
- * once the link_state is set.
+ * @brief Function to wait until the link is up. Returns RL_TRUE
+ * once the link_state is set or RL_FALSE in case of timeout.
  *
  * @param rpmsg_lite_dev    RPMsg-Lite instance pointer
+ * @param timeout           Timeout in ms, 0 if nonblocking
+ *
+ * @return RL_TRUE when link up, RL_FALSE when timeout.
+ *
  */
-void rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
+uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t timeout);
 
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 

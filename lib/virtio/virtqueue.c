@@ -40,6 +40,65 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq);
 static void vq_ring_notify_host(struct virtqueue *vq);
 static uint16_t virtqueue_nused(struct virtqueue *vq);
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+/*!
+ * virtqueue_create_static - Creates new VirtIO queue - static version
+ *
+ * @param id        - VirtIO queue ID , must be unique
+ * @param name      - Name of VirtIO queue
+ * @param ring      - Pointer to vring_alloc_info control block
+ * @param callback  - Pointer to callback function, invoked
+ *                    when message is available on VirtIO queue
+ * @param notify    - Pointer to notify function, used to notify
+ *                    other side that there is job available for it
+ * @param v_queue   - Created VirtIO queue.
+ * @param vq_ctxt   - Statically allocated virtqueue context
+ *
+ * @return          - Function status
+ */
+int32_t virtqueue_create_static(uint16_t id,
+                                const char *name,
+                                struct vring_alloc_info *ring,
+                                void (*callback_fc)(struct virtqueue *vq),
+                                void (*notify_fc)(struct virtqueue *vq),
+                                struct virtqueue **v_queue,
+                                struct vq_static_context *vq_ctxt)
+{
+    struct virtqueue *vq    = VQ_NULL;
+    volatile int32_t status = VQUEUE_SUCCESS;
+    uint32_t vq_size        = 0U;
+
+    VQ_PARAM_CHK(vq_ctxt == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
+    VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
+    VQ_PARAM_CHK(ring->num_descs == 0U, status, ERROR_VQUEUE_INVLD_PARAM);
+    VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1U), status, ERROR_VRING_ALIGN);
+
+    if (status == VQUEUE_SUCCESS)
+    {
+        vq_size = sizeof(struct virtqueue);
+        vq      = &vq_ctxt->vq;
+
+        env_memset(vq, 0x00, vq_size);
+
+        env_strncpy(vq->vq_name, name, VIRTQUEUE_MAX_NAME_SZ);
+        vq->vq_queue_index = id;
+        vq->vq_alignment   = (int32_t)(ring->align);
+        vq->vq_nentries    = ring->num_descs;
+        vq->callback_fc    = callback_fc;
+        vq->notify_fc      = notify_fc;
+
+        // indirect addition  is not supported
+        vq->vq_ring_size = vring_size(ring->num_descs, ring->align);
+        vq->vq_ring_mem  = (void *)ring->phy_addr;
+
+        vring_init(&vq->vq_ring, vq->vq_nentries, vq->vq_ring_mem, (uint32_t)vq->vq_alignment);
+
+        *v_queue = vq;
+    }
+
+    return (status);
+}
+#else
 /*!
  * virtqueue_create - Creates new VirtIO queue
  *
@@ -99,64 +158,7 @@ int32_t virtqueue_create(uint16_t id,
 
     return (status);
 }
-
-/*!
- * virtqueue_create_static - Creates new VirtIO queue - static version
- *
- * @param id        - VirtIO queue ID , must be unique
- * @param name      - Name of VirtIO queue
- * @param ring      - Pointer to vring_alloc_info control block
- * @param callback  - Pointer to callback function, invoked
- *                    when message is available on VirtIO queue
- * @param notify    - Pointer to notify function, used to notify
- *                    other side that there is job available for it
- * @param v_queue   - Created VirtIO queue.
- * @param vq_ctxt   - Statically allocated virtqueue context
- *
- * @return          - Function status
- */
-int32_t virtqueue_create_static(uint16_t id,
-                                const char *name,
-                                struct vring_alloc_info *ring,
-                                void (*callback_fc)(struct virtqueue *vq),
-                                void (*notify_fc)(struct virtqueue *vq),
-                                struct virtqueue **v_queue,
-                                struct vq_static_context *vq_ctxt)
-{
-    struct virtqueue *vq    = VQ_NULL;
-    volatile int32_t status = VQUEUE_SUCCESS;
-    uint32_t vq_size        = 0U;
-
-    VQ_PARAM_CHK(vq_ctxt == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
-    VQ_PARAM_CHK(ring == VQ_NULL, status, ERROR_VQUEUE_INVLD_PARAM);
-    VQ_PARAM_CHK(ring->num_descs == 0U, status, ERROR_VQUEUE_INVLD_PARAM);
-    VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1U), status, ERROR_VRING_ALIGN);
-
-    if (status == VQUEUE_SUCCESS)
-    {
-        vq_size = sizeof(struct virtqueue);
-        vq      = &vq_ctxt->vq;
-
-        env_memset(vq, 0x00, vq_size);
-
-        env_strncpy(vq->vq_name, name, VIRTQUEUE_MAX_NAME_SZ);
-        vq->vq_queue_index = id;
-        vq->vq_alignment   = (int32_t)(ring->align);
-        vq->vq_nentries    = ring->num_descs;
-        vq->callback_fc    = callback_fc;
-        vq->notify_fc      = notify_fc;
-
-        // indirect addition  is not supported
-        vq->vq_ring_size = vring_size(ring->num_descs, ring->align);
-        vq->vq_ring_mem  = (void *)ring->phy_addr;
-
-        vring_init(&vq->vq_ring, vq->vq_nentries, vq->vq_ring_mem, (uint32_t)vq->vq_alignment);
-
-        *v_queue = vq;
-    }
-
-    return (status);
-}
+#endif /* RL_USE_STATIC_API */
 
 /*!
  * virtqueue_add_buffer()   - Enqueues new buffer in vring for consumption
@@ -294,6 +296,25 @@ uint32_t virtqueue_get_buffer_length(struct virtqueue *vq, uint16_t idx)
     return vq->vq_ring.desc[idx].len;
 }
 
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+/*!
+ * virtqueue_free   - Frees VirtIO queue resources - static version
+ *
+ * @param vq        - Pointer to VirtIO queue control block
+ *
+ */
+void virtqueue_free_static(struct virtqueue *vq)
+{
+    if (vq != VQ_NULL)
+    {
+        if (vq->vq_ring_mem != VQ_NULL)
+        {
+            vq->vq_ring_size = 0;
+            vq->vq_ring_mem  = VQ_NULL;
+        }
+    }
+}
+#else
 /*!
  * virtqueue_free   - Frees VirtIO queue resources
  *
@@ -313,24 +334,7 @@ void virtqueue_free(struct virtqueue *vq)
         env_free_memory(vq);
     }
 }
-
-/*!
- * virtqueue_free   - Frees VirtIO queue resources - static version
- *
- * @param vq        - Pointer to VirtIO queue control block
- *
- */
-void virtqueue_free_static(struct virtqueue *vq)
-{
-    if (vq != VQ_NULL)
-    {
-        if (vq->vq_ring_mem != VQ_NULL)
-        {
-            vq->vq_ring_size = 0;
-            vq->vq_ring_mem  = VQ_NULL;
-        }
-    }
-}
+#endif /* RL_USE_STATIC_API */
 
 /*!
  * virtqueue_get_available_buffer   - Returns buffer available for use in the
@@ -433,9 +437,11 @@ int32_t virtqueue_fill_used_buffers(struct virtqueue *vq, void *buffer, uint32_t
  */
 int32_t virtqueue_enable_cb(struct virtqueue *vq)
 {
+    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+     * implementation */
     return (vq_ring_enable_interrupt(vq, 0));
 }
-
+/* coco end */
 /*!
  * virtqueue_enable_cb - Disables callback generation
  *
@@ -448,8 +454,11 @@ void virtqueue_disable_cb(struct virtqueue *vq)
 
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
     {
+        /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
+         * utilized in rpmsg_lite implementation */
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx - vq->vq_nentries - 1U;
     }
+    /* coco end */
     else
     {
         vq->vq_ring.avail->flags |= (uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
@@ -486,6 +495,8 @@ void virtqueue_kick(struct virtqueue *vq)
  */
 void virtqueue_dump(struct virtqueue *vq)
 {
+    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+     * implementation */
     if (vq == VQ_NULL)
     {
         return;
@@ -499,6 +510,7 @@ void virtqueue_dump(struct virtqueue *vq)
         vq->vq_ring.avail->idx, vq->vq_used_cons_idx, vq->vq_ring.used->idx, vq->vq_ring.avail->flags,
         vq->vq_ring.used->flags);
 }
+/* coco end */
 
 /*!
  * virtqueue_get_desc_size - Returns vring descriptor size
@@ -509,6 +521,8 @@ void virtqueue_dump(struct virtqueue *vq)
  */
 uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
 {
+    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+     * implementation */
     uint16_t head_idx;
     uint16_t avail_idx;
     uint32_t len;
@@ -524,6 +538,7 @@ uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
 
     return (len);
 }
+/* coco end */
 
 /**************************************************************************
  *                            Helper Functions                            *
@@ -541,7 +556,9 @@ static uint16_t vq_ring_add_buffer(
 
     if (buffer == VQ_NULL)
     {
-        return head_idx;
+        return head_idx; /* coco validated: line never reached, vq_ring_add_buffer() is called from
+                            rpmsg_lite_master_init() only and the buffer parameter not being null check is done before
+                            passing the parameter */
     }
 
     VQASSERT(vq, head_idx != VQ_RING_DESC_CHAIN_END, "premature end of free desc chain");
@@ -639,6 +656,8 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
  */
 static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
 {
+    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+     * implementation */
     /*
      * Enable interrupts, making sure we get the latest index of
      * what's already been consumed.
@@ -666,6 +685,7 @@ static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
 
     return (0);
 }
+/* coco end */
 
 /*!
  *
@@ -695,12 +715,15 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
 
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
     {
+        /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
+         * utilized in rpmsg_lite implementation */
         new_idx   = vq->vq_ring.avail->idx;
         prev_idx  = new_idx - vq->vq_queued_cnt;
         event_idx = (uint16_t)vring_avail_event(&vq->vq_ring);
 
         return ((vring_need_event(event_idx, new_idx, prev_idx) != 0) ? 1 : 0);
     }
+    /* coco end */
 
     return (((vq->vq_ring.used->flags & ((uint16_t)VRING_USED_F_NO_NOTIFY)) == 0U) ? 1 : 0);
 }
@@ -725,6 +748,8 @@ static void vq_ring_notify_host(struct virtqueue *vq)
  */
 static uint16_t virtqueue_nused(struct virtqueue *vq)
 {
+    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+     * implementation */
     uint16_t used_idx, nused;
 
     used_idx = vq->vq_ring.used->idx;
@@ -734,3 +759,4 @@ static uint16_t virtqueue_nused(struct virtqueue *vq)
 
     return (nused);
 }
+/* coco end */

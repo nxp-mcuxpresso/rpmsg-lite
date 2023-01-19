@@ -113,14 +113,15 @@ void *env_get_platform_context(void *env_context)
  * env_wait_for_link_up
  *
  * Wait until the link_state parameter of the rpmsg_lite_instance is set.
- * Busy loop implementation for now, to be replaced by events.
+ * Busy loop implementation, timeout_ms parameter ignored for now, to be replaced by events.
  *
  */
-void env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
     while (*link_state != 1U)
     {
     }
+    return 1U;
 }
 
 /*!

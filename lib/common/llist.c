@@ -58,7 +58,7 @@ void add_to_list(struct llist **head, struct llist *node)
 {
     if (node == LIST_NULL)
     {
-        return;
+        return; /* coco validated: line never reached, add_to_list() is called from rpmsg_lite_create_ept() only and the node parameter not being null check is done before passing the parameter */
     }
 
     if (*head != LIST_NULL)
@@ -91,7 +91,7 @@ void remove_from_list(struct llist **head, struct llist *node)
 {
     if ((*head == LIST_NULL) || (node == LIST_NULL))
     {
-        return;
+        return; /* coco validated: line never reached, remove_from_list() is called from rpmsg_lite_destroy_ept() only, the head and node parameters not being null check is done before passing these parameters */
     }
 
     if (node == *head)

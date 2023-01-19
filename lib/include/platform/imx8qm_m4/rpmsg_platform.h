@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2019, 2022 NXP
  * All rights reserved.
  *
  *
@@ -26,7 +26,7 @@
 #define VRING_SIZE (0x8000UL)
 #endif
 
-/* size of shared memory + 2*VRING size */
+/* define shared memory space for VRINGS per one channel */
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
 /* VQ_ID in 8QM is defined as follows:
