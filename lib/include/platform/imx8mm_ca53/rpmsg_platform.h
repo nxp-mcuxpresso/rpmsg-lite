@@ -1,17 +1,16 @@
 /*
- * Copyright 2022 NXP
- * All rights reserved.
- *
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef RPMSG_PLATFORM_H_
 #define RPMSG_PLATFORM_H_
 
 #include <stdint.h>
 
 /* RPMSG channel index */
-#define RPMSG_SGI_MBOX_CHANNEL (0)
+#define RPMSG_MBOX_CHANNEL (0)
 
 /*
  * Linux requires the ALIGN to 0x1000(4KB) instead of 0x80

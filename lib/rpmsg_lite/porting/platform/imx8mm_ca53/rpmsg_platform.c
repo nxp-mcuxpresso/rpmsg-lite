@@ -1,6 +1,5 @@
 /*
- * Copyright 2022 NXP
- * All rights reserved.
+ * Copyright 2022-2023 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -18,46 +17,52 @@
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-#ifndef RL_SGIMBOX_BASE
-#error "RL_SGIMBOX_BASE is NOT defined, define it in rpmsg_config.h!"
+#ifndef RL_GEN_SW_MBOX_BASE
+#error "RL_GEN_SW_MBOX_BASE is NOT defined, define it in rpmsg_config.h!"
 #endif
 
-#ifndef RL_SGIMBOX_TARGET_CORE
-/* Define RL_SGIMBOX_TARGET_CORE in applications' rpmsg_config.h, otherwise core0 will be used by default */
-#define RL_SGIMBOX_TARGET_CORE	(0)
+#ifndef RL_GEN_SW_MBOX_IRQ
+#error "RL_GEN_SW_MBOX_IRQ is NOT defined, define it in rpmsg_config.h!"
 #endif
 
-#ifndef RL_SGIMBOX_IRQ
-/* Define RL_SGIMBOX_IRQ in applications' rpmsg_config.h, otherwise Software10_IRQn will be used by default */
-#define RL_SGIMBOX_IRQ	Software10_IRQn
+#ifndef RL_GEN_SW_MBOX_REMOTE_IRQ
+#error "RL_GEN_SW_MBOX_REMOTE_IRQ is NOT defined, define it in rpmsg_config.h!"
 #endif
-
-#define TARGET_CORE	(1 << (RL_SGIMBOX_TARGET_CORE))
 
 /*
- * status register brelf description:
+ * Generic software Registers:
  *
- * bit31                       |bit7            |bit3         bit0
- * ---------------------------------------------------------------
- * |      |      |      |      |  TX_CH status  |  RX_CH status  |
- * ---------------------------------------------------------------
- * TX_CH field: Each bit for a TX channel
- * RX_CH field: Each bit for a RX channel
+ * RX_STATUS[n]: RX channel n status
+ * 	0: indicates message in RX_CH[n] is invalid and channel ready.
+ * 	1: indicates message in RX_CH[n] is valid and channel busy.
+ * TX_STATUS[n]: TX channel n status
+ * 	0: indicates message in TX_CH[n] is invalid and channel ready.
+ * 	1: indicates message in TX_CH[n] is valid and channel busy.
+ * RX_CH[n]: Receive data register for channel n
+ * TX_CH[n]: Transmit data register for channel n
  *
- * Set by the initiator to indicate the 'data' in the TX_CH register valid;
- * And clear by the terminator to indicate TX done.
+ * To send a message:
+ * Update the data register TX_CH[n] with the message, then set the
+ * TX_STATUS[n] to 1, inject a interrupt to remote side.
+ *
+ * When received a message:
+ * Get the received data from RX_CH[n] and then clear the RX_STATUS[n] to
+ * indicate the remote side transmit done.
  */
 
 #define MAX_CH		(4)
-#define RX_CH_SHFIT	(0)
-#define TX_CH_SHFIT	MAX_CH
-#define RX_CH_BIT(n)	(1 << (n + RX_CH_SHFIT))
-#define TX_CH_BIT(n)	(1 << (n + TX_CH_SHFIT))
 
-struct sgi_mbox {
-    uint32_t status;
+struct gen_sw_mbox {
+    uint32_t rx_status[MAX_CH];
+    uint32_t tx_status[MAX_CH];
+    uint32_t reserved[MAX_CH];
     uint32_t rx_ch[MAX_CH];
     uint32_t tx_ch[MAX_CH];
+};
+
+enum sw_mbox_channel_status {
+    S_INVALID,
+    S_VALID,
 };
 
 extern uint64_t ullPortInterruptNesting;
@@ -68,46 +73,47 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
-static void sgi_mbox_handler(void *data)
+static void gen_sw_mbox_handler(void *data)
 {
-    struct sgi_mbox *base = (struct sgi_mbox *)data;
+    struct gen_sw_mbox *base = (struct gen_sw_mbox *)data;
     uint32_t vector_id;
 
     /* Check if the interrupt is for us */
-    if ((base->status & RX_CH_BIT(RPMSG_SGI_MBOX_CHANNEL)) == 0)
+    if (base->rx_status[RPMSG_MBOX_CHANNEL] == S_INVALID)
         return;
 
-    vector_id = base->rx_ch[RPMSG_SGI_MBOX_CHANNEL];
+    vector_id = base->rx_ch[RPMSG_MBOX_CHANNEL];
 
-    base->status &= ~(RX_CH_BIT(RPMSG_SGI_MBOX_CHANNEL));
+    base->rx_status[RPMSG_MBOX_CHANNEL] = S_INVALID;
     __DSB();
 
     env_isr(vector_id >> 16);
 }
 
-static void sgi_mailbox_init(struct sgi_mbox *base)
+static void gen_sw_mailbox_init(struct gen_sw_mbox *base)
 {
     /* Clear status register */
-    base->status = 0;
-    irq_register(RL_SGIMBOX_IRQ, sgi_mbox_handler, base, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
-    GIC_EnableIRQ(RL_SGIMBOX_IRQ);
+    base->rx_status[RPMSG_MBOX_CHANNEL] = 0;
+    base->tx_status[RPMSG_MBOX_CHANNEL] = 0;
+
+    irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler, base, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
+    GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
 }
 
-static void sgi_mbox_sendmsg(struct sgi_mbox *base, uint32_t ch, uint32_t msg)
+static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
 {
-    while (base->status & TX_CH_BIT(ch)) {
+    while (base->tx_status[ch] == S_VALID) {
 	/* Avoid sending the same vq id multiple times when channel is busy */
         if (msg == base->tx_ch[ch])
 		return;
     }
 
     base->tx_ch[ch] = msg;
-    base->status |= TX_CH_BIT(ch);
-    /* sync before trigger SGI */
+    base->tx_status[ch] = S_VALID;
+    /* sync before trigger interrupt to remote */
     __DSB();
 
-    /* trigger SGI to core 0 */
-    GIC_SendSGI(RL_SGIMBOX_IRQ, 0, TARGET_CORE);
+    GIC_SetPendingIRQ(RL_GEN_SW_MBOX_REMOTE_IRQ);
 }
 
 static void platform_global_isr_disable(void)
@@ -149,7 +155,7 @@ void platform_notify(uint32_t vector_id)
     uint32_t msg = (uint32_t)(vector_id << 16);
 
     env_lock_mutex(platform_lock);
-    sgi_mbox_sendmsg((struct sgi_mbox *)RL_SGIMBOX_BASE, RPMSG_SGI_MBOX_CHANNEL, msg);
+    gen_sw_mbox_sendmsg((struct gen_sw_mbox *)RL_GEN_SW_MBOX_BASE, RPMSG_MBOX_CHANNEL, msg);
     env_unlock_mutex(platform_lock);
 }
 
@@ -211,7 +217,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
-	GIC_EnableIRQ(RL_SGIMBOX_IRQ);
+	GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
     }
     platform_global_isr_enable();
 
@@ -233,11 +239,11 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     RL_ASSERT(0 <= disable_counter);
 
     platform_global_isr_disable();
-    /* virtqueues use the same NVIC vector
+    /* virtqueues use the same GIC vector
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
-	GIC_DisableIRQ(RL_SGIMBOX_IRQ);
+	GIC_DisableIRQ(RL_GEN_SW_MBOX_IRQ);
     }
     disable_counter++;
     platform_global_isr_enable();
@@ -304,7 +310,7 @@ void *platform_patova(uintptr_t addr)
  */
 int32_t platform_init(void)
 {
-    sgi_mailbox_init((struct sgi_mbox *)RL_SGIMBOX_BASE);
+    gen_sw_mailbox_init((struct gen_sw_mbox *)RL_GEN_SW_MBOX_BASE);
 
     /* Create lock used in multi-instanced RPMsg */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
