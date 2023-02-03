@@ -8,7 +8,6 @@
 #include <string.h>
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
-#include "irq.h"
 #include "FreeRTOS.h"
 
 #include "fsl_device_registers.h"
@@ -73,7 +72,7 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
-static void gen_sw_mbox_handler(void *data)
+void gen_sw_mbox_handler(void *data)
 {
     struct gen_sw_mbox *base = (struct gen_sw_mbox *)data;
     uint32_t vector_id;
@@ -95,9 +94,6 @@ static void gen_sw_mailbox_init(struct gen_sw_mbox *base)
     /* Clear status register */
     base->rx_status[RPMSG_MBOX_CHANNEL] = 0;
     base->tx_status[RPMSG_MBOX_CHANNEL] = 0;
-
-    irq_register(RL_GEN_SW_MBOX_IRQ, gen_sw_mbox_handler, base, (portLOWEST_USABLE_INTERRUPT_PRIORITY - 1) << portPRIORITY_SHIFT);
-    GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
 }
 
 static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
