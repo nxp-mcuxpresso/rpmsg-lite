@@ -31,7 +31,7 @@
 #define RL_GET_LINK_ID(id)              (((id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(id)                 ((id)&0x1U)
 
-#define RL_PLATFORM_IMX8MM_CA53_USER_LINK_ID (0U)
+#define RL_PLATFORM_USER_LINK_ID           (0U)
 #define RL_PLATFORM_HIGHEST_LINK_ID        (15U)
 
 /* platform interrupt related functions */
