@@ -61,8 +61,6 @@ enum sw_mbox_channel_status {
     S_VALID,
 };
 
-extern uint64_t ullPortInterruptNesting;
-
 static int32_t disable_counter = 0;
 static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -175,20 +173,6 @@ void platform_time_delay(uint32_t num_msec)
         __NOP();
         loop--;
     }
-}
-
-/**
- * platform_in_isr
- *
- * Return whether CPU is processing IRQ
- *
- * @return True for IRQ, false otherwise.
- *
- */
-int32_t platform_in_isr(void)
-{
-    /* This is only working for FreeRTOS */
-    return (ullPortInterruptNesting > 0);
 }
 
 /**

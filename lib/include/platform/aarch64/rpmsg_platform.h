@@ -39,7 +39,6 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);
 int32_t platform_deinit_interrupt(uint32_t vector_id);
 int32_t platform_interrupt_enable(uint32_t vector_id);
 int32_t platform_interrupt_disable(uint32_t vector_id);
-int32_t platform_in_isr(void);
 void platform_notify(uint32_t vector_id);
 
 /* platform low-level time-delay (busy loop) */
