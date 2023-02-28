@@ -26,24 +26,24 @@
 #endif
 
 /*
- * Generic software Registers:
+ * Generic software mailbox Registers:
  *
  * RX_STATUS[n]: RX channel n status
- * 	0: indicates message in RX_CH[n] is invalid and channel ready.
- * 	1: indicates message in RX_CH[n] is valid and channel busy.
  * TX_STATUS[n]: TX channel n status
- * 	0: indicates message in TX_CH[n] is invalid and channel ready.
- * 	1: indicates message in TX_CH[n] is valid and channel busy.
+ * 	0: indicates message in T/RX_CH[n] is invalid and channel ready.
+ * 	1: indicates message in T/RX_CH[n] is valid and channel busy.
+ * 	2: indicates message in T/RX_CH[n] has been received by the peer.
  * RX_CH[n]: Receive data register for channel n
  * TX_CH[n]: Transmit data register for channel n
  *
  * To send a message:
  * Update the data register TX_CH[n] with the message, then set the
- * TX_STATUS[n] to 1, inject a interrupt to remote side.
+ * TX_STATUS[n] to 1, inject a interrupt to remote side; after the
+ * transmission done set the TX_STATUS[n] back to 0.
  *
  * When received a message:
- * Get the received data from RX_CH[n] and then clear the RX_STATUS[n] to
- * indicate the remote side transmit done.
+ * Get the received data from RX_CH[n] and then set the RX_STATUS[n] to
+ * 2 and inject a interrupt to notify the remote side transmission done.
  */
 
 #define MAX_CH		(4)
@@ -57,8 +57,9 @@ struct gen_sw_mbox {
 };
 
 enum sw_mbox_channel_status {
-    S_INVALID,
-    S_VALID,
+    S_READY,
+    S_BUSY,
+    S_DONE,
 };
 
 static int32_t disable_counter = 0;
@@ -72,14 +73,18 @@ void gen_sw_mbox_handler(void *data)
     struct gen_sw_mbox *base = (struct gen_sw_mbox *)data;
     uint32_t vector_id;
 
+    if (base->tx_status[RPMSG_MBOX_CHANNEL] == S_DONE)
+        base->tx_status[RPMSG_MBOX_CHANNEL] = S_READY;
+
     /* Check if the interrupt is for us */
-    if (base->rx_status[RPMSG_MBOX_CHANNEL] == S_INVALID)
+    if (base->rx_status[RPMSG_MBOX_CHANNEL] != S_BUSY)
         return;
 
     vector_id = base->rx_ch[RPMSG_MBOX_CHANNEL];
 
-    base->rx_status[RPMSG_MBOX_CHANNEL] = S_INVALID;
+    base->rx_status[RPMSG_MBOX_CHANNEL] = S_DONE;
     __DSB();
+    GIC_SetPendingIRQ(RL_GEN_SW_MBOX_REMOTE_IRQ);
 
     env_isr(vector_id >> 16);
 }
@@ -93,14 +98,14 @@ static void gen_sw_mailbox_init(struct gen_sw_mbox *base)
 
 static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
 {
-    while (base->tx_status[ch] == S_VALID) {
+    while (base->tx_status[ch] != S_READY) {
 	/* Avoid sending the same vq id multiple times when channel is busy */
         if (msg == base->tx_ch[ch])
 		return;
     }
 
     base->tx_ch[ch] = msg;
-    base->tx_status[ch] = S_VALID;
+    base->tx_status[ch] = S_BUSY;
     /* sync before trigger interrupt to remote */
     __DSB();
 
