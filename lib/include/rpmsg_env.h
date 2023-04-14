@@ -524,7 +524,7 @@ void env_delete_queue(void *queue);
  * @return - status of function execution
  */
 
-int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms);
+int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms);
 
 /*!
  * env_get_queue
@@ -538,7 +538,7 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms);
  * @return - status of function execution
  */
 
-int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms);
+int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms);
 
 /*!
  * env_get_current_queue_size
