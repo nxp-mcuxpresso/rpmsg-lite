@@ -22,7 +22,7 @@
 #include "rpmsg_default_config.h"
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 typedef k_sem LOCK_STATIC_CONTEXT;
 typedef k_msgq rpmsg_static_queue_ctxt;

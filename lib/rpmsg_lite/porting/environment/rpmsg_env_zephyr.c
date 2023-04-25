@@ -45,7 +45,7 @@
 
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
 
