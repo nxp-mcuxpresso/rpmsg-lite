@@ -8,6 +8,7 @@
 #include <string.h>
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
+#include "fsl_device_registers.h"
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
