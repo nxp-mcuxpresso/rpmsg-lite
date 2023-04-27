@@ -117,7 +117,7 @@ void *env_get_platform_context(void *env_context)
  * Busy loop implementation, timeout_ms parameter, to be replaced by events.
  *
  */
-uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uintptr_t timeout_ms)
 {
     uint32_t tick_count = 0U;
     uint32_t tick_temp;
