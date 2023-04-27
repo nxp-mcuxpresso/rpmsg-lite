@@ -617,7 +617,7 @@ int32_t env_deinit_interrupt(void *env, int32_t vq_id);
  * @return RL_TRUE when link up, RL_FALSE when timeout.
  *
  */
-uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms);
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uintptr_t timeout_ms);
 
 /*!
  * env_tx_callback

@@ -551,7 +551,7 @@ uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
     return (RL_TRUE == rpmsg_lite_dev->link_state ? RL_TRUE : RL_FALSE);
 }
 
-uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t timeout)
+uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uintptr_t timeout)
 {
     if (rpmsg_lite_dev == RL_NULL)
     {
@@ -583,7 +583,7 @@ static int32_t rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_
                                          char *data,
                                          uint32_t size,
                                          uint32_t flags,
-                                         uint32_t timeout)
+                                         uintptr_t timeout)
 {
     struct rpmsg_std_msg *rpmsg_msg;
     void *buffer;

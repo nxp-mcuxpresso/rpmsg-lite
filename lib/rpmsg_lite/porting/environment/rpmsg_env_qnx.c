@@ -116,7 +116,7 @@ void *env_get_platform_context(void *env_context)
  * Busy loop implementation, timeout_ms parameter ignored for now, to be replaced by events.
  *
  */
-uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uintptr_t timeout_ms)
 {
     while (*link_state != 1U)
     {
@@ -722,7 +722,7 @@ void env_delete_queue(void *queue)
  *
  * @return - status of function execution
  */
-int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     env_queue_t *q = queue;
 
@@ -745,7 +745,7 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
  *
  * @return - status of function execution
  */
-int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     env_queue_t *q = queue;
     if (mq_receive(q->mqd, msg, q->msg_len, ((void *)0)) == -1)
