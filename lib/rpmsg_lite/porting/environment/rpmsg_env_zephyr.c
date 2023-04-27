@@ -99,7 +99,7 @@ static int32_t env_in_isr(void)
  * Utilize events to avoid busy loop implementation.
  *
  */
-uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
+uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uintptr_t timeout_ms)
 {
     if (*link_state != 1U)
     {
