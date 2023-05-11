@@ -69,6 +69,10 @@ enum sw_mbox_channel_status
     S_DONE,
 };
 
+static struct gen_sw_mbox_priv {
+	struct gen_sw_mbox *base;
+} mbox_priv;
+
 static int32_t disable_counter = 0;
 static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -96,11 +100,12 @@ void gen_sw_mbox_handler(void *data)
     env_isr(vector_id >> 16);
 }
 
-static void gen_sw_mailbox_init(struct gen_sw_mbox *base)
+void gen_sw_mailbox_init(void *base)
 {
+    mbox_priv.base = base;
     /* Clear status register */
-    base->rx_status[RPMSG_MBOX_CHANNEL] = 0;
-    base->tx_status[RPMSG_MBOX_CHANNEL] = 0;
+    mbox_priv.base->rx_status[RPMSG_MBOX_CHANNEL] = 0;
+    mbox_priv.base->tx_status[RPMSG_MBOX_CHANNEL] = 0;
 }
 
 static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
@@ -159,7 +164,7 @@ void platform_notify(uint32_t vector_id)
     uint32_t msg = (uint32_t)(vector_id << 16);
 
     env_lock_mutex(platform_lock);
-    gen_sw_mbox_sendmsg((struct gen_sw_mbox *)RL_GEN_SW_MBOX_BASE, RPMSG_MBOX_CHANNEL, msg);
+    gen_sw_mbox_sendmsg(mbox_priv.base, RPMSG_MBOX_CHANNEL, msg);
     env_unlock_mutex(platform_lock);
 }
 
@@ -320,8 +325,6 @@ void *platform_patova(uintptr_t addr)
  */
 int32_t platform_init(void)
 {
-    gen_sw_mailbox_init((struct gen_sw_mbox *)RL_GEN_SW_MBOX_BASE);
-
     /* Create lock used in multi-instanced RPMsg */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_static_ctxt))
