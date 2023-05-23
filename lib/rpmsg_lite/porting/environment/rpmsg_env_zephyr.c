@@ -45,6 +45,7 @@
 
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
+#include "rpmsg_lite.h"
 #include <zephyr/kernel.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
@@ -106,7 +107,8 @@ uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, u
             timeout_ms = 0; /* force timeout == 0 when in ISR */
         }
 
-        if (0 != k_event_wait_all(&env_event, (1UL << link_id), false, K_MSEC(timeout_ms)))
+        if (0 != k_event_wait_all(&env_event, (1UL << link_id), false,
+                                  (timeout_ms == RL_BLOCK) ? K_FOREVER : K_MSEC(timeout_ms)))
         {
             return 1U;
         }
@@ -493,7 +495,7 @@ void env_release_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    k_sleep(K_MSEC(num_msec));
+    k_sleep((num_msec == RL_BLOCK) ? K_FOREVER : K_MSEC(num_msec));
 }
 
 /*!
@@ -679,7 +681,8 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
         timeout_ms = 0; /* force timeout == 0 when in ISR */
     }
 
-    if (0 == k_msgq_put((struct k_msgq *)queue, msg, K_MSEC(timeout_ms)))
+    if (0 == k_msgq_put((struct k_msgq *)queue, msg,
+                        (timeout_ms == RL_BLOCK) ? K_FOREVER : K_MSEC(timeout_ms)))
     {
         return 1;
     }
@@ -705,7 +708,8 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
         timeout_ms = 0; /* force timeout == 0 when in ISR */
     }
 
-    if (0 == k_msgq_get((struct k_msgq *)queue, msg, K_MSEC(timeout_ms)))
+    if (0 == k_msgq_get((struct k_msgq *)queue, msg,
+                        (timeout_ms == RL_BLOCK) ? K_FOREVER : K_MSEC(timeout_ms)))
     {
         return 1;
     }
