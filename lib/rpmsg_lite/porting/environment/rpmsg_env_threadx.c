@@ -470,7 +470,7 @@ void env_delete_sync_lock(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(uint32_t num_msec)
+void env_sleep_msec(uintptr_t num_msec)
 {
     // (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000UL);
     (void)tx_thread_sleep((num_msec / 1000UL) * TX_TIMER_TICKS_PER_SECOND +
