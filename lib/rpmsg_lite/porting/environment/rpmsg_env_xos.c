@@ -506,7 +506,7 @@ void env_release_sync_lock(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(uint32_t num_msec)
+void env_sleep_msec(uintptr_t num_msec)
 {
     (void)xos_thread_sleep_msec(num_msec);
 }
