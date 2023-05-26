@@ -342,7 +342,7 @@ void env_delete_sync_lock(void *lock);
  *
  * @param num_msec -  delay in msecs
  */
-void env_sleep_msec(uint32_t num_msec);
+void env_sleep_msec(uintptr_t num_msec);
 
 /*!
  * env_register_isr

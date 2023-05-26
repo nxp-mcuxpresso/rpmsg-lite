@@ -447,7 +447,7 @@ void env_delete_sync_lock(void *lock)
  *
  * Suspends the calling thread for given time , in msecs.
  */
-void env_sleep_msec(uint32_t num_msec)
+void env_sleep_msec(uintptr_t num_msec)
 {
     delay(num_msec);
 }
