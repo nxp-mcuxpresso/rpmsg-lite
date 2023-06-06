@@ -210,9 +210,10 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     platform_global_isr_disable();
     disable_counter--;
 
+    /* application should enable the generic mbox interrupt line */
     if (disable_counter == 0)
     {
-        GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
+        /* do nothing */;
     }
     platform_global_isr_enable();
 
@@ -234,11 +235,10 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     RL_ASSERT(0 <= disable_counter);
 
     platform_global_isr_disable();
-    /* virtqueues use the same GIC vector
-       if counter is set - the interrupts are disabled */
+    /* we only use one channel, so don't disable generic mbox interrupt line */
     if (disable_counter == 0)
     {
-        GIC_DisableIRQ(RL_GEN_SW_MBOX_IRQ);
+        /* do nothing */;
     }
     disable_counter++;
     platform_global_isr_enable();
