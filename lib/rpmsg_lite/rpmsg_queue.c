@@ -71,10 +71,15 @@ rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev
 
     /* create message queue for channel default endpoint */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    status = env_create_queue(&q, (int32_t)rpmsg_lite_dev->rvq->vq_nentries, (int32_t)sizeof(rpmsg_queue_rx_cb_data_t),
-                              queue_storage, queue_ctxt);
+    if ((queue_storage == RL_NULL) || (queue_ctxt == RL_NULL))
+    {
+        return RL_NULL;
+    }
+    status = env_create_queue(&q, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
+                              (int32_t)sizeof(rpmsg_queue_rx_cb_data_t), queue_storage, queue_ctxt);
 #else
-    status = env_create_queue(&q, (int32_t)rpmsg_lite_dev->rvq->vq_nentries, (int32_t)sizeof(rpmsg_queue_rx_cb_data_t));
+    status = env_create_queue(&q, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
+                              (int32_t)sizeof(rpmsg_queue_rx_cb_data_t));
 #endif
     if ((status != 0) || (q == RL_NULL))
     {

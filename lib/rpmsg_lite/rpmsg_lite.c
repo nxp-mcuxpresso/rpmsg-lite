@@ -875,7 +875,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #endif
 {
     int32_t status;
-    void (*callback[2])(struct virtqueue * vq);
+    void (*callback[2])(struct virtqueue *vq);
     const char *vq_names[2];
     struct vring_alloc_info ring_info;
     struct virtqueue *vqs[2] = {0};
@@ -947,14 +947,14 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     status = env_init(&rpmsg_lite_dev->env, env_cfg);
 #else
-    status = env_init();
+    status                      = env_init();
 #endif
     if (status != RL_SUCCESS)
     {
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
         env_free_memory(rpmsg_lite_dev); /* coco validated: not able to force the application to reach this line */
 #endif
-        return RL_NULL; /* coco validated: not able to force the application to reach this line */
+        return RL_NULL;                  /* coco validated: not able to force the application to reach this line */
     }
 
     rpmsg_lite_dev->link_id = link_id;
@@ -964,7 +964,8 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
      * shared buffers. Create shared memory pool to handle buffers.
      */
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
+    rpmsg_lite_dev->sh_mem_base =
+        (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
     rpmsg_lite_dev->sh_mem_remaining = (RL_WORD_ALIGN_DOWN(shmem_length - 2U * shmem_config.vring_size)) /
                                        (uint32_t)(shmem_config.buffer_payload_size + 16UL);
 #else
@@ -990,9 +991,9 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         ring_info.align     = shmem_config.vring_align;
         ring_info.num_descs = shmem_config.buffer_count;
 #else
-        ring_info.phy_addr = (void *)(char *)((uintptr_t)(char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr) +
+        ring_info.phy_addr  = (void *)(char *)((uintptr_t)(char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr) +
                                               (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
-        ring_info.align = VRING_ALIGN;
+        ring_info.align     = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
@@ -1168,7 +1169,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 #endif
 {
     int32_t status;
-    void (*callback[2])(struct virtqueue * vq);
+    void (*callback[2])(struct virtqueue *vq);
     const char *vq_names[2];
     struct vring_alloc_info ring_info;
     struct virtqueue *vqs[2] = {0};
@@ -1225,7 +1226,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     status = env_init(&rpmsg_lite_dev->env, env_cfg);
 #else
-    status = env_init();
+    status                      = env_init();
 #endif
 
     if (status != RL_SUCCESS)
@@ -1233,7 +1234,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
         env_free_memory(rpmsg_lite_dev); /* coco validated: not able to force the application to reach this line */
 #endif
-        return RL_NULL; /* coco validated: not able to force the application to reach this line */
+        return RL_NULL;                  /* coco validated: not able to force the application to reach this line */
     }
 
     rpmsg_lite_dev->link_id = link_id;
@@ -1244,7 +1245,8 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     callback[1]            = rpmsg_lite_rx_callback;
     rpmsg_lite_dev->vq_ops = &remote_vq_ops;
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-    rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
+    rpmsg_lite_dev->sh_mem_base =
+        (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
 #else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
 #endif /* defined(RL_ALLOW_CUSTOM_VRING_CONFIG) && (RL_ALLOW_CUSTOM_VRING_CONFIG == 1) */
@@ -1258,9 +1260,9 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
         ring_info.align     = shmem_config.vring_align;
         ring_info.num_descs = shmem_config.buffer_count;
 #else
-        ring_info.phy_addr = (void *)(char *)((uintptr_t)(char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr) +
+        ring_info.phy_addr  = (void *)(char *)((uintptr_t)(char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr) +
                                               (uint32_t)((idx == 0U) ? (0U) : (VRING_SIZE)));
-        ring_info.align = VRING_ALIGN;
+        ring_info.align     = VRING_ALIGN;
         ring_info.num_descs = RL_BUFFER_COUNT;
 #endif /* defined(RL_ALLOW_CUSTOM_VRING_CONFIG) && (RL_ALLOW_CUSTOM_VRING_CONFIG == 1) */
 

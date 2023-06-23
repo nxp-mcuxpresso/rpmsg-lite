@@ -201,9 +201,9 @@ void platform_cache_disable(void)
  * Dummy implementation
  *
  */
-uint32_t platform_vatopa(void *addr)
+uintptr_t platform_vatopa(void *addr)
 {
-    return ((uint32_t)(char *)addr);
+    return ((uintptr_t)(char *)addr);
 }
 
 /**
@@ -212,7 +212,7 @@ uint32_t platform_vatopa(void *addr)
  * Dummy implementation
  *
  */
-void *platform_patova(uint32_t addr)
+void *platform_patova(uintptr_t addr)
 {
     return ((void *)(char *)addr);
 }

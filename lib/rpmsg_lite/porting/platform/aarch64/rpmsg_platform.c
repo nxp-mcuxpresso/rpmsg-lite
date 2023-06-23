@@ -46,9 +46,10 @@
  * 2 and inject a interrupt to notify the remote side transmission done.
  */
 
-#define MAX_CH		(4)
+#define MAX_CH (4)
 
-struct gen_sw_mbox {
+struct gen_sw_mbox
+{
     uint32_t rx_status[MAX_CH];
     uint32_t tx_status[MAX_CH];
     uint32_t reserved[MAX_CH];
@@ -56,7 +57,8 @@ struct gen_sw_mbox {
     uint32_t tx_ch[MAX_CH];
 };
 
-enum sw_mbox_channel_status {
+enum sw_mbox_channel_status
+{
     S_READY,
     S_BUSY,
     S_DONE,
@@ -98,13 +100,14 @@ static void gen_sw_mailbox_init(struct gen_sw_mbox *base)
 
 static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
 {
-    while (base->tx_status[ch] != S_READY) {
-	/* Avoid sending the same vq id multiple times when channel is busy */
+    while (base->tx_status[ch] != S_READY)
+    {
+        /* Avoid sending the same vq id multiple times when channel is busy */
         if (msg == base->tx_ch[ch])
-		return;
+            return;
     }
 
-    base->tx_ch[ch] = msg;
+    base->tx_ch[ch]     = msg;
     base->tx_status[ch] = S_BUSY;
     /* sync before trigger interrupt to remote */
     __DSB();
@@ -114,16 +117,16 @@ static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t 
 
 static void platform_global_isr_disable(void)
 {
-    __asm volatile ( "MSR DAIFSET, #2" ::: "memory" );
-    __asm volatile ( "DSB SY" );
-    __asm volatile ( "ISB SY" );
+    __asm volatile("MSR DAIFSET, #2" ::: "memory");
+    __asm volatile("DSB SY");
+    __asm volatile("ISB SY");
 }
 
 static void platform_global_isr_enable(void)
 {
-    __asm volatile ( "MSR DAIFCLR, #2" ::: "memory" );
-    __asm volatile ( "DSB SY" );
-    __asm volatile ( "ISB SY" );
+    __asm volatile("MSR DAIFCLR, #2" ::: "memory");
+    __asm volatile("DSB SY");
+    __asm volatile("ISB SY");
 }
 
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
@@ -199,7 +202,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
-	GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
+        GIC_EnableIRQ(RL_GEN_SW_MBOX_IRQ);
     }
     platform_global_isr_enable();
 
@@ -225,7 +228,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
-	GIC_DisableIRQ(RL_GEN_SW_MBOX_IRQ);
+        GIC_DisableIRQ(RL_GEN_SW_MBOX_IRQ);
     }
     disable_counter++;
     platform_global_isr_enable();

@@ -257,9 +257,9 @@ void platform_cache_disable(void)
  * Translate CM33 addresses to DSP addresses
  *
  */
-uint32_t platform_vatopa(void *addr)
+uintptr_t platform_vatopa(void *addr)
 {
-    return (((uint32_t)(char *)addr & 0x0FFFFFFFu) + 0x800000u);
+    return (((uintptr_t)(char *)addr & 0x0FFFFFFFu) + 0x800000u);
 }
 
 /**
@@ -268,7 +268,7 @@ uint32_t platform_vatopa(void *addr)
  * Translate DSP addresses to CM33 addresses
  *
  */
-void *platform_patova(uint32_t addr)
+void *platform_patova(uintptr_t addr)
 {
     return (void *)(char *)((addr - 0x00800000u) | 0x20000000u);
 }

@@ -263,6 +263,7 @@ int32_t env_deinit(void)
     }
 }
 
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
 /*!
  * env_allocate_memory - implementation
  *
@@ -285,6 +286,7 @@ void env_free_memory(void *ptr)
         vPortFree(ptr);
     }
 }
+#endif
 
 /*!
  *
