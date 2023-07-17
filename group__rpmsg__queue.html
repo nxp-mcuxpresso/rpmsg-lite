@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 5.0.0</span>
+   &#160;<span id="projectnumber">Rev. 5.1.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -134,14 +134,14 @@ Functions</h2></td></tr>
 <tr class="memitem:ga480a59ddeeef5f54f84cd3977efcd1ec"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#ga480a59ddeeef5f54f84cd3977efcd1ec">rpmsg_queue_destroy</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q)</td></tr>
 <tr class="memdesc:ga480a59ddeeef5f54f84cd3977efcd1ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy a queue and clean up. Do not destroy a queue which is registered with an active endpoint!  <a href="#ga480a59ddeeef5f54f84cd3977efcd1ec">More...</a><br /></td></tr>
 <tr class="separator:ga480a59ddeeef5f54f84cd3977efcd1ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaed084bf79a613f41f0e100250ba2a99"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#gaaed084bf79a613f41f0e100250ba2a99">rpmsg_queue_recv</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q, uint32_t *src, char *data, uint32_t maxlen, uint32_t *len, uint32_t timeout)</td></tr>
-<tr class="memdesc:gaaed084bf79a613f41f0e100250ba2a99"><td class="mdescLeft">&#160;</td><td class="mdescRight">blocking receive function - blocking version of the received function that can be called from an RTOS task. The data is copied from the receive buffer into the user supplied buffer.  <a href="#gaaed084bf79a613f41f0e100250ba2a99">More...</a><br /></td></tr>
-<tr class="separator:gaaed084bf79a613f41f0e100250ba2a99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5b6528593ab94d2377967a1cf2ec6180"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180">rpmsg_queue_recv_nocopy</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q, uint32_t *src, char **data, uint32_t *len, uint32_t timeout)</td></tr>
-<tr class="memdesc:ga5b6528593ab94d2377967a1cf2ec6180"><td class="mdescLeft">&#160;</td><td class="mdescRight">blocking receive function - blocking version of the received function that can be called from an RTOS task. The data is NOT copied into the user-app. buffer.  <a href="#ga5b6528593ab94d2377967a1cf2ec6180">More...</a><br /></td></tr>
-<tr class="separator:ga5b6528593ab94d2377967a1cf2ec6180"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf624a7049539d62c80c6c032dab3e8d8"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#gaf624a7049539d62c80c6c032dab3e8d8">rpmsg_queue_recv</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q, uint32_t *src, char *data, uint32_t maxlen, uint32_t *len, uintptr_t timeout)</td></tr>
+<tr class="memdesc:gaf624a7049539d62c80c6c032dab3e8d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">blocking receive function - blocking version of the received function that can be called from an RTOS task. The data is copied from the receive buffer into the user supplied buffer.  <a href="#gaf624a7049539d62c80c6c032dab3e8d8">More...</a><br /></td></tr>
+<tr class="separator:gaf624a7049539d62c80c6c032dab3e8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga70c77536c40ade2d13371846023f6d72"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#ga70c77536c40ade2d13371846023f6d72">rpmsg_queue_recv_nocopy</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, <a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q, uint32_t *src, char **data, uint32_t *len, uintptr_t timeout)</td></tr>
+<tr class="memdesc:ga70c77536c40ade2d13371846023f6d72"><td class="mdescLeft">&#160;</td><td class="mdescRight">blocking receive function - blocking version of the received function that can be called from an RTOS task. The data is NOT copied into the user-app. buffer.  <a href="#ga70c77536c40ade2d13371846023f6d72">More...</a><br /></td></tr>
+<tr class="separator:ga70c77536c40ade2d13371846023f6d72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1c3cff098b9464fa89788510bda231a3"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#ga1c3cff098b9464fa89788510bda231a3">rpmsg_queue_nocopy_free</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, void *data)</td></tr>
-<tr class="memdesc:ga1c3cff098b9464fa89788510bda231a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function frees a buffer previously returned by <a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a>.  <a href="#ga1c3cff098b9464fa89788510bda231a3">More...</a><br /></td></tr>
+<tr class="memdesc:ga1c3cff098b9464fa89788510bda231a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function frees a buffer previously returned by <a class="el" href="group__rpmsg__queue.html#ga70c77536c40ade2d13371846023f6d72" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a>.  <a href="#ga1c3cff098b9464fa89788510bda231a3">More...</a><br /></td></tr>
 <tr class="separator:ga1c3cff098b9464fa89788510bda231a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2d65626ac1279a50be5e1f86ed80acbf"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__queue.html#ga2d65626ac1279a50be5e1f86ed80acbf">rpmsg_queue_get_current_size</a> (<a class="el" href="group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e">rpmsg_queue_handle</a> q)</td></tr>
 <tr class="memdesc:ga2d65626ac1279a50be5e1f86ed80acbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the number of pending messages in the queue.  <a href="#ga2d65626ac1279a50be5e1f86ed80acbf">More...</a><br /></td></tr>
@@ -261,7 +261,7 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="gaaed084bf79a613f41f0e100250ba2a99"></a>
+<a class="anchor" id="gaf624a7049539d62c80c6c032dab3e8d8"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -304,7 +304,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramtype">uintptr_t&#160;</td>
           <td class="paramname"><em>timeout</em>&#160;</td>
         </tr>
         <tr>
@@ -330,11 +330,11 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of function execution</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__queue.html#ga70c77536c40ade2d13371846023f6d72" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy</a> </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="ga5b6528593ab94d2377967a1cf2ec6180"></a>
+<a class="anchor" id="ga70c77536c40ade2d13371846023f6d72"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -371,7 +371,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramtype">uintptr_t&#160;</td>
           <td class="paramname"><em>timeout</em>&#160;</td>
         </tr>
         <tr>
@@ -398,7 +398,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Status of function execution.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__queue.html#ga1c3cff098b9464fa89788510bda231a3" title="This function frees a buffer previously returned by rpmsg_queue_recv_nocopy(). ">rpmsg_queue_nocopy_free</a> </dd>
 <dd>
-<a class="el" href="group__rpmsg__queue.html#gaaed084bf79a613f41f0e100250ba2a99" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv</a> </dd></dl>
+<a class="el" href="group__rpmsg__queue.html#gaf624a7049539d62c80c6c032dab3e8d8" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv</a> </dd></dl>
 
 </div>
 </div>
@@ -426,7 +426,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function frees a buffer previously returned by <a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a>. </p>
+<p>This function frees a buffer previously returned by <a class="el" href="group__rpmsg__queue.html#ga70c77536c40ade2d13371846023f6d72" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy()</a>. </p>
 <p>Once the zero-copy mechanism of receiving data is used, this function has to be called to free a buffer and to make it available for the next data transfer.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -436,7 +436,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Status of function execution.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__queue.html#ga5b6528593ab94d2377967a1cf2ec6180" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group__rpmsg__queue.html#ga70c77536c40ade2d13371846023f6d72" title="blocking receive function - blocking version of the received function that can be called from an RTOS...">rpmsg_queue_recv_nocopy</a> </dd></dl>
 
 </div>
 </div>

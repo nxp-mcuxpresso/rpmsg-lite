@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tvq',['tvq',['../group__rpmsg__lite.html#ae1d9d59636e550051ebce42bd0b58816',1,'rpmsg_lite_instance']]]
+  ['node',['node',['../group__rpmsg__lite.html#aac24ffeec310481457938c02b916c426',1,'rpmsg_lite_ept_static_context']]]
 ];

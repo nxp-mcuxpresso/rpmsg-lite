@@ -9,7 +9,11 @@ var NAVTREE =
         [ "Name Service sub-component (optional)", "index.html#rpmsg_nameservice", null ]
       ] ],
       [ "Usage", "index.html#usage", null ],
-      [ "Configuration options", "index.html#configuration", null ],
+      [ "Notes", "index.html#notes", [
+        [ "Environment layers implementation", "index.html#Environment_layers_implementation", null ],
+        [ "Shared memory configuration", "index.html#Shared_memory_configuration", null ]
+      ] ],
+      [ "Configuration options", "index.html#configuration_options", null ],
       [ "References", "index.html#references", null ],
       [ "Revision History", "index.html#revision_history", null ]
     ] ],
