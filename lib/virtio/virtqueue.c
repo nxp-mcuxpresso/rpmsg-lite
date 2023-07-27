@@ -365,7 +365,7 @@ void *virtqueue_get_available_buffer(struct virtqueue *vq, uint16_t *avail_idx, 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     buffer = env_map_patova(vq->env, ((uint32_t)(vq->vq_ring.desc[*avail_idx].addr)));
 #else
-    buffer = env_map_patova((uint32_t)(vq->vq_ring.desc[*avail_idx].addr));
+    buffer   = env_map_patova((uint32_t)(vq->vq_ring.desc[*avail_idx].addr));
 #endif
     *len = vq->vq_ring.desc[*avail_idx].len;
 

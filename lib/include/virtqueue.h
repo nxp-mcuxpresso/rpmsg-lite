@@ -132,11 +132,11 @@ struct virtqueue
     boolean used_read;   /* 8bit wide */
     boolean used_write;  /* 8bit wide */
 
-    uint16_t padd; /* aligned to 32bits after this: */
+    uint16_t padd;       /* aligned to 32bits after this: */
 
-    void *priv; /* private pointer, upper layer instance pointer */
+    void *priv;          /* private pointer, upper layer instance pointer */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-    void *env; /* private pointer to environment layer internal context */
+    void *env;           /* private pointer to environment layer internal context */
 #endif
 };
 

@@ -91,6 +91,8 @@ extern "C" {
  * @param rpmsg_lite_dev    RPMsg-Lite instance
  * @param app_cb            Application nameservice callback
  * @param user_data         Application nameservice callback data
+ * @param ns_ept_ctxt       Nameservice endpoint preallocated context pointer, used in case of static api
+ * (RL_USE_STATIC_API)
  *
  * @return RL_NULL on error, NameService handle on success.
  *

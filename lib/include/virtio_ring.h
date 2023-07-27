@@ -1,6 +1,6 @@
 /*-
  * Copyright Rusty Russell IBM Corporation 2007.
- * Copyright 2019 NXP
+ * Copyright 2019,2022 NXP
  * This header is BSD licensed so anyone can use the definitions to implement
  * compatible drivers/servers.
  *
@@ -144,7 +144,7 @@ static inline void vring_init(struct vring *vr, uint32_t num, uint8_t *p, uint32
     vr->num   = num;
     vr->desc  = (struct vring_desc *)(void *)p;
     vr->avail = (struct vring_avail *)(void *)(p + num * sizeof(struct vring_desc));
-    vr->used  = (struct vring_used *)(((uint32_t)&vr->avail->ring[num] + align - 1UL) & ~(align - 1UL));
+    vr->used  = (struct vring_used *)(((uintptr_t)&vr->avail->ring[num] + align - 1UL) & ~(align - 1UL));
 }
 
 /*
