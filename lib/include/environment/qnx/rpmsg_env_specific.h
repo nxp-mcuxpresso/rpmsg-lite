@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021,2023 NXP
  * All rights reserved.
  *
  *
@@ -22,6 +22,13 @@
 #include <stdint.h>
 #include "rpmsg_default_config.h"
 
+typedef struct rpmsg_env_init
+{
+    void *user_input; /* Pointer to user init cfg */
+    uint32_t pa;      /* Physical address of memory pool reserved for rpmsg */
+    void *va;         /* Virtual address of the memory pool */
+} rpmsg_env_init_t;
+
 typedef struct
 {
     uint32_t src;
@@ -30,15 +37,7 @@ typedef struct
 } rpmsg_queue_rx_cb_data_t;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-#include <pthread.h>
-#include <mqueue.h>
-
-typedef pthread_mutex_t LOCK_STATIC_CONTEXT;
-typedef env_queue_t rpmsg_static_queue_ctxt;
-/* Queue object static storage size in bytes, should be defined as (RL_BUFFER_COUNT*sizeof(rpmsg_queue_rx_cb_data_t))
-   This macro helps the application to statically allocate the queue object static storage memory. Note, the
-   RL_BUFFER_COUNT is not applied for all instances when RL_ALLOW_CUSTOM_SHMEM_CONFIG is set to 1 ! */
-#define RL_ENV_QUEUE_STATIC_STORAGE_SIZE (RL_BUFFER_COUNT * sizeof(rpmsg_queue_rx_cb_data_t))
+    #error "This RPMsg-Lite port requires RL_USE_STATIC_API set to 0"
 #endif
 
 #endif /* RPMSG_ENV_SPECIFIC_H_ */

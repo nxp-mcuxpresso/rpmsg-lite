@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2023 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <mqueue.h>
-#include "rpmsg_env_qnx.h"
 
 #if __PTR_BITS__ > 32
 #include <fcntl.h>
@@ -59,6 +58,8 @@
 #else
 #include <arm/inline.h>
 #endif
+
+#include <sys/imx_rpmsg_lite.h>
 
 /* Max supported ISR counts */
 #define ISR_COUNT (32U)
@@ -301,16 +302,8 @@ void env_wmb(void)
  */
 uint32_t env_map_vatopa(void *env, void *address)
 {
-#if IMX_MMAP_VA_ON_PA
+    /* Wrapper maps VA to PA */
     return ((uint32_t)address);
-#else
-    /* This is faster then mem_offset64() */
-    env_context_t *ctx = env;
-    uint64_t va        = (uint64_t)address;
-    uint64_t va_start  = (uint64_t)ctx->va;
-    uint64_t pa        = ctx->pa + (va - va_start);
-    return pa;
-#endif
 }
 
 /*!
@@ -320,14 +313,8 @@ uint32_t env_map_vatopa(void *env, void *address)
  */
 void *env_map_patova(void *env, uint32_t address)
 {
-#if IMX_MMAP_VA_ON_PA
+    /* Wrapper maps VA to PA */
     return ((void *)address);
-#else
-    env_context_t *ctx = env;
-    uint64_t va_start  = (uint64_t)ctx->va;
-    uint64_t va        = (va_start + (address - ctx->pa));
-    return (void *)va;
-#endif
 }
 
 /*!
@@ -577,7 +564,7 @@ void env_disable_cache(void)
  *
  *
  */
-uint32_t long env_get_timestamp(void)
+uint64_t env_get_timestamp(void)
 {
     fprintf(stderr, "%s unsupported\n", __FUNCTION__);
     return 0;
@@ -680,7 +667,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
     mqstat.mq_recvwait = 0;
     mqstat.mq_sendwait = 0;
     q->msg_len         = element_size;
-    q->mqd             = (name, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR, &mqstat);
+    q->mqd             = mq_open(name, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR, &mqstat);
     if (q->mqd == -1)
     {
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
@@ -722,7 +709,7 @@ void env_delete_queue(void *queue)
  *
  * @return - status of function execution
  */
-int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     env_queue_t *q = queue;
 
@@ -745,7 +732,7 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
  *
  * @return - status of function execution
  */
-int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
     env_queue_t *q = queue;
     if (mq_receive(q->mqd, msg, q->msg_len, ((void *)0)) == -1)

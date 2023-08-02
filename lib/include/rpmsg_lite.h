@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2023 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -52,15 +52,15 @@ extern "C" {
  * Definitions
  ******************************************************************************/
 
-#define RL_VERSION "5.0.0" /*!< Current RPMsg Lite version */
+#define RL_VERSION "5.1.0" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
 #define RL_WORD_SIZE (sizeof(uint32_t))
-#define RL_WORD_ALIGN_UP(a)                                                                                \
-    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
-                                                       ((uint32_t)(a)))
+#define RL_WORD_ALIGN_UP(a)                                                                                  \
+    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
+                                                        ((uintptr_t)(a)))
 #define RL_WORD_ALIGN_DOWN(a) \
-    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uint32_t)(a)))
+    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uintptr_t)(a)))
 
 /* Definitions for device types , null pointer, etc.*/
 #define RL_SUCCESS    (0)
@@ -73,7 +73,7 @@ extern "C" {
 #define RL_RELEASE    (0)
 #define RL_HOLD       (1)
 #define RL_DONT_BLOCK (0)
-#define RL_BLOCK      (0xFFFFFFFFU)
+#define RL_BLOCK      (~0UL)
 
 /* Error macros. */
 #define RL_ERRORS_BASE   (-5000)
@@ -88,6 +88,44 @@ extern "C" {
 
 /* Init flags */
 #define RL_NO_FLAGS (0U)
+
+/* rpmsg_std_hdr contains a reserved field,
+ * this implementation of RPMSG uses this reserved
+ * field to hold the idx and totlen of the buffer
+ * not being returned to the vring in the receive
+ * callback function. This way, the no-copy API
+ * can use this field to return the buffer later.
+ */
+struct rpmsg_hdr_reserved
+{
+    uint16_t rfu; /* reserved for future usage */
+    uint16_t idx;
+};
+
+RL_PACKED_BEGIN
+/*!
+ * Common header for all rpmsg messages.
+ * Every message sent/received on the rpmsg bus begins with this header.
+ */
+struct rpmsg_std_hdr
+{
+    uint32_t src;                       /*!< source endpoint address */
+    uint32_t dst;                       /*!< destination endpoint address */
+    struct rpmsg_hdr_reserved reserved; /*!< reserved for future use */
+    uint16_t len;                       /*!< length of payload (in bytes) */
+    uint16_t flags;                     /*!< message flags */
+} RL_PACKED_END;
+
+RL_PACKED_BEGIN
+/*!
+ * Common message structure.
+ * Contains the header and the payload.
+ */
+struct rpmsg_std_msg
+{
+    struct rpmsg_std_hdr hdr; /*!< RPMsg message header */
+    uint8_t data[1];          /*!< bytes of message payload data */
+} RL_PACKED_END;
 
 /*! \typedef rl_ept_rx_cb_t
     \brief Receive callback function type.
@@ -123,20 +161,20 @@ struct rpmsg_lite_ept_static_context
  */
 struct rpmsg_lite_instance
 {
-    struct virtqueue *rvq;      /*!< receive virtqueue */
-    struct virtqueue *tvq;      /*!< transmit virtqueue */
-    struct llist *rl_endpoints; /*!< linked list of endpoints */
-    LOCK *lock;                 /*!< local RPMsg Lite mutex lock */
+    struct virtqueue *rvq;                /*!< receive virtqueue */
+    struct virtqueue *tvq;                /*!< transmit virtqueue */
+    struct llist *rl_endpoints;           /*!< linked list of endpoints */
+    LOCK *lock;                           /*!< local RPMsg Lite mutex lock */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     LOCK_STATIC_CONTEXT lock_static_ctxt; /*!< Static context for lock object creation */
 #endif
-    uint32_t link_state;                /*!< state of the link, up/down*/
-    char *sh_mem_base;                  /*!< base address of the shared memory */
-    uint32_t sh_mem_remaining;          /*!< amount of remaining unused buffers in shared memory */
-    uint32_t sh_mem_total;              /*!< total amount of buffers in shared memory */
-    struct virtqueue_ops const *vq_ops; /*!< ops functions table pointer */
+    uint32_t link_state;                  /*!< state of the link, up/down*/
+    char *sh_mem_base;                    /*!< base address of the shared memory */
+    uint32_t sh_mem_remaining;            /*!< amount of remaining unused buffers in shared memory */
+    uint32_t sh_mem_total;                /*!< total amount of buffers in shared memory */
+    struct virtqueue_ops const *vq_ops;   /*!< ops functions table pointer */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-    void *env; /*!< pointer to the environment layer context */
+    void *env;                            /*!< pointer to the environment layer context */
 #endif
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -282,7 +320,7 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                         uint32_t dst,
                         char *data,
                         uint32_t size,
-                        uint32_t timeout);
+                        uintptr_t timeout);
 
 /*!
  * @brief Function to get the link state
@@ -336,7 +374,7 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
  *
  * @see rpmsg_lite_send_nocopy
  */
-void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uint32_t timeout);
+void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uintptr_t timeout);
 
 /*!
  * @brief Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 NXP
+ * Copyright 2020-2023 NXP
  * All rights reserved.
  *
  *
@@ -14,12 +14,13 @@
  *
  * DESCRIPTION
  *
- *       This file is ThreadX Implementation of env layer for OpenAMP.
+ *       This file is ThreadX Implementation of env layer for RPMsg_Lite.
  *
  *
  **************************************************************************/
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
+#include "rpmsg_lite.h"
 #include "tx_api.h"
 #include "tx_event_flags.h"
 #include "rpmsg_platform.h"
@@ -29,9 +30,9 @@
 #include <string.h>
 #include "virtqueue.h"
 
-static int32_t env_init_counter = 0;
-static TX_SEMAPHORE env_sema;
-static TX_EVENT_FLAGS_GROUP event_group;
+static int32_t env_init_counter         = 0;
+static TX_SEMAPHORE env_sema            = {0};
+static TX_EVENT_FLAGS_GROUP event_group = {0};
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -76,16 +77,26 @@ static int32_t env_in_isr(void)
  */
 uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
+    ULONG actual_events;
     if (*link_state != 1U)
     {
-        if (TX_SUCCESS == tx_event_flags_get(&event_group, (1UL << link_id), TX_AND, NULL, timeout_ms))
+        if (RL_BLOCK == timeout_ms)
         {
-            return 1U;
+            if (TX_SUCCESS ==
+                tx_event_flags_get(&event_group, (1UL << link_id), TX_AND, &actual_events, TX_WAIT_FOREVER))
+            {
+                return 1U;
+            }
         }
         else
         {
-            return 0U;
+            if (TX_SUCCESS == tx_event_flags_get(&event_group, (1UL << link_id), TX_AND, &actual_events,
+                                                 ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+            {
+                return 1U;
+            }
         }
+        return 0U;
     }
     else
     {
@@ -107,7 +118,7 @@ void env_tx_callback(uint32_t link_id)
 /*!
  * env_init
  *
- * Initializes OS/ThreadX environment.
+ * Initializes ThreadX environment.
  *
  */
 int32_t env_init(void)
@@ -127,7 +138,7 @@ int32_t env_init(void)
     if (env_init_counter == 1)
     {
         /* first call */
-        if (TX_SUCCESS != _tx_semaphore_create((TX_SEMAPHORE *)&env_sema, NULL, 0))
+        if (TX_SUCCESS != tx_semaphore_create((TX_SEMAPHORE *)&env_sema, NULL, 0))
         {
             EnableGlobalIRQ(regPrimask);
             return -1;
@@ -159,7 +170,7 @@ int32_t env_init(void)
 /*!
  * env_deinit
  *
- * Uninitializes OS/BM environment.
+ * Uninitializes ThreadX environment.
  *
  * @returns - execution status
  */
@@ -172,7 +183,7 @@ int32_t env_deinit(void)
     RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
-        EnableGlobalIRQ(regPrimask);
+        EnableGlobalIRQ(regPrimask); /* re-enable scheduler */
         return -1;
     }
 
@@ -186,7 +197,7 @@ int32_t env_deinit(void)
         retval = platform_deinit();
         (void)tx_event_flags_delete(&event_group);
         (void)memset(&event_group, 0, sizeof(event_group));
-        (void)_tx_semaphore_delete((TX_SEMAPHORE *)&env_sema);
+        (void)tx_semaphore_delete((TX_SEMAPHORE *)&env_sema);
         (void)memset(&env_sema, 0, sizeof(env_sema));
         EnableGlobalIRQ(regPrimask);
         return retval;
@@ -361,7 +372,7 @@ int32_t env_create_mutex(void **lock, int32_t count)
         return -1;
     }
 
-    if (TX_SUCCESS == _tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
+    if (TX_SUCCESS == tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
     {
         *lock = (void *)semaphore_ptr;
         return 0;
@@ -383,7 +394,7 @@ int32_t env_create_mutex(void **lock, int32_t count)
  */
 void env_delete_mutex(void *lock)
 {
-    (void)_tx_semaphore_delete((TX_SEMAPHORE *)lock);
+    (void)tx_semaphore_delete((TX_SEMAPHORE *)lock);
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(lock);
 #endif
@@ -412,7 +423,7 @@ void env_unlock_mutex(void *lock)
 {
     if (env_in_isr() == 0)
     {
-        tx_semaphore_put((TX_SEMAPHORE *)lock);
+        (void)tx_semaphore_put((TX_SEMAPHORE *)lock);
     }
 }
 
@@ -483,7 +494,7 @@ void env_release_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    tx_thread_sleep(num_msec);
+    (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000);
 }
 
 /*!
@@ -574,6 +585,19 @@ void env_disable_cache(void)
     platform_cache_disable();
 }
 
+/*!
+ *
+ * env_get_timestamp
+ *
+ * Returns a 64 bit time stamp.
+ *
+ *
+ */
+uint64_t env_get_timestamp(void)
+{
+    return tx_time_get();
+}
+
 /*========================================================= */
 /* Util data / functions  */
 
@@ -615,10 +639,10 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
     char *msgq_buffer_ptr      = ((void *)0);
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    queue_ptr       = (struct k_msgq *)queue_static_context;
+    queue_ptr       = (struct TX_QUEUE *)queue_static_context;
     msgq_buffer_ptr = (char *)queue_static_storage;
 #else
-    queue_ptr       = (struct k_msgq *)env_allocate_memory(sizeof(struct TX_QUEUE));
+    queue_ptr       = (struct TX_QUEUE *)env_allocate_memory(sizeof(TX_QUEUE));
     msgq_buffer_ptr = (char *)env_allocate_memory(length * element_size);
 #endif
     if ((queue_ptr == ((void *)0)) || (msgq_buffer_ptr == ((void *)0)))
@@ -626,8 +650,8 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
         return -1;
     }
 
-    if (TX_SUCCESS ==
-        _tx_queue_create((TX_QUEUE *)queue_ptr, NULL, element_size, (VOID *)msgq_buffer_ptr, (length * element_size)))
+    if (TX_SUCCESS == tx_queue_create((TX_QUEUE *)queue_ptr, NULL, (element_size / RL_WORD_SIZE),
+                                      (VOID *)msgq_buffer_ptr, (length * element_size)))
     {
         *queue = (void *)queue_ptr;
         return 0;
@@ -635,8 +659,8 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
     else
     {
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-        env_free_memory(queue_ptr);
         env_free_memory(msgq_buffer_ptr);
+        env_free_memory(queue_ptr);
 #endif
         return -1;
     }
@@ -652,8 +676,9 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 
 void env_delete_queue(void *queue)
 {
-    tx_queue_delete(queue);
+    tx_queue_delete((TX_QUEUE *)(queue));
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
+    env_free_memory(((TX_QUEUE *)(queue))->tx_queue_start);
     env_free_memory(queue);
 #endif
 }
@@ -670,16 +695,23 @@ void env_delete_queue(void *queue)
  * @return - status of function execution
  */
 
-int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
-    if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)queue, msg, timeout_ms))
+    if (RL_BLOCK == timeout_ms)
     {
-        return 0;
+        if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)(queue), msg, TX_WAIT_FOREVER))
+        {
+            return 1;
+        }
     }
     else
     {
-        return -1;
+        if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+        {
+            return 1;
+        }
     }
+    return 0;
 }
 
 /*!
@@ -694,16 +726,23 @@ int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
  * @return - status of function execution
  */
 
-int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
-    if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)queue, msg, timeout_ms))
+    if (RL_BLOCK == timeout_ms)
     {
-        return 0;
+        if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)(queue), msg, TX_WAIT_FOREVER))
+        {
+            return 1;
+        }
     }
     else
     {
-        return -1;
+        if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+        {
+            return 1;
+        }
     }
+    return 0;
 }
 
 /*!
@@ -723,10 +762,10 @@ int32_t env_get_current_queue_size(void *queue)
     TX_THREAD *first_suspended;
     ULONG suspended_count;
     TX_QUEUE *next_queue;
-    if (TX_SUCCESS == tx_queue_info_get((TX_QUEUE *)queue, NULL, (ULONG *)&enqueued, &available_storage,
+    if (TX_SUCCESS == tx_queue_info_get((TX_QUEUE *)(queue), NULL, (ULONG *)&enqueued, &available_storage,
                                         &first_suspended, &suspended_count, &next_queue))
     {
-        return 0;
+        return enqueued;
     }
     else
     {

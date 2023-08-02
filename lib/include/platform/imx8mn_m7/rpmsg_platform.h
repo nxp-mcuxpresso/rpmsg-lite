@@ -51,8 +51,8 @@ void platform_time_delay(uint32_t num_msec);
 void platform_map_mem_region(uint32_t vrt_addr, uint32_t phy_addr, uint32_t size, uint32_t flags);
 void platform_cache_all_flush_invalidate(void);
 void platform_cache_disable(void);
-uint32_t platform_vatopa(void *addr);
-void *platform_patova(uint32_t addr);
+uintptr_t platform_vatopa(void *addr);
+void *platform_patova(uintptr_t addr);
 
 /* platform init/deinit */
 int32_t platform_init(void);
