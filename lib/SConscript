@@ -1,0 +1,19 @@
+from building import *
+
+cwd     = GetCurrentDir()
+src     = Split("""
+    common/llist.c
+    rpmsg_lite/rpmsg_lite.c
+    rpmsg_lite/rpmsg_ns.c
+    rpmsg_lite/rpmsg_queue.c
+    rpmsg_lite/porting/environment/rpmsg_env_rt-thread.c
+    virtio/virtqueue.c
+""")
+
+CPPPATH = [cwd,
+           cwd + r'/include',
+           cwd + r'/include/environment/rt-thread']
+
+group = DefineGroup('rpmsg-lite', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

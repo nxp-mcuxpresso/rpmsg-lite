@@ -2,7 +2,8 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2022 NXP
+ * Copyright 2016-2023 NXP
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,29 +34,38 @@
 /**************************************************************************
  * FILE NAME
  *
- *       rpmsg_env_xos.c
+ *       rpmsg_env_freertos.c
  *
  *
  * DESCRIPTION
  *
- *       This file is XOS Implementation of env layer for RPMsg_Lite.
+ *       This file is FreeRTOS Implementation of env layer for OpenAMP.
  *
  *
  **************************************************************************/
+#include "rtthread.h"
+#include "rthw.h"
+
+#define DBG_TAG "rpmsg.env"
+#define DBG_LVL DBG_WARNING
+#include <rtdbg.h>
 
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
-#include "rpmsg_lite.h"
-#include <xtensa/xos.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
+#include "rpmsg_lite.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-static int32_t env_init_counter  = 0;
-static struct XosSem env_sema    = {0};
-static struct XosEvent env_event = {0};
+static int32_t env_init_counter       = 0;
+static rt_sem_t env_sema     = ((void *)0);
+static rt_event_t event_group = ((void *)0);
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+struct rt_semaphore env_sem_static_context;
+struct rt_event event_group_static_context;
+#endif
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
    if the inital count is 1, this function behaves as a mutex
@@ -63,7 +73,7 @@ static struct XosEvent env_event = {0};
    the maximum of 'count' resources available.
    Currently, only the first use-case is applicable/applied in RPMsg-Lite.
  */
-#define RL_ENV_MAX_MUTEX_COUNT (10)
+#define RL_ENV_MAX_MUTEX_COUNT (1)
 
 /* Max supported ISR counts */
 #define ISR_COUNT (32U)
@@ -80,6 +90,14 @@ static struct isr_info isr_table[ISR_COUNT];
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
+#if defined(AARCH64)
+
+static int32_t os_in_isr(void)
+{
+    return 0;
+}
+#endif
+
 /*!
  * env_in_isr
  *
@@ -88,7 +106,12 @@ static struct isr_info isr_table[ISR_COUNT];
  */
 static int32_t env_in_isr(void)
 {
+#if defined(AARCH64)
+    return os_in_isr();
+#else
     return platform_in_isr();
+#endif
+    return 0;
 }
 
 /*!
@@ -100,23 +123,25 @@ static int32_t env_in_isr(void)
  */
 uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
+    rt_uint32_t recved;
+    rt_int32_t timeout;
+
     if (*link_state != 1U)
     {
-        if (RL_BLOCK == timeout_ms)
+        if  (timeout_ms == RL_BLOCK)
+            timeout = RT_WAITING_FOREVER;
+        else
+            timeout = rt_tick_from_millisecond(timeout_ms);
+
+        if (rt_event_recv(event_group, 1 << link_id, RT_EVENT_FLAG_CLEAR | RT_EVENT_FLAG_OR, timeout, &recved) == RT_EOK)
         {
-            if (XOS_OK == xos_event_wait_all(&env_event, (1UL << link_id)))
-            {
-                return 1U;
-            }
+            return 1U;
         }
         else
         {
-            if (XOS_OK == xos_event_wait_all_timeout(&env_event, (1UL << link_id), xos_msecs_to_cycles(timeout_ms)))
-            {
-                return 1U;
-            }
+            LOG_E("rt_event_recv failed...");
+            return 0U;
         }
-        return 0U;
     }
     else
     {
@@ -132,51 +157,85 @@ uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, u
  */
 void env_tx_callback(uint32_t link_id)
 {
-    xos_event_set(&env_event, (1UL << link_id));
+    rt_event_send(event_group, 1UL << link_id);
 }
 
 /*!
  * env_init
  *
- * Initializes XOS environment.
+ * Initializes OS/BM environment.
  *
  */
 int32_t env_init(void)
 {
     int32_t retval;
-    uint32_t regPrimask = xos_disable_interrupts(); /* stop scheduler */
+    rt_base_t level;
+
+    level = rt_hw_interrupt_disable(); /* stop scheduler */
     /* verify 'env_init_counter' */
     RL_ASSERT(env_init_counter >= 0);
     if (env_init_counter < 0)
     {
-        xos_restore_interrupts(regPrimask); /* re-enable scheduler */
+        /* coco begin validated: (env_init_counter < 0) condition will never met unless RAM is corrupted */
+        rt_hw_interrupt_enable(level); /* re-enable scheduler */
         return -1;
+        /* coco end */
     }
     env_init_counter++;
     /* multiple call of 'env_init' - return ok */
     if (env_init_counter == 1)
     {
         /* first call */
-        (void)xos_sem_create(&env_sema, XOS_SEM_WAIT_PRIORITY, 1);
-        (void)xos_event_create(&env_event, 0xFFFFFFFFu, XOS_EVENT_AUTO_CLEAR);
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+        if (rt_sem_init(&env_sem_static_context, "rl_sem", 0, RT_IPC_FLAG_FIFO) != RT_EOK)
+        {
+            LOG_E("rt_sem_init failed ...");
+            rt_hw_interrupt_enable(level);
+            return -1;
+        }
+        env_sema = &env_sem_static_context;
+
+        if (rt_event_init(&event_group_static_context, "rl_event", RT_IPC_FLAG_FIFO) != EOK)
+        {
+            LOG_E("rt_event_init failed ...");
+            rt_sem_detach(&env_sem_static_context);
+            rt_hw_interrupt_enable(level);
+            return -1;
+        }
+        event_group = &event_group_static_context;
+#else
+        env_sema = rt_sem_create("rl_sem", 0, RT_IPC_FLAG_FIFO);
+        if (env_sema == RT_NULL)
+        {
+            rt_hw_interrupt_enable(level);
+            return -1;
+        }
+
+        event_group = rt_event_create("rl_event", RT_IPC_FLAG_FIFO);
+        if (event_group == RT_NULL)
+        {
+            rt_sem_delete(env_sema);
+            rt_hw_interrupt_enable(level);
+            return -1;            
+        }
+#endif
         (void)memset(isr_table, 0, sizeof(isr_table));
-        xos_restore_interrupts(regPrimask);
+        rt_hw_interrupt_enable(level);
         retval = platform_init();
-        (void)xos_sem_put(&env_sema);
 
         return retval;
     }
     else
     {
-        xos_restore_interrupts(regPrimask);
+        rt_hw_interrupt_enable(level);
         /* Get the semaphore and then return it,
          * this allows for platform_init() to block
          * if needed and other tasks to wait for the
          * blocking to be done.
          * This is in ENV layer as this is ENV specific.*/
-        if (XOS_OK == xos_sem_get(&env_sema))
+        if (rt_sem_take(env_sema, RT_WAITING_FOREVER) == RT_EOK)
         {
-            (void)xos_sem_put(&env_sema);
+            rt_sem_release(env_sema);
         }
         return 0;
     }
@@ -185,20 +244,21 @@ int32_t env_init(void)
 /*!
  * env_deinit
  *
- * Uninitializes XOS environment.
+ * Uninitializes OS/BM environment.
  *
  * @returns - execution status
  */
 int32_t env_deinit(void)
 {
     int32_t retval;
+    rt_base_t level;
 
-    uint32_t regPrimask = xos_disable_interrupts(); /* stop scheduler */
+    level = rt_hw_interrupt_disable(); /* stop scheduler */
     /* verify 'env_init_counter' */
     RL_ASSERT(env_init_counter > 0);
     if (env_init_counter <= 0)
     {
-        xos_restore_interrupts(regPrimask); /* re-enable scheduler */
+        rt_hw_interrupt_enable(level); /* re-enable scheduler */
         return -1;
     }
 
@@ -210,19 +270,22 @@ int32_t env_deinit(void)
         /* last call */
         (void)memset(isr_table, 0, sizeof(isr_table));
         retval = platform_deinit();
-        (void)xos_event_delete(&env_event);
-        (void)xos_sem_delete(&env_sema);
-        xos_restore_interrupts(regPrimask);
+        rt_event_delete(event_group);
+        event_group = ((void *)0);
+        rt_sem_delete(env_sema);
+        env_sema = ((void *)0);
+        rt_hw_interrupt_enable(level);
 
         return retval;
     }
     else
     {
-        xos_restore_interrupts(regPrimask);
+        rt_hw_interrupt_enable(level);
         return 0;
     }
 }
 
+#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
 /*!
  * env_allocate_memory - implementation
  *
@@ -230,7 +293,7 @@ int32_t env_deinit(void)
  */
 void *env_allocate_memory(uint32_t size)
 {
-    return (malloc(size));
+    return (rt_malloc(size));
 }
 
 /*!
@@ -242,9 +305,10 @@ void env_free_memory(void *ptr)
 {
     if (ptr != ((void *)0))
     {
-        free(ptr);
+        rt_free(ptr);
     }
 }
+#endif
 
 /*!
  *
@@ -369,33 +433,28 @@ int32_t env_create_mutex(void **lock, int32_t count, void *context)
 int32_t env_create_mutex(void **lock, int32_t count)
 #endif
 {
-    struct XosSem *semaphore_ptr;
-
     if (count > RL_ENV_MAX_MUTEX_COUNT)
     {
         return -1;
     }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    semaphore_ptr = (struct XosSem *)context;
-#else
-    semaphore_ptr = (struct XosSem *)env_allocate_memory(sizeof(struct XosSem));
-#endif
-    if (semaphore_ptr == ((void *)0))
+    if (rt_mutex_init(context, "rl_mutex", RT_IPC_FLAG_PRIO) != RT_EOK)
     {
+        LOG_E("rt_mutex_init failed ...");
         return -1;
     }
 
-    if (XOS_OK == xos_sem_create(semaphore_ptr, XOS_SEM_WAIT_PRIORITY, count))
+    *lock = context;
+#else
+    *lock = rt_mutex_create("rl_mutex", RT_IPC_FLAG_PRIO);
+#endif
+    if (*lock != ((void *)0))
     {
-        *lock = (void *)semaphore_ptr;
         return 0;
     }
     else
     {
-#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-        env_free_memory(semaphore_ptr);
-#endif
         return -1;
     }
 }
@@ -408,10 +467,7 @@ int32_t env_create_mutex(void **lock, int32_t count)
  */
 void env_delete_mutex(void *lock)
 {
-    xos_sem_delete(lock);
-#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-    env_free_memory(lock);
-#endif
+    rt_mutex_delete(lock);
 }
 
 /*!
@@ -422,10 +478,7 @@ void env_delete_mutex(void *lock)
  */
 void env_lock_mutex(void *lock)
 {
-    if (env_in_isr() == 0)
-    {
-        (void)xos_sem_get((struct XosSem *)lock);
-    }
+    rt_mutex_take(lock, RT_WAITING_FOREVER);
 }
 
 /*!
@@ -435,10 +488,7 @@ void env_lock_mutex(void *lock)
  */
 void env_unlock_mutex(void *lock)
 {
-    if (env_in_isr() == 0)
-    {
-        (void)xos_sem_put((struct XosSem *)lock);
-    }
+    rt_mutex_release(lock);
 }
 
 /*!
@@ -482,10 +532,7 @@ void env_delete_sync_lock(void *lock)
  */
 void env_acquire_sync_lock(void *lock)
 {
-    if (lock != ((void *)0))
-    {
-        env_lock_mutex(lock);
-    }
+    rt_mutex_take((rt_mutex_t)lock, RT_WAITING_FOREVER);
 }
 
 /*!
@@ -495,10 +542,7 @@ void env_acquire_sync_lock(void *lock)
  */
 void env_release_sync_lock(void *lock)
 {
-    if (lock != ((void *)0))
-    {
-        env_unlock_mutex(lock);
-    }
+    rt_mutex_release((rt_mutex_t)lock);
 }
 
 /*!
@@ -508,7 +552,7 @@ void env_release_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    (void)xos_thread_sleep_msec(num_msec);
+    rt_thread_mdelay(num_msec);
 }
 
 /*!
@@ -609,7 +653,7 @@ void env_disable_cache(void)
  */
 uint64_t env_get_timestamp(void)
 {
-    return xos_get_system_cycles();
+    return (uint64_t)rt_tick_get();
 }
 
 /*========================================================= */
@@ -645,32 +689,26 @@ int32_t env_create_queue(void **queue,
                          int32_t element_size,
                          uint8_t *queue_static_storage,
                          rpmsg_static_queue_ctxt *queue_static_context)
+{
+    if (rt_mq_init(queue_static_context, "rl_mq", queue_static_storage, element_size, length, RT_IPC_FLAG_PRIO) != RT_EOK)
+    {
+        LOG_E("rt_mq_init failed ...");
+        return -1;
+    }
+    *queue = queue_static_context;
 #else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
-#endif
 {
-    char *queue_ptr = ((void *)0);
+    *queue = rt_mq_create("rl_mq", element_size, length, RT_IPC_FLAG_PRIO);
+#endif
 
-#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    queue_ptr = (char *)queue_static_storage;
-#else
-    queue_ptr = (char *)env_allocate_memory(XOS_MSGQ_SIZE(length, element_size));
-#endif
-    if (queue_ptr != ((void *)0))
+    if (*queue != ((void *)0))
     {
-        if (XOS_OK ==
-            xos_msgq_create((XosMsgQueue *)queue_ptr, (uint16_t)length, (uint32_t)element_size, XOS_MSGQ_WAIT_PRIORITY))
-        {
-            *queue = (void *)queue_ptr;
-            return 0;
-        }
-        else
-        {
-#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-            env_free_memory(queue_ptr);
-#endif
-            return -1;
-        }
+        return 0;
+    }
+    else
+    {
+        LOG_E("rt_mq_create failed...");
     }
     return -1;
 }
@@ -685,10 +723,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 
 void env_delete_queue(void *queue)
 {
-    xos_msgq_delete(queue);
-#if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-    env_free_memory(queue);
-#endif
+    rt_mq_delete(queue);
 }
 
 /*!
@@ -705,25 +740,23 @@ void env_delete_queue(void *queue)
 
 int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
-    if (RL_BLOCK == timeout_ms)
+    rt_int32_t timeout;
+    if  (timeout_ms == RL_BLOCK)
+        timeout = RT_WAITING_FOREVER;
+    else
+        timeout = rt_tick_from_millisecond(timeout_ms);
+
+    rt_mq_t mq = (rt_mq_t)queue;
+    rt_err_t ret = rt_mq_send_wait(mq, msg, mq->msg_size, timeout);
+    if (ret < 0)
     {
-        /* If no space is available, this function will block if called from a thread, but will
-           return immediately if called from an interrupt handler. */
-        if (XOS_OK == xos_msgq_put(queue, msg))
-        {
-            return 1;
-        }
+        LOG_E("rt_mq_send_wait failed ret:%d", ret);
+        return 0;
     }
     else
-    {
-        /* If no space is available, this function will block if called from a thread, but will
-           return immediately if called from an interrupt handler. */
-        if (XOS_OK == xos_msgq_put_timeout(queue, msg, xos_msecs_to_cycles(timeout_ms)))
-        {
-            return 1;
-        }
-    }
-    return 0;
+        LOG_D("rt_mq_send_wait success...");
+        
+    return 1;
 }
 
 /*!
@@ -740,26 +773,23 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
 
 int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 {
-    if (RL_BLOCK == timeout_ms)
+    rt_int32_t timeout;
+    if  (timeout_ms == RL_BLOCK)
+        timeout = RT_WAITING_FOREVER;
+    else
+        timeout = rt_tick_from_millisecond(timeout_ms);
+
+    rt_mq_t mq = (rt_mq_t)queue;
+    rt_err_t ret = rt_mq_recv(mq, msg, mq->msg_size, timeout);
+    if (ret < 0)
     {
-        /* If no message is available, this function will block if called from a thread, but will return
-           immediately if called from an interrupt handler. */
-        if (XOS_OK == xos_msgq_get(queue, msg))
-        {
-            return 1;
-        }
+        LOG_E("rt_mq_recv failed ret:%d", ret);
+        return 0;
     }
     else
-    {
-        /* If no message is available, this function will block if called from a thread, but will return
-           immediately if called from an interrupt handler. The thread will be unblocked when a message
-           arrives in the queue or the timeout expires. */
-        if (XOS_OK == xos_msgq_get_timeout(queue, msg, xos_msecs_to_cycles(timeout_ms)))
-        {
-            return 1;
-        }
-    }
-    return 0;
+        LOG_D("rt_mq_recv success...");
+
+    return 1;
 }
 
 /*!
@@ -774,5 +804,7 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 
 int32_t env_get_current_queue_size(void *queue)
 {
-    return ((int32_t)xos_msgq_empty(queue));
+    rt_mq_t mq = (rt_mq_t)queue;
+        
+    return mq->entry;
 }
