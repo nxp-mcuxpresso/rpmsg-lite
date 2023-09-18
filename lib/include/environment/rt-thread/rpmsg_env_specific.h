@@ -13,7 +13,7 @@
  *
  * DESCRIPTION
  *
- *       This file contains baremetal specific constructions.
+ *       This file contains rt-thread specific constructions.
  *
  **************************************************************************/
 #ifndef RPMSG_ENV_SPECIFIC_H_
