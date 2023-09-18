@@ -39,7 +39,7 @@
  *
  * DESCRIPTION
  *
- *       This file is FreeRTOS Implementation of env layer for OpenAMP.
+ *       This file is rt-thread Implementation of env layer for RPMsg_Lite.
  *
  *
  **************************************************************************/
