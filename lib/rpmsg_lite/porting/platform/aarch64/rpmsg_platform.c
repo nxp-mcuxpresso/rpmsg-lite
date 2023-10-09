@@ -9,67 +9,12 @@
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
 #include "fsl_device_registers.h"
-
-#ifndef __DSB
-#define __DSB()	__asm__ volatile ("dsb sy" ::: "memory")
-#endif
+#include "gen_sw_mbox.h"
+#include "gen_sw_mbox_config.h"
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
-
-#ifndef RL_GEN_SW_MBOX_BASE
-#error "RL_GEN_SW_MBOX_BASE is NOT defined, define it in rpmsg_config.h!"
-#endif
-
-#ifndef RL_GEN_SW_MBOX_IRQ
-#error "RL_GEN_SW_MBOX_IRQ is NOT defined, define it in rpmsg_config.h!"
-#endif
-
-#ifndef RL_GEN_SW_MBOX_REMOTE_IRQ
-#error "RL_GEN_SW_MBOX_REMOTE_IRQ is NOT defined, define it in rpmsg_config.h!"
-#endif
-
-/*
- * Generic software mailbox Registers:
- *
- * RX_STATUS[n]: RX channel n status
- * TX_STATUS[n]: TX channel n status
- * 	0: indicates message in T/RX_CH[n] is invalid and channel ready.
- * 	1: indicates message in T/RX_CH[n] is valid and channel busy.
- * 	2: indicates message in T/RX_CH[n] has been received by the peer.
- * RX_CH[n]: Receive data register for channel n
- * TX_CH[n]: Transmit data register for channel n
- *
- * To send a message:
- * Update the data register TX_CH[n] with the message, then set the
- * TX_STATUS[n] to 1, inject a interrupt to remote side; after the
- * transmission done set the TX_STATUS[n] back to 0.
- *
- * When received a message:
- * Get the received data from RX_CH[n] and then set the RX_STATUS[n] to
- * 2 and inject a interrupt to notify the remote side transmission done.
- */
-
-#define MAX_CH		(4)
-
-struct gen_sw_mbox {
-    uint32_t rx_status[MAX_CH];
-    uint32_t tx_status[MAX_CH];
-    uint32_t reserved[MAX_CH];
-    uint32_t rx_ch[MAX_CH];
-    uint32_t tx_ch[MAX_CH];
-};
-
-enum sw_mbox_channel_status {
-    S_READY,
-    S_BUSY,
-    S_DONE,
-};
-
-static struct gen_sw_mbox_priv {
-	struct gen_sw_mbox *base;
-} mbox_priv;
 
 static int32_t disable_counter = 0;
 static void *platform_lock;
@@ -77,49 +22,15 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
-void gen_sw_mbox_handler(void *data)
+#ifndef GEN_SW_MBOX_BASE
+#error "GEN_SW_MBOX_BASE is NOT defined!"
+#endif
+
+static void mbox_recv_cb(void *data, uint32_t msg)
 {
-    struct gen_sw_mbox *base = (struct gen_sw_mbox *)data;
-    uint32_t vector_id;
+    uint32_t vector_id = msg >> 16;
 
-    if (base->tx_status[RPMSG_MBOX_CHANNEL] == S_DONE)
-        base->tx_status[RPMSG_MBOX_CHANNEL] = S_READY;
-
-    /* Check if the interrupt is for us */
-    if (base->rx_status[RPMSG_MBOX_CHANNEL] != S_BUSY)
-        return;
-
-    vector_id = base->rx_ch[RPMSG_MBOX_CHANNEL];
-
-    base->rx_status[RPMSG_MBOX_CHANNEL] = S_DONE;
-    __DSB();
-    GIC_SetPendingIRQ(RL_GEN_SW_MBOX_REMOTE_IRQ);
-
-    env_isr(vector_id >> 16);
-}
-
-void gen_sw_mailbox_init(void *base)
-{
-    mbox_priv.base = base;
-    /* Clear status register */
-    mbox_priv.base->rx_status[RPMSG_MBOX_CHANNEL] = 0;
-    mbox_priv.base->tx_status[RPMSG_MBOX_CHANNEL] = 0;
-}
-
-static void gen_sw_mbox_sendmsg(struct gen_sw_mbox *base, uint32_t ch, uint32_t msg)
-{
-    while (base->tx_status[ch] != S_READY) {
-	/* Avoid sending the same vq id multiple times when channel is busy */
-        if (msg == base->tx_ch[ch])
-		return;
-    }
-
-    base->tx_ch[ch] = msg;
-    base->tx_status[ch] = S_BUSY;
-    /* sync before trigger interrupt to remote */
-    __DSB();
-
-    GIC_SetPendingIRQ(RL_GEN_SW_MBOX_REMOTE_IRQ);
+    env_isr(vector_id);
 }
 
 static void platform_global_isr_disable(void)
@@ -161,7 +72,7 @@ void platform_notify(uint32_t vector_id)
     uint32_t msg = (uint32_t)(vector_id << 16);
 
     env_lock_mutex(platform_lock);
-    gen_sw_mbox_sendmsg(mbox_priv.base, RPMSG_MBOX_CHANNEL, msg);
+    gen_sw_mbox_sendmsg((void *)GEN_SW_MBOX_BASE, RPMSG_MBOX_CHANNEL, msg, true);
     env_unlock_mutex(platform_lock);
 }
 
@@ -312,6 +223,8 @@ int32_t platform_init(void)
         return -1;
     }
 
+    gen_sw_mbox_register_chan_callback((void *)GEN_SW_MBOX_BASE, RPMSG_MBOX_CHANNEL, mbox_recv_cb, NULL);
+
     return 0;
 }
 
@@ -322,6 +235,8 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+    gen_sw_mbox_unregister_chan_callback((void *)GEN_SW_MBOX_BASE, RPMSG_MBOX_CHANNEL);
+
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);
     platform_lock = ((void *)0);
