@@ -62,7 +62,4 @@ void *platform_patova(uintptr_t addr);
 int32_t platform_init(void);
 int32_t platform_deinit(void);
 
-void gen_sw_mbox_handler(void *data);
-void gen_sw_mailbox_init(void *base);
-
 #endif /* RPMSG_PLATFORM_H_ */
