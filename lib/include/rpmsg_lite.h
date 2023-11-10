@@ -410,6 +410,17 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
                                uint32_t size);
 #endif /* RL_API_HAS_ZEROCOPY */
 
+/*!
+ * @brief Find the rpmsg endpoint by @addr
+ *
+ * @param rpmsg_lite_dev    RPMsg-Lite instance
+ * @param addr              Desired address
+ *
+ * @return endpoint pointer on success or else RL_NULL.
+ *
+ */
+struct rpmsg_lite_endpoint *rpmsg_lite_get_endpoint(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t addr);
+
 //! @}
 
 #if defined(__cplusplus)
