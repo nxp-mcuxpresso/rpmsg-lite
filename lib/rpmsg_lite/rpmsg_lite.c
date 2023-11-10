@@ -147,6 +147,20 @@ static struct llist *rpmsg_lite_get_endpoint_from_addr(struct rpmsg_lite_instanc
     return RL_NULL;
 }
 
+struct rpmsg_lite_endpoint *rpmsg_lite_get_endpoint(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t addr)
+{
+    struct rpmsg_lite_endpoint *ept = NULL;
+    struct llist *node;
+
+    node = rpmsg_lite_get_endpoint_from_addr(rpmsg_lite_dev, addr);
+
+    if (node != RL_NULL) {
+       ept = (struct rpmsg_lite_endpoint *)node->data;
+    }
+
+    return ept;
+}
+
 /***************************************************************
    mmm    mm   m      m      mmmmm    mm     mmm  m    m  mmmm
  m"   "   ##   #      #      #    #   ##   m"   " #  m"  #"   "
