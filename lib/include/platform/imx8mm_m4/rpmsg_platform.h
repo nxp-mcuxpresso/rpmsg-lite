@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2022 NXP
  * All rights reserved.
  *
  *
@@ -23,11 +23,7 @@
 
 /* contains pool of descriptors and two circular buffers */
 #ifndef VRING_SIZE
-#ifdef RL_BUFFER_8M
-#define VRING_SIZE (0x100000UL)
-#else
 #define VRING_SIZE (0x8000UL)
-#endif
 #endif
 
 /* define shared memory space for VRINGS per one channel */
