@@ -1,7 +1,5 @@
 /*
  * Copyright 2021,2023 NXP
- * All rights reserved.
- *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -37,7 +35,7 @@ typedef struct
 } rpmsg_queue_rx_cb_data_t;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    #error "This RPMsg-Lite port requires RL_USE_STATIC_API set to 0"
+#error "This RPMsg-Lite port requires RL_USE_STATIC_API set to 0"
 #endif
 
 #endif /* RPMSG_ENV_SPECIFIC_H_ */
