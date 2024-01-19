@@ -81,9 +81,9 @@ typedef struct
  ******************************************************************************/
 volatile int32_t globCntr = 0;
 
-struct rpmsg_lite_endpoint *ctrl_ept;
+struct rpmsg_lite_endpoint *volatile ctrl_ept = NULL;
 rpmsg_queue_handle ctrl_q;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 
 #if defined(FSL_RTOS_THREADX)
 VOID sendRecvTestTask(ULONG arg);

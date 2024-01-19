@@ -1,0 +1,39 @@
+#
+# Copyright 2023 NXP
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+config ZEPHYR_RPMSG_LITE_MODULE
+	bool
+
+config RPMSGLITE
+	bool "RPMSG-Lite Support"
+	depends on ZEPHYR_RPMSG_LITE_MODULE
+	help
+	  This option enables the RPMSG-Lite library
+
+config ZEPHYR_BUILD
+	bool
+
+if RPMSGLITE
+
+config ZEPHYR_BUILD
+	default y
+	depends on RPMSGLITE
+
+config RPMSGLITE_QUEUE
+	bool "RPMSG-Lite Queue"
+	default n
+	depends on RPMSGLITE
+	help
+	  This option enables RPMSG-Lite Queue support.
+
+config RPMSGLITE_NS
+	bool "RPMSG-Lite Name Service"
+	default n
+	depends on RPMSGLITE
+	help
+	  This option enables RPMSG-Lite Name Service support.
+
+endif # RPMSGLITE

@@ -1,7 +1,5 @@
 /*
  * Copyright 2020-2023 NXP
- * All rights reserved.
- *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -41,6 +39,10 @@ static TX_EVENT_FLAGS_GROUP event_group = {0};
    Currently, only the first use-case is applicable/applied in RPMsg-Lite.
  */
 #define RL_ENV_MAX_MUTEX_COUNT (10)
+
+#ifndef TX_TIMER_TICKS_PER_SECOND
+#define TX_TIMER_TICKS_PER_SECOND ((ULONG)100)
+#endif
 
 /* Max supported ISR counts */
 #define ISR_COUNT (32U)

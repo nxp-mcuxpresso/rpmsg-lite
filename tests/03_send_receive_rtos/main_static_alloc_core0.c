@@ -51,13 +51,13 @@ typedef struct
 /*******************************************************************************
  * Code
  ******************************************************************************/
-struct rpmsg_lite_endpoint *my_ept = NULL;
+struct rpmsg_lite_endpoint *volatile my_ept = NULL;
 struct rpmsg_lite_ept_static_context my_ept_ctxt;
 
 rpmsg_queue_handle my_queue = NULL;
 rpmsg_static_queue_ctxt my_queue_ctxt = {0};
 uint8_t my_rpmsg_queue_storage[RL_ENV_QUEUE_STATIC_STORAGE_SIZE] = {0};
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt = {0};
 rpmsg_ns_handle ns_handle = NULL;
 rpmsg_ns_static_context my_ns_ctxt = {0};
@@ -116,7 +116,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rpmsg_static_queue_ctxt queues_ctxt[], struct rpmsg_lite_endpoint *epts[], struct rpmsg_lite_ept_static_context epts_ctxt[], int32_t count, int32_t init_addr)
+int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rpmsg_static_queue_ctxt queues_ctxt[], struct rpmsg_lite_endpoint *volatile epts[], struct rpmsg_lite_ept_static_context epts_ctxt[], int32_t count, int32_t init_addr)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -139,7 +139,7 @@ int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rp
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");

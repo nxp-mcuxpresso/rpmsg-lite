@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2023 NXP
  * All rights reserved.
  *
  *
@@ -11,7 +11,7 @@
 
 #include "rpmsg_platform.h"
 #include "rpmsg_env.h"
-#include <ipm.h>
+#include <zephyr/drivers/ipm.h>
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
@@ -23,9 +23,9 @@ static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
-static struct device *ipm_handle = ((void *)0);
+static const struct device *const ipm_handle = DEVICE_DT_GET(DT_CHOSEN(zephyr_ipc));
 
-void platform_ipm_callback(void *context, u32_t id, volatile void *data)
+void platform_ipm_callback(const struct device *dev, void *context, uint32_t id, volatile void *data)
 {
     if (((*(uint32_t *)data) & 0x01) != 0UL)
     {
@@ -225,7 +225,6 @@ void *platform_patova(uintptr_t addr)
 int32_t platform_init(void)
 {
     /* Get IPM device handle */
-    ipm_handle = device_get_binding(DT_NXP_LPC_MAILBOX_0_LABEL);
     if (!ipm_handle)
     {
         return -1;

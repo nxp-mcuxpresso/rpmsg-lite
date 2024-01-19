@@ -45,7 +45,7 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
  ******************************************************************************/
 struct rpmsg_lite_endpoint *default_ept;
 rpmsg_queue_handle default_queue;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 
 // utility: initialize rpmsg and environment
 // and wait for default channel
@@ -71,7 +71,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count, int32_t init_addr)
+int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count, int32_t init_addr)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -91,7 +91,7 @@ int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -206,7 +206,7 @@ end0:
 
 void tc_1_defchnl_3(void)
 {
-    struct rpmsg_lite_endpoint *epts[TC_EPT_COUNT] = {0};
+    struct rpmsg_lite_endpoint *volatile epts[TC_EPT_COUNT] = {0};
     rpmsg_queue_handle queues[TC_EPT_COUNT] = {0};
     int32_t result = 0;
 

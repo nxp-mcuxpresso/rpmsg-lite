@@ -60,6 +60,7 @@ void tc_1_rpmsg_init()
 
         /* incomming interrupt changes state to state_created_channel */
         rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
+        TEST_ASSERT_MESSAGE(1 == rpmsg_lite_is_link_up(my_rpmsg), "rpmsg_lite_is_link_up function failed");
         //increase the branch covergae in platform_init_interrupt/platform_deinit_interrupt
         platform_init_interrupt(10, ((void *)0));
         platform_deinit_interrupt(10);
@@ -87,6 +88,7 @@ void tc_1_rpmsg_init()
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL), "rpmsg_lite_is_link_up function with bad rpmsg_lite_dev param failed");
+    TEST_ASSERT_MESSAGE(0 == rpmsg_lite_wait_for_link_up(RL_NULL, RL_BLOCK), "rpmsg_lite_wait_for_link_up function with bad rpmsg_lite_dev param failed");
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
     /* Wrong shmem_length param */
     my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE/4, RPMSG_LITE_LINK_ID,

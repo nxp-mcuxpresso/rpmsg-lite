@@ -53,7 +53,7 @@ volatile int32_t message_received_2 = 0;
 ACKNOWLEDGE_MESSAGE ack_msg = {0};
 struct rpmsg_lite_endpoint *ctrl_ept = {0};
 struct rpmsg_lite_ept_static_context ctrl_ept_ctxt;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt;
 rpmsg_ns_handle ns_handle = NULL;
 rpmsg_ns_static_context nameservice_ept_ctxt;

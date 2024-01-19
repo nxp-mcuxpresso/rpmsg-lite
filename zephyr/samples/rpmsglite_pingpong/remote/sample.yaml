@@ -1,0 +1,15 @@
+sample:
+  description: RPMSG-Lite Ping Pong sample
+  name: rpmsglite pingpong (remote)
+tests:
+  sample.ipc.rpmsglite_pingpong.remote:
+    platform_allow:
+      - lpcxpresso54114_m4
+      - lpcxpresso55s69_cpu0
+      - mimxrt1160_evk_cm7
+      - mimxrt1170_evk_cm7
+      - mimxrt1170_evkb_cm7
+    integration_platforms:
+      - mimxrt1170_evk_cm7
+    tags: ipm
+    harness: remote

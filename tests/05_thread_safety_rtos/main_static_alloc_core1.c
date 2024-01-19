@@ -88,13 +88,13 @@ typedef struct
  ******************************************************************************/
 volatile int32_t globCntr = 0;
 
-struct rpmsg_lite_endpoint *ctrl_ept = NULL;
+struct rpmsg_lite_endpoint *volatile ctrl_ept = NULL;
 struct rpmsg_lite_ept_static_context ctrl_ept_ctxt = {0};
 
 rpmsg_queue_handle ctrl_q = NULL;
 rpmsg_static_queue_ctxt ctrl_queue_ctxt = {0};
 uint8_t ctrl_queue_storage[RL_ENV_QUEUE_STATIC_STORAGE_SIZE] = {0};
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt = {0};
 
 #if defined(FSL_RTOS_THREADX)

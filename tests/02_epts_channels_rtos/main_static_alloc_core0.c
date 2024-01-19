@@ -50,7 +50,7 @@ rpmsg_queue_handle default_queue = NULL;
 rpmsg_static_queue_ctxt default_queue_ctxt = {0};
 uint8_t default_rpmsg_queue_storage[RL_ENV_QUEUE_STATIC_STORAGE_SIZE] = {0};
 
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt = {0};
 
 // utility: initialize rpmsg and environment
@@ -79,7 +79,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rpmsg_static_queue_ctxt queues_ctxt[], struct rpmsg_lite_endpoint *epts[], struct rpmsg_lite_ept_static_context epts_ctxt[], int32_t count, int32_t init_addr)
+int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rpmsg_static_queue_ctxt queues_ctxt[], struct rpmsg_lite_endpoint *volatile epts[], struct rpmsg_lite_ept_static_context epts_ctxt[], int32_t count, int32_t init_addr)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -99,7 +99,7 @@ int32_t ts_create_epts(rpmsg_queue_handle queues[], uint8_t queues_storage[], rp
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -224,7 +224,7 @@ end0:
 
 void tc_1_defchnl_3(void)
 {
-    struct rpmsg_lite_endpoint *epts[TC_EPT_COUNT] = {0};
+    struct rpmsg_lite_endpoint *volatile epts[TC_EPT_COUNT] = {0};
     struct rpmsg_lite_ept_static_context ept_ctxt[TC_EPT_COUNT];
     rpmsg_queue_handle queues[TC_EPT_COUNT] = {0};
     rpmsg_static_queue_ctxt queues_ctxt[TC_EPT_COUNT] = {0};

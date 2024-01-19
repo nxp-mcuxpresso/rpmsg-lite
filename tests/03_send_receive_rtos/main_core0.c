@@ -51,10 +51,10 @@ typedef struct
 /*******************************************************************************
  * Code
  ******************************************************************************/
-struct rpmsg_lite_endpoint *my_ept = NULL;
+struct rpmsg_lite_endpoint *volatile my_ept = NULL;
 rpmsg_queue_handle my_queue = NULL;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
-rpmsg_ns_handle ns_handle;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
+rpmsg_ns_handle ns_handle = NULL;
 volatile uint32_t remote_addr = 0U;
 void *aux_mutex = NULL;
 void *aux_q = RL_NULL;
@@ -103,7 +103,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count, int32_t init_addr)
+int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count, int32_t init_addr)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -129,7 +129,7 @@ int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");

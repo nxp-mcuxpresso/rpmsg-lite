@@ -57,9 +57,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int32_t env_init_counter       = 0;
-static SemaphoreHandle_t env_sema     = ((void *)0);
+static int32_t env_init_counter   = 0;
+static SemaphoreHandle_t env_sema = ((void *)0);
+#ifndef __COVERAGESCANNER__
 static EventGroupHandle_t event_group = ((void *)0);
+#else
+EventGroupHandle_t event_group = ((void *)0);
+#endif
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
 LOCK_STATIC_CONTEXT env_sem_static_context;
 StaticEventGroup_t event_group_static_context;
@@ -112,6 +116,8 @@ static int32_t env_in_isr(void)
 #endif
 }
 
+#ifndef __COVERAGESCANNER__
+
 /*!
  * env_wait_for_link_up
  *
@@ -162,6 +168,7 @@ void env_tx_callback(uint32_t link_id)
         (void)xEventGroupSetBits(event_group, (EventBits_t)(1UL << link_id));
     }
 }
+#endif /* __COVERAGESCANNER__*/
 
 /*!
  * env_init
@@ -188,11 +195,11 @@ int32_t env_init(void)
     {
         /* first call */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-        env_sema    = xSemaphoreCreateBinaryStatic(&env_sem_static_context);
-        event_group = xEventGroupCreateStatic(&event_group_static_context);
+        env_sema    = (SemaphoreHandle_t)xSemaphoreCreateBinaryStatic(&env_sem_static_context);
+        event_group = (EventGroupHandle_t)xEventGroupCreateStatic(&event_group_static_context);
 #else
-        env_sema    = xSemaphoreCreateBinary();
-        event_group = xEventGroupCreate();
+        env_sema    = (SemaphoreHandle_t)xSemaphoreCreateBinary();
+        event_group = (EventGroupHandle_t)xEventGroupCreate();
 #endif
 #if (configUSE_16_BIT_TICKS == 1)
         (void)xEventGroupClearBits(event_group, 0xFFu);
@@ -417,10 +424,10 @@ int32_t env_create_mutex(void **lock, int32_t count)
     }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    *lock = xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count,
-                                           (StaticSemaphore_t *)context);
+    *lock = (void *)xSemaphoreCreateCountingStatic((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count,
+                                                   (StaticSemaphore_t *)context);
 #else
-    *lock = xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
+    *lock = (void *)xSemaphoreCreateCounting((UBaseType_t)RL_ENV_MAX_MUTEX_COUNT, (UBaseType_t)count);
 #endif
     if (*lock != ((void *)0))
     {
@@ -505,6 +512,7 @@ void env_delete_sync_lock(void *lock)
     }
 }
 
+#ifndef __COVERAGESCANNER__
 /*!
  * env_acquire_sync_lock
  *
@@ -545,6 +553,7 @@ void env_release_sync_lock(void *lock)
         (void)xSemaphoreGive(xSemaphore);
     }
 }
+#endif /* __COVERAGESCANNER__ */
 
 /*!
  * env_sleep_msec
@@ -698,8 +707,8 @@ int32_t env_create_queue(void **queue,
                          uint8_t *queue_static_storage,
                          rpmsg_static_queue_ctxt *queue_static_context)
 {
-    *queue =
-        xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_static_storage, queue_static_context);
+    *queue = (void *)xQueueCreateStatic((UBaseType_t)length, (UBaseType_t)element_size, queue_static_storage,
+                                        queue_static_context);
 #else
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
@@ -728,6 +737,7 @@ void env_delete_queue(void *queue)
     vQueueDelete(queue);
 }
 
+#ifndef __COVERAGESCANNER__
 /*!
  * env_put_queue
  *
@@ -795,6 +805,7 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
     }
     return 0;
 }
+#endif /* __COVERAGESCANNER__ */
 
 /*!
  * env_get_current_queue_size

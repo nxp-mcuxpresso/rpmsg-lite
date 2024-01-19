@@ -46,10 +46,10 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 /*******************************************************************************
  * Code
  ******************************************************************************/
-struct rpmsg_lite_endpoint *ctrl_ept;
-rpmsg_queue_handle ctrl_q;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
-rpmsg_ns_handle ns_handle;
+struct rpmsg_lite_endpoint *volatile ctrl_ept = NULL;
+rpmsg_queue_handle ctrl_q = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
+rpmsg_ns_handle ns_handle = NULL;
 volatile uint32_t remote_addr = 0U;
 
 static void app_nameservice_isr_cb(uint32_t new_ept, const char *new_ept_name, uint32_t flags, void *user_data)

@@ -1,7 +1,7 @@
-[![Version](https://img.shields.io/github/v/release/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/releases/latest)
-[![Contributors](https://img.shields.io/github/contributors/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/graphs/contributors)
-[![Issues](https://img.shields.io/github/issues/NXPmicro/rpmsg-lite)](https://github.com/NXPmicro/rpmsg-lite/issues)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/NXPmicro/rpmsg-lite/pulls)
+[![Version](https://img.shields.io/github/v/release/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/releases/latest)
+[![Contributors](https://img.shields.io/github/contributors/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/nxp-mcuxpresso/rpmsg-lite/pulls)
 
 RPMsg Component
 ===============
@@ -12,7 +12,7 @@ Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (Op
 
 The RPMsg-Lite is an open-source component developed by NXP Semiconductors and released under the BSD-compatible license.
 
-For Further documentation, please look at doxygen documentation at: https://nxpmicro.github.io/rpmsg-lite/
+For Further documentation, please look at doxygen documentation at: https://nxp-mcuxpresso.github.io/rpmsg-lite/
 
 # Motivation to create RPMsg-Lite
 
@@ -138,4 +138,4 @@ This script executes the application named *clang-format.exe*. You need to have 
 
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2023 NXP
+Copyright © 2016-2024 NXP

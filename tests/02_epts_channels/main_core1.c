@@ -47,7 +47,7 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 volatile int32_t message_received = 0;
 int32_t trans_data = 0;
 uint32_t trans_src = 0;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt;
 
 // custom ept callback
@@ -88,7 +88,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(struct rpmsg_lite_endpoint *epts[],
+int32_t ts_create_epts(struct rpmsg_lite_endpoint *volatile epts[],
                    int32_t count,
                    int32_t init_addr,
                    struct rpmsg_lite_ept_static_context ctxts[])
@@ -111,7 +111,7 @@ int32_t ts_create_epts(struct rpmsg_lite_endpoint *epts[],
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(count > 0, "negative number");
@@ -158,7 +158,7 @@ void tc_1_defchnl_transport_receive(struct rpmsg_lite_endpoint *src, int32_t dst
 
 void tc_1_defchnl_transport(void)
 {
-    struct rpmsg_lite_endpoint *epts[TC_EPT_COUNT] = {0};
+    struct rpmsg_lite_endpoint *volatile epts[TC_EPT_COUNT] = {0};
     struct rpmsg_lite_ept_static_context epts_ctxts[TC_EPT_COUNT];
     int32_t result = 0;
 

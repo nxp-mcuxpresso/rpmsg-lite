@@ -48,7 +48,7 @@ struct rpmsg_lite_endpoint *ctrl_ept = {0};
 struct rpmsg_lite_endpoint *ept_with_addr_1 = {0};
 struct rpmsg_lite_ept_static_context ctrl_ept_ctxt;
 struct rpmsg_lite_ept_static_context ept_with_addr_1_ctxt;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 struct rpmsg_lite_instance rpmsg_ctxt;
 rpmsg_ns_handle ns_handle = NULL;
 rpmsg_ns_static_context nameservice_ept_ctxt;

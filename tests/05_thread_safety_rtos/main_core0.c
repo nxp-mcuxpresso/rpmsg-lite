@@ -50,9 +50,9 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 struct rpmsg_lite_endpoint *endpoints[TC_EPT_COUNT] = {NULL};
 rpmsg_queue_handle qs[TC_EPT_COUNT] = {NULL};
 int32_t ept_num = 0;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 
-struct rpmsg_lite_endpoint *ctrl_ept;
+struct rpmsg_lite_endpoint *volatile ctrl_ept = NULL;
 rpmsg_queue_handle ctrl_q;
 
 /*

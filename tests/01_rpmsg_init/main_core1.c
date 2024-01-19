@@ -62,6 +62,7 @@ void tc_1_rpmsg_init()
 
         /* incomming interrupt changes state to state_created_channel */
         rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
+        TEST_ASSERT_MESSAGE(1 == rpmsg_lite_is_link_up(my_rpmsg), "rpmsg_lite_is_link_up function failed");
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
         TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
@@ -85,6 +86,7 @@ void tc_1_rpmsg_init()
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL), "rpmsg_lite_is_link_up function with bad rpmsg_lite_dev param failed");
+    TEST_ASSERT_MESSAGE(0 == rpmsg_lite_wait_for_link_up(RL_NULL, RL_BLOCK), "rpmsg_lite_wait_for_link_up function with bad rpmsg_lite_dev param failed");
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
     /* Wrong link_id param */
     my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base, RPMSG_LITE_LINK_ID+1, RL_NO_FLAGS, &rpmsg_ctxt);

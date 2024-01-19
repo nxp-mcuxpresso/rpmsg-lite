@@ -92,9 +92,9 @@ struct my_rpmsg_std_msg
 } RL_PACKED_END;
 #endif /*__COVERAGESCANNER__*/
 
-struct rpmsg_lite_endpoint *my_ept = NULL;
+struct rpmsg_lite_endpoint *volatile my_ept = NULL;
 rpmsg_queue_handle my_queue = NULL;
-struct rpmsg_lite_instance *my_rpmsg = NULL;
+struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 rpmsg_ns_handle ns_handle = NULL;
 
 static void app_nameservice_isr_cb(uint32_t new_ept, const char *new_ept_name, uint32_t flags, void *user_data)
@@ -135,7 +135,7 @@ int32_t ts_deinit_rpmsg(void)
 }
 
 // utility: create number of epts
-int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count, int32_t init_addr)
+int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count, int32_t init_addr)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
@@ -163,7 +163,7 @@ int32_t ts_create_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *
 }
 
 // utility: destroy number of epts
-int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *epts[], int32_t count)
+int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint *volatile epts[], int32_t count)
 {
     TEST_ASSERT_MESSAGE(queues != NULL, "NULL param");
     TEST_ASSERT_MESSAGE(epts != NULL, "NULL param");
