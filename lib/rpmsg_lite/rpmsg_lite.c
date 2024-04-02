@@ -665,7 +665,9 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
 
     // FIXME : may be just copy the data size equal to buffer length and Tx it.
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-    if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE(rpmsg_lite_dev->link_id))
+    rpmsg_platform_shmem_config_t shmem_config;
+    platform_get_custom_shmem_config(rpmsg_lite_dev->link_id, &shmem_config);
+    if (size > (uint32_t)shmem_config.buffer_payload_size)
 #else
     if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE)
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
@@ -748,7 +750,9 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     }
 
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-    if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE(rpmsg_lite_dev->link_id))
+    rpmsg_platform_shmem_config_t shmem_config;
+    platform_get_custom_shmem_config(rpmsg_lite_dev->link_id, &shmem_config);
+    if (size > (uint32_t)shmem_config.buffer_payload_size)
 #else
     if (size > (uint32_t)RL_BUFFER_PAYLOAD_SIZE)
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
