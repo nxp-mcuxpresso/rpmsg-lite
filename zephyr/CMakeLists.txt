@@ -23,21 +23,24 @@ if(CONFIG_RPMSGLITE)
     string(TOUPPER ${CONFIG_SOC} MCUX_DEVICE_PATH)
   endif()
 
-  #
-  # Select only supported platforms for RPMSG-Lite based on Zephyr selected SOC.
-  #
-  if(("${MCUX_DEVICE}" STREQUAL "LPC54114") OR ("${MCUX_DEVICE}" STREQUAL "LPC54114_m0"))
-    set(RPMSG_LITE_PLATFORM_PATH "lpc5411x")
-  elseif("${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu0" OR "${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu1")
-    set(RPMSG_LITE_PLATFORM_PATH "lpc55s69")
-  elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm7")
-    set(RPMSG_LITE_PLATFORM_PATH "imxrt1170")
-  elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm7")
-  set(RPMSG_LITE_PLATFORM_PATH "imxrt1160")
-  else()
-    message(FATAL_ERROR "RPMSG-Lite Selected for unsupported platform: ${CONFIG_SOC}")
-  endif()
-
+  # In case of IPC Service Device Selection is done via Device Tree
+  # therefore build is not tied to specific MCU directly here.
+  if(NOT CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
+    #
+    # Select only supported platforms for RPMSG-Lite based on Zephyr selected SOC.
+    #
+    if(("${MCUX_DEVICE}" STREQUAL "LPC54114") OR ("${MCUX_DEVICE}" STREQUAL "LPC54114_m0"))
+        set(RPMSG_LITE_PLATFORM_PATH "lpc5411x")
+    elseif("${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu0" OR "${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu1")
+        set(RPMSG_LITE_PLATFORM_PATH "lpc55s69")
+    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm7")
+        set(RPMSG_LITE_PLATFORM_PATH "imxrt1170")
+    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm7")
+    set(RPMSG_LITE_PLATFORM_PATH "imxrt1160")
+    else()
+        message(FATAL_ERROR "RPMSG-Lite Selected for unsupported platform: ${CONFIG_SOC}")
+    endif()
+  endif(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
 
   set (RPMSGLITE_LIB rpmsg_lite)
 
@@ -51,12 +54,27 @@ if(CONFIG_RPMSGLITE)
       ${RPMSGLITE_DIR}/virtio/virtqueue.c
     )
 
+    list(APPEND _INCLUDES
+        ${RPMSGLITE_DIR}/include
+    )
+
     #
     # Platform Specific RPMSG-Lite Sources
     #
-    list(APPEND _SOURCES
-      ${RPMSGLITE_DIR}/rpmsg_lite/porting/platform/${RPMSG_LITE_PLATFORM_PATH}/rpmsg_platform_zephyr_ipm.c
-    )
+    if(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
+        # Requires different platform and env files when building RPMSG Lite as IPC Backend Service
+        list(APPEND _INCLUDES
+            ${RPMSGLITE_DIR}/include/platform/zephyr-ipc-service
+        )
+    else(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
+        # This usualy means using RPMSG Lite lib as directly part of Zephyr Application
+        list(APPEND _SOURCES
+            ${RPMSGLITE_DIR}/rpmsg_lite/porting/platform/${RPMSG_LITE_PLATFORM_PATH}/rpmsg_platform_zephyr_ipm.c
+        )
+        list(APPEND _INCLUDES
+            ${RPMSGLITE_DIR}/include/platform/${RPMSG_LITE_PLATFORM_PATH}
+        )
+    endif(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
 
     #
     # Environment Specific RPMSG-Lite Sources
@@ -64,15 +82,14 @@ if(CONFIG_RPMSGLITE)
     list(APPEND _SOURCES
       ${RPMSGLITE_DIR}/rpmsg_lite/porting/environment/rpmsg_env_zephyr.c
     )
+    list(APPEND _INCLUDES
+        ${RPMSGLITE_DIR}/include/environment/zephyr
+    )
 
     zephyr_library_named(${RPMSGLITE_LIB})
     add_dependencies(${ZEPHYR_CURRENT_LIBRARY} ${OFFSETS_H_TARGET})
     zephyr_library_sources(${_SOURCES})
-    zephyr_include_directories(
-      ${RPMSGLITE_DIR}/include/platform/${RPMSG_LITE_PLATFORM_PATH}
-      ${RPMSGLITE_DIR}/include/environment/zephyr
-      ${RPMSGLITE_DIR}/include
-      )
+    zephyr_include_directories(${_INCLUDES})
 
     zephyr_library_sources_ifdef(CONFIG_RPMSGLITE_QUEUE  ${RPMSGLITE_DIR}/rpmsg_lite/rpmsg_queue.c)
     zephyr_library_sources_ifdef(CONFIG_RPMSGLITE_NS  ${RPMSGLITE_DIR}/rpmsg_lite/rpmsg_ns.c)
