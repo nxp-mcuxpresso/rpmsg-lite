@@ -6,7 +6,7 @@ RPMSG-Lite Ping Pong
 Overview
 ********
 
-The Multicore RPMsg-Lite pingpong sample that can be used with: :ref:`supported board <boards>`.
+The Multicore RPMsg-Lite pingpong sample that can be used with supported boards listed bellow.
 
 The Multicore RPMsg-Lite pingpong project is a simple demonstration program that uses the
 Zephyr OS and the RPMsg-Lite library and shows how to implement the inter-core

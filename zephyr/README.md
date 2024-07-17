@@ -2,7 +2,9 @@
 
 ## Adding RPMSG-Lite to Zephyr as module
 
-To include RPMSG-Lite Zephyr, update Zephyr's west.yml:
+RPMSG-Lite was tested with [Zephyr 3.6.0](https://docs.zephyrproject.org/latest/releases/release-notes-3.6.html) version.
+
+To include RPMSG-Lite into Zephyr, update Zephyr's west.yml:
 
 ``` yml
   projects:
@@ -14,6 +16,18 @@ To include RPMSG-Lite Zephyr, update Zephyr's west.yml:
 Then run:
 ``` sh
 west update rpmsg-lite
+```
+
+## Samples
+
+Samples are located in *zephyr/samples*. Examples can be build by west tool:
+
+### RPMSG-Lite Ping Pong Example
+
+```sh
+cd path/to/zephyrproject
+west build --sysbuild -b <supported board> modules/lib/rpmsg-lite/zephyr/samples/rpmsglite_pingpong/ -p
+west flash
 ```
 
 ## Supported Platforms
@@ -66,15 +80,3 @@ User can copy and update this config file.
 ### CMakeList
 
 CMakeLists.txt defines RPSMG-Lite as Zephyr library. Includes all required directories and source files for Zephyr environment.
-
-## Samples
-
-Samples are located in *zephyr/samples*. Examples can be build by west tool:
-
-### RPMSG-Lite Ping Pong Example
-
-```sh
-cd path/to/zephyrproject
-west build --sysbuild -b <supported board> modules/lib/rpmsg-lite/zephyr/samples/rpmsglite_pingpong/ -p
-west flash
-```
