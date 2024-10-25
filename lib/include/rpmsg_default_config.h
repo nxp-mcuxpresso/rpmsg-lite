@@ -129,6 +129,16 @@
 #define RL_CLEAR_USED_BUFFERS (0)
 #endif
 
+//! @def RL_USE_DCACHE
+//!
+//! Memory cache management of shared memory.
+//! Use in case of data cache is enabled for shared memory.
+//! enabled/disabled.
+//! The default value is 0 (disabled).
+#ifndef RL_USE_DCACHE
+#define RL_USE_DCACHE (0)
+#endif
+
 //! @def RL_USE_MCMGR_IPC_ISR_HANDLER
 //!
 //! When enabled IPC interrupts are managed by the Multicore Manager (IPC

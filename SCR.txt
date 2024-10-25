@@ -1,0 +1,8 @@
+Name: mcux-sdk-rpmsg-lite
+Version: v5.1.1
+Outgoing License: BSD-3-Clause
+License File: LICENSE
+Format: source code
+Description: Lightweight implementation of the Remote Processor Messaging (RPMsg) protocol.
+Location: https://github.com/nxp-mcuxpresso/rpmsg-lite
+Origin: NXP (BSD-3-Clause)

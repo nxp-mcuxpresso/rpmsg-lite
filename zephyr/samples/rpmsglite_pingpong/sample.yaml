@@ -4,13 +4,13 @@ sample:
 tests:
   sample.ipc.rpmsglite_pingpong:
     platform_allow:
-      - lpcxpresso54114_m4
-      - lpcxpresso55s69_cpu0
-      - mimxrt1160_evk_cm7
-      - mimxrt1170_evk_cm7
-      - mimxrt1170_evkb_cm7
+      - mimxrt1170_evk@B/mimxrt1176/cm7
+      - mimxrt1170_evk/mimxrt1176/cm7
+      - mimxrt1160_evk/mimxrt1166/cm7
+      - lpcxpresso55s69/lpc55s69/cpu0
+      - lpcxpresso54114/lpc54114/m4
     integration_platforms:
-      - mimxrt1170_evk_cm7
+      - mimxrt1170_evk/mimxrt1176/cm7
     tags: ipm
     harness: console
     sysbuild: true

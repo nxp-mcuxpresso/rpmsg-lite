@@ -4,7 +4,6 @@
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
  * Copyright 2016-2024 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -112,12 +111,12 @@ static struct llist *rpmsg_lite_get_endpoint_from_addr(struct rpmsg_lite_instanc
  */
 static void rpmsg_lite_rx_callback(struct virtqueue *vq)
 {
-    struct rpmsg_std_msg *rpmsg_msg;
+    struct rpmsg_std_msg *rpmsg_msg = RL_NULL;
+    struct rpmsg_lite_endpoint *ept = RL_NULL;
+    struct llist *node              = RL_NULL;
     uint32_t len;
     uint16_t idx;
-    struct rpmsg_lite_endpoint *ept;
     int32_t cb_ret;
-    struct llist *node;
     struct rpmsg_lite_instance *rpmsg_lite_dev = (struct rpmsg_lite_instance *)vq->priv;
 #if defined(RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION) && (RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION == 1)
     uint32_t rx_freed = RL_FALSE;
@@ -211,6 +210,9 @@ static void rpmsg_lite_tx_callback(struct virtqueue *vq)
 static void vq_tx_remote(struct virtqueue *tvq, void *buffer, uint32_t len, uint16_t idx)
 {
     int32_t status;
+
+    env_cache_flush(buffer, len);
+
     status = virtqueue_add_consumed_buffer(tvq, idx, len);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -231,7 +233,14 @@ static void vq_tx_remote(struct virtqueue *tvq, void *buffer, uint32_t len, uint
  */
 static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_available_buffer(tvq, idx, len);
+    void *data = RL_NULL;
+
+    data = virtqueue_get_available_buffer(tvq, idx, len);
+    if (data != RL_NULL)
+    {
+        env_cache_invalidate(data, *len);
+    }
+    return data;
 }
 
 /*!
@@ -247,7 +256,15 @@ static void *vq_tx_alloc_remote(struct virtqueue *tvq, uint32_t *len, uint16_t *
  */
 static void *vq_rx_remote(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_available_buffer(rvq, idx, len);
+    void *data = RL_NULL;
+
+    data = virtqueue_get_available_buffer(rvq, idx, len);
+    if (data != RL_NULL)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -264,6 +281,7 @@ static void vq_rx_free_remote(struct virtqueue *rvq, void *buffer, uint32_t len,
     int32_t status;
 #if defined(RL_CLEAR_USED_BUFFERS) && (RL_CLEAR_USED_BUFFERS == 1)
     env_memset(buffer, 0x00, len);
+    env_cache_flush(buffer, len);
 #endif
     status = virtqueue_add_consumed_buffer(rvq, idx, len);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
@@ -298,6 +316,9 @@ static void vq_rx_free_remote(struct virtqueue *rvq, void *buffer, uint32_t len,
 static void vq_tx_master(struct virtqueue *tvq, void *buffer, uint32_t len, uint16_t idx)
 {
     int32_t status;
+
+    env_cache_flush(buffer, len);
+
     status = virtqueue_add_buffer(tvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -318,7 +339,15 @@ static void vq_tx_master(struct virtqueue *tvq, void *buffer, uint32_t len, uint
  */
 static void *vq_tx_alloc_master(struct virtqueue *tvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_buffer(tvq, len, idx);
+    void *data = RL_NULL;
+
+    data = virtqueue_get_buffer(tvq, len, idx);
+    if (data != RL_NULL)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -334,7 +363,16 @@ static void *vq_tx_alloc_master(struct virtqueue *tvq, uint32_t *len, uint16_t *
  */
 static void *vq_rx_master(struct virtqueue *rvq, uint32_t *len, uint16_t *idx)
 {
-    return virtqueue_get_buffer(rvq, len, idx);
+    void *data = RL_NULL;
+
+    data = virtqueue_get_buffer(rvq, len, idx);
+
+    if (data != RL_NULL)
+    {
+        env_cache_invalidate(data, *len);
+    }
+
+    return data;
 }
 
 /*!
@@ -352,7 +390,9 @@ static void vq_rx_free_master(struct virtqueue *rvq, void *buffer, uint32_t len,
     int32_t status;
 #if defined(RL_CLEAR_USED_BUFFERS) && (RL_CLEAR_USED_BUFFERS == 1)
     env_memset(buffer, 0x00, len);
+    env_cache_flush(buffer, len);
 #endif
+
     status = virtqueue_add_buffer(rvq, idx);
     RL_ASSERT(status == VQUEUE_SUCCESS); /* must success here */
 
@@ -1084,11 +1124,15 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                          (RL_NULL);
 
             RL_ASSERT(buffer != RL_NULL);
-
+            uint32_t buff_size = 0;
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-            env_memset(buffer, 0x00, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+            buff_size = (uint32_t)(shmem_config.buffer_payload_size + 16UL);
+            env_memset(buffer, 0x00, buff_size);
+            env_cache_flush(buffer, buff_size);
 #else
-            env_memset(buffer, 0x00, (uint32_t)RL_BUFFER_SIZE);
+            buff_size = (uint32_t)RL_BUFFER_SIZE;
+            env_memset(buffer, 0x00, buff_size);
+            env_cache_flush(buffer, buff_size);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
             if (vqs[j] == rpmsg_lite_dev->rvq)
             {

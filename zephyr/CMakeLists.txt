@@ -29,18 +29,18 @@ if(CONFIG_RPMSGLITE)
     #
     # Select only supported platforms for RPMSG-Lite based on Zephyr selected SOC.
     #
-    if(("${MCUX_DEVICE}" STREQUAL "LPC54114") OR ("${MCUX_DEVICE}" STREQUAL "LPC54114_m0"))
+    if("${MCUX_DEVICE}" STREQUAL "LPC54114")
         set(RPMSG_LITE_PLATFORM_PATH "lpc5411x")
-    elseif("${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu0" OR "${MCUX_DEVICE}" STREQUAL "LPC55S69_cpu1")
+    elseif("${MCUX_DEVICE}" STREQUAL "LPC55S69")
         set(RPMSG_LITE_PLATFORM_PATH "lpc55s69")
-    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm7")
+    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176")
         set(RPMSG_LITE_PLATFORM_PATH "imxrt1170")
-    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1166_cm7")
-    set(RPMSG_LITE_PLATFORM_PATH "imxrt1160")
+    elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1166")
+        set(RPMSG_LITE_PLATFORM_PATH "imxrt1160")
     else()
         message(FATAL_ERROR "RPMSG-Lite Selected for unsupported platform: ${CONFIG_SOC}")
     endif()
-  endif(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
+  endif(NOT CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
 
   set (RPMSGLITE_LIB rpmsg_lite)
 

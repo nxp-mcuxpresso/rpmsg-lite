@@ -19,3 +19,5 @@ iar
 kds
 build
 *.patch
+tests/**/test_*.xml
+.vscode

@@ -2,9 +2,8 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2024 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -474,8 +473,23 @@ uint64_t env_get_timestamp(void);
  * Disables system caches.
  *
  */
-
 void env_disable_cache(void);
+
+/*!
+ * env_cache_flush
+ *
+ * Flushes system caches.
+ *
+ */
+void env_cache_flush(void *data, uint32_t len);
+
+/*!
+ * env_cache_invalidate
+ *
+ * Invalidates system caches.
+ *
+ */
+void env_cache_invalidate(void *data, uint32_t len);
 
 typedef void LOCK;
 

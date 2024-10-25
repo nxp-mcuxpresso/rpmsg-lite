@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -169,11 +169,11 @@ int32_t ts_init_rpmsg(void)
     // Correct call
     ctrl_ept = rpmsg_lite_create_ept(my_rpmsg, TC_LOCAL_EPT_ADDR, rpmsg_queue_rx_cb, ctrl_q);
     TEST_ASSERT_MESSAGE(NULL != ctrl_ept, "'rpmsg_lite_create_ept' failed");
-    
+
     // Invalid params for rpmsg_ns_bind
     ns_handle = rpmsg_ns_bind(my_rpmsg, RL_NULL, (void *)&remote_addr);
     TEST_ASSERT_MESSAGE(RL_NULL == ns_handle, "'rpmsg_ns_bind' with bad app_cb param failed");
-    
+
     return 0;
 }
 
@@ -224,7 +224,7 @@ int32_t ts_destroy_epts()
                                  &num_of_received_bytes, RL_BLOCK);
     TEST_ASSERT_MESSAGE(0 == ret_value, "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE(CTR_CMD_DESTROY_EP == ack_msg.CMD_ACK,
-                        "error! expecting acknowledge of CTR_CMD_DESTROY_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_DESTROY_EP command");
     TEST_ASSERT_MESSAGE(0 == ack_msg.RETURN_VALUE, "error! failed to destroy endpoints on other side");
 
     return 0;
@@ -273,7 +273,7 @@ void tc_1_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on the other side");
 
@@ -294,7 +294,7 @@ void tc_1_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 != ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on other side");
 
@@ -317,7 +317,7 @@ void tc_1_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on the other side");
     /* Get address of endpoint that was created with RL_ADDR_ANY parameter*/
@@ -345,7 +345,7 @@ void tc_1_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 != ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on the other side");
 
@@ -370,7 +370,7 @@ void tc_1_main_task(void)
         TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                             "error! failed to receive acknowledge message from other side");
         TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                            "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                            "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
         TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                             "error! failed to create endpoint on other side");
     }
@@ -442,7 +442,7 @@ void tc_2_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from other side");
             TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                                "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to create endpoint on other side");
             env_memcpy((void *)&responder_ept_addr, (void *)ack_msg.RESP_DATA, (uint32_t)(sizeof(uint32_t)));
@@ -470,7 +470,7 @@ void tc_2_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from other side");
             TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                                "error! expecting acknowledge of CTR_CMD_RECV command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed when call rpmsg_rtos_recv function on the other side");
             TEST_ASSERT_MESSAGE((0 == strncmp(ack_msg.RESP_DATA, "aaa", 3) ? 1 : (0 != ts_destroy_epts())),
@@ -541,7 +541,7 @@ void tc_2_main_task(void)
         TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                             "error! failed to receive acknowledge message from other side");
         TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                            "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                            "error! expecting acknowledge of CTR_CMD_RECV command");
         TEST_ASSERT_MESSAGE((RL_ERR_PARAM == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                             "error! failed when call rpmsg_rtos_recv function on the other side");
 
@@ -612,7 +612,7 @@ void tc_3_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from responder");
             TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                                "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to create endpoint on other side");
             env_memcpy((void *)&responder_ept_addr, (void *)ack_msg.RESP_DATA, (uint32_t)(sizeof(uint32_t)));
@@ -640,7 +640,7 @@ void tc_3_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from other side");
             TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                                "error! expecting acknowledge of CTR_CMD_RECV command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed when call rpmsg_rtos_recv function on the other side");
             TEST_ASSERT_MESSAGE((0 == strncmp(ack_msg.RESP_DATA, "aaa", 3) ? 1 : (0 != ts_destroy_epts())),
@@ -705,7 +705,7 @@ void tc_3_main_task(void)
         TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                             "error! failed to receive acknowledge message from other side");
         TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                            "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                            "error! expecting acknowledge of CTR_CMD_RECV command");
         TEST_ASSERT_MESSAGE((RL_ERR_PARAM == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                             "error! failed when call rpmsg_rtos_recv function on the other side");
 
@@ -752,7 +752,7 @@ void tc_4_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on other side");
     env_memcpy((void *)&responder_ept_addr, (void *)ack_msg.RESP_DATA,
@@ -773,7 +773,7 @@ void tc_4_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                        "error! expecting acknowledge of CTR_CMD_RECV command");
     TEST_ASSERT_MESSAGE((0 != ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed when call rpmsg_rtos_recv function on the other side");
     TEST_ASSERT_INT_WITHIN_MESSAGE(CMD_RECV_TIMEOUT_MS * 0.2, CMD_RECV_TIMEOUT_MS, ack_msg.TIMEOUT_MSEC,
@@ -798,7 +798,7 @@ void tc_4_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                        "error! expecting acknowledge of CTR_CMD_RECV command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed when call rpmsg_rtos_recv function on the other side");
     TEST_ASSERT_INT_WITHIN_MESSAGE((CMD_RECV_TIMEOUT_MS / 2) * 0.2, CMD_RECV_TIMEOUT_MS / 2, ack_msg.TIMEOUT_MSEC,
@@ -846,7 +846,7 @@ void tc_5_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                        "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to create endpoint on other side");
     env_memcpy((void *)&responder_ept_addr, (void *)ack_msg.RESP_DATA,
@@ -867,7 +867,7 @@ void tc_5_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                        "error! expecting acknowledge of CTR_CMD_RECV command");
     TEST_ASSERT_MESSAGE((0 != ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed when call rpmsg_rtos_recv function on the other side");
     TEST_ASSERT_INT_WITHIN_MESSAGE(CMD_RECV_TIMEOUT_MS * 0.2, CMD_RECV_TIMEOUT_MS, ack_msg.TIMEOUT_MSEC,
@@ -892,7 +892,7 @@ void tc_5_main_task(void)
     TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                         "error! failed to receive acknowledge message from other side");
     TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                        "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                        "error! expecting acknowledge of CTR_CMD_RECV command");
     TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                         "error! failed when call rpmsg_rtos_recv on the other side");
     TEST_ASSERT_INT_WITHIN_MESSAGE((CMD_RECV_TIMEOUT_MS / 2) * 0.2, CMD_RECV_TIMEOUT_MS / 2, ack_msg.TIMEOUT_MSEC,
@@ -963,7 +963,7 @@ void tc_6_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from responder");
             TEST_ASSERT_MESSAGE((CTR_CMD_CREATE_EP == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_CREATE_EP copmmand");
+                                "error! expecting acknowledge of CTR_CMD_CREATE_EP command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to create endpoint on other side");
             env_memcpy((void *)&responder_ept_addr, (void *)ack_msg.RESP_DATA,
@@ -991,7 +991,7 @@ void tc_6_main_task(void)
             TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed to receive acknowledge message from other side");
             TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                                "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                                "error! expecting acknowledge of CTR_CMD_RECV command");
             TEST_ASSERT_MESSAGE((0 == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                                 "error! failed when call rpmsg_rtos_recv function on the other side");
             TEST_ASSERT_MESSAGE((0 == strncmp(ack_msg.RESP_DATA, "aaa", 3) ? 1 : (0 != ts_destroy_epts())),
@@ -1056,7 +1056,7 @@ void tc_6_main_task(void)
         TEST_ASSERT_MESSAGE((0 == ret_value ? 1 : (0 != ts_destroy_epts())),
                             "error! failed to receive acknowledge message from other side");
         TEST_ASSERT_MESSAGE((CTR_CMD_RECV == ack_msg.CMD_ACK ? 1 : (0 != ts_destroy_epts())),
-                            "error! expecting acknowledge of CTR_CMD_RECV copmmand");
+                            "error! expecting acknowledge of CTR_CMD_RECV command");
         TEST_ASSERT_MESSAGE((RL_ERR_PARAM == ack_msg.RETURN_VALUE ? 1 : (0 != ts_destroy_epts())),
                             "error! failed when call rpmsg_rtos_recv function on the other side");
 

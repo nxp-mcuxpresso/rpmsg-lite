@@ -42,11 +42,11 @@ The RPSMG-Lite is currently supported on these platforms:
 To support other platform please create new platform specific file `rpmsg_platform_zephyr_ipm.c` in
 directory **`rpmsg-lite/lib/rpmsg_lite/porting/platform/<platform_name>`** and add new entry in file `rpmsg-lite/zephyr/CMakeLists.txt`.
 ```cmake
-  if(("${MCUX_DEVICE}" STREQUAL "LPC54114") OR ("${MCUX_DEVICE}" STREQUAL "LPC54114_m0"))
+  if(("${MCUX_DEVICE}" STREQUAL "LPC54114"))
     set(RPMSG_LITE_PLATFORM_PATH "lpc5411x")
   ...
   ...
-  elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm4" OR "${MCUX_DEVICE}" STREQUAL "MIMXRT1176_cm7")
+  elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1176")
     set(RPMSG_LITE_PLATFORM_PATH "imxrt1170")
 ```
 Also update samples with board/platform specific configs or DT overlays in: `rpmsg-lite/zephyr/samples/<sample_name>/boards` and

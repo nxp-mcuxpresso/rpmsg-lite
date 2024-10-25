@@ -1,7 +1,7 @@
 /*
  * Copyright 2023 NXP
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <zephyr/drivers/ipm.h>
@@ -73,7 +73,7 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
                                          &g_ept_context);
 
     /* Temporary wait a bit here until remote core will process initialization and is ready to receive data */
-    (void)k_event_wait_all(&wait_event, 5, false, K_MSEC(20));
+    (void)k_event_wait_all(&wait_event, 5, false, K_MSEC(50));
 
     /* Send the first message to the remoteproc */
     g_msg.DATA = 0U;

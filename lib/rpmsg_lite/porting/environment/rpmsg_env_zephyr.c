@@ -2,8 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
- * All rights reserved.
+ * Copyright 2016-2024 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,6 +45,7 @@
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
 #include <zephyr/kernel.h>
+#include <zephyr/cache.h>
 #include <zephyr/sys_clock.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
@@ -583,6 +583,20 @@ void env_disable_cache(void)
 {
     platform_cache_all_flush_invalidate();
     platform_cache_disable();
+}
+
+void env_cache_flush(void *data, uint32_t len)
+{
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
+    sys_cache_data_flush_range(data, len);
+#endif
+}
+
+void env_cache_invalidate(void *data, uint32_t len)
+{
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
+    sys_cache_data_invd_range(data, len);
+#endif
 }
 
 /*========================================================= */

@@ -1,6 +1,6 @@
 # Copyright 2022-2023 NXP
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 
 # Add external project
 ExternalZephyrProject_Add(

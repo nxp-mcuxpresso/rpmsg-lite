@@ -1,0 +1,265 @@
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
+# TODO: These are in yml but not in here...
+# MIMX8MD6
+# MIMX8MD7
+# MIMX8SL1
+# MIMX8US3
+# MIMX8US5
+# MIMX8UX5
+# MIMX8UX6
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.evkmimxrt595
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT595S) && MCUX_HW_CORE_ID_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT500 CM33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.evkmimxrt595_fusionf1
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT595S) && MCUX_HW_CORE_ID_FUSIONF1
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT500 Fusion 1 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.evkmimxrt685
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT633S || MCUX_HW_DEVICE_MIMXRT685S) && MCUX_HW_CORE_ID_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT600 CM33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.evkmimxrt685_hifi4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT633S || MCUX_HW_DEVICE_MIMXRT685S) && MCUX_HW_CORE_ID_HIFI4
+    help
+        "RPMSG-Lite Porting Layer for MIMXRT-685 HIFI4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt700
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT798S || MCUX_HW_DEVICE_MIMXRT758S || \
+               MCUX_HW_DEVICE_MIMXRT735S) && MCUX_HW_CORE_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT700 CM33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt700_hifi1
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT798S || MCUX_HW_DEVICE_MIMXRT758S || \
+               MCUX_HW_DEVICE_MIMXRT735S) && MCUX_HW_CORE_ID_HIFI1
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT700 HIFI1 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt700_hifi4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMXRT798S || MCUX_HW_DEVICE_MIMXRT758S || \
+               MCUX_HW_DEVICE_MIMXRT735S) && MCUX_HW_CORE_ID_HIFI4
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT700 HIFI4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.frdmmcxw7x
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MCXW716A || MCUX_HW_DEVICE_MCXW716C
+    help
+        "RPMSG-Lite Porting Layer for FRDM-MCXW7"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx7ulp_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MCIMX7U3 || MCUX_HW_DEVICE_MCIMX7U5) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for i.MX 7ULP M4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8dxl_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8DL1 || MCUX_HW_DEVICE_MIMX8DX1 || \
+                MCUX_HW_DEVICE_MIMX8DX2 || MCUX_HW_DEVICE_MIMX8DX3 || \
+                MCUX_HW_DEVICE_MIMX8DX4 || MCUX_HW_DEVICE_MIMX8DX5 || \
+                MCUX_HW_DEVICE_MIMX8DX6) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for MCIMX8DXL-EVK M4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8mm_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8MM1 || MCUX_HW_DEVICE_MIMX8MM2 || \
+                MCUX_HW_DEVICE_MIMX8MM3 || MCUX_HW_DEVICE_MIMX8MM4 || \
+                MCUX_HW_DEVICE_MIMX8MM5 || MCUX_HW_DEVICE_MIMX8MM6) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for i.MX 8M Mini EVK M4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8mn_m7
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8MN1 || MCUX_HW_DEVICE_MIMX8MN2 || \
+                MCUX_HW_DEVICE_MIMX8MN3 || MCUX_HW_DEVICE_MIMX8MN4 || \
+                MCUX_HW_DEVICE_MIMX8MN5 || MCUX_HW_DEVICE_MIMX8MN6) && MCUX_HW_CORE_ID_CM7
+    help
+        "RPMSG-Lite Porting Layer for i.MX 8M Mini EVK M7 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8mp_m7
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8ML3 || MCUX_HW_DEVICE_MIMX8ML4 || \
+                MCUX_HW_DEVICE_MIMX8ML6 || MCUX_HW_DEVICE_MIMX8ML8) && MCUX_HW_CORE_ID_CM7
+    help
+        "RPMSG-Lite Porting Layer for i.MX 8M Plus EVK M7 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8mq_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8MQ5 || MCUX_HW_DEVICE_MIMX8MQ6 || \
+                MCUX_HW_DEVICE_MIMX8MQ7) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for i.MX 8M Quad EVK M7 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8qm_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8QM5 || MCUX_HW_DEVICE_MIMX8QM6) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for MIMX8QM M4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8qx_m4
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8QX1 || MCUX_HW_DEVICE_MIMX8QX2 || \
+                MCUX_HW_DEVICE_MIMX8QX3 || MCUX_HW_DEVICE_MIMX8QX4 || \
+                MCUX_HW_DEVICE_MIMX8QX5 || MCUX_HW_DEVICE_MIMX8QX6) && MCUX_HW_CORE_ID_CM4
+    help
+        "RPMSG-Lite Porting Layer for MIMX8X6 M4 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx8ulp_m33
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX8UD3 || MCUX_HW_DEVICE_MIMX8UD5 || \
+                MCUX_HW_DEVICE_MIMX8UD7) && MCUX_HW_CORE_ID_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX 8ULP EVK CM33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx93_m33
+    bool
+    default y
+    depends on (MCUX_HW_DEVICE_MIMX9301 || MCUX_HW_DEVICE_MIMX9302 || \
+                MCUX_HW_DEVICE_MIMX9311 || MCUX_HW_DEVICE_MIMX9312 || \
+                MCUX_HW_DEVICE_MIMX9321 || MCUX_HW_DEVICE_MIMX9322 || \
+                MCUX_HW_DEVICE_MIMX9331 || MCUX_HW_DEVICE_MIMX9332 || \
+                MCUX_HW_DEVICE_MIMX9351 || MCUX_HW_DEVICE_MIMX9352) && MCUX_HW_CORE_ID_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX 93 EVK CM33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m7
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMX9596 && MCUX_HW_CORE_ID_CM7
+    help
+        "RPMSG-Lite Porting Layer for i.MX 95 EVK M7 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m33
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMX9596 && MCUX_HW_CORE_ID_CM33
+    help
+        "RPMSG-Lite Porting Layer for i.MX 95 EVK M33 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt1160
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMXRT1165 || MCUX_HW_DEVICE_MIMXRT1166
+    help
+        "RPMSG-Lite Porting Layer for i.MX-RT1160"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt1170
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMXRT1173 || MCUX_HW_DEVICE_MIMXRT1175 || \
+               MCUX_HW_DEVICE_MIMXRT1176
+    help
+        "RPMSG-Lite Porting Layer for i.MX RT1170"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt1180
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMXRT1187 || MCUX_HW_DEVICE_MIMXRT1189 || \
+               MCUX_HW_DEVICE_MIMXRT1189A
+    help
+        "RPMSG-Lite Porting Layer for i.MX RT1180"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32l3a6
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_K32L3A60
+    help
+        "RPMSG-Lite Porting Layer for FRDM-K32L3A6"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32w1
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_K32W1480
+    help
+        "RPMSG-Lite Porting Layer for K32W1"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw45b41
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_KW45B41Z52 || MCUX_HW_DEVICE_KW45B41Z53 || \
+               MCUX_HW_DEVICE_KW45B41Z82 || MCUX_HW_DEVICE_KW45B41Z83 || \
+               MCUX_HW_DEVICE_KW45B41Z82 || MCUX_HW_DEVICE_KW45B41Z83
+    help
+        "RPMSG-Lite Porting Layer for KW45B41Z EVK/LOC"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw47b42
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_KW47B42ZB7
+    help
+        "RPMSG-Lite Porting Layer for KW47B42 EVK"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxw71x
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MCXW716A || MCUX_HW_DEVICE_MCXW716C
+    help
+        "RPMSG-Lite Porting Layer for MCX-W71X"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxw72x
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MCXW727A || MCUX_HW_DEVICE_MCXW727C || \
+               MCUX_HW_DEVICE_MCXW727D || MCUX_HW_DEVICE_MCXW728A || \
+               MCUX_HW_DEVICE_MCXW728D || MCUX_HW_DEVICE_MCXW72B1 || \
+               MCUX_HW_DEVICE_MCXW72BD
+    help
+        "RPMSG-Lite Porting Layer for MCX-W72X"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.lpc55s69
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_LPC55S66 || MCUX_HW_DEVICE_LPC55S69
+    help
+        "RPMSG-Lite Porting Layer for LPCXpresso55S69"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.lpc54114
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_LPC54102 || MCUX_HW_DEVICE_LPC54114
+    help
+        "RPMSG-Lite Porting Layer for LPCXpresso54114"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxnx4x
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MCXN546 || MCUX_HW_DEVICE_MCXN547 || \
+               MCUX_HW_DEVICE_MCXN947 || MCUX_HW_DEVICE_MCXN946
+    help
+        "RPMSG-Lite Porting Layer for MCX N94x and N54x"

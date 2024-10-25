@@ -74,6 +74,14 @@ typedef uint8_t boolean;
 /* Support to suppress interrupt until specific index is reached. */
 #define VIRTIO_RING_F_EVENT_IDX (1 << 29)
 
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
+#define VQUEUE_FLUSH(x, s)      env_cache_flush(x, s)
+#define VQUEUE_INVALIDATE(x, s) env_cache_invalidate(x, s)
+#else
+#define VQUEUE_FLUSH(x, s)
+#define VQUEUE_INVALIDATE(x, s)
+#endif /* RL_USE_DCACHE */
+
 /*
  * Hint on how long the next interrupt should be postponed. This is
  * only used when the EVENT_IDX feature is negotiated.

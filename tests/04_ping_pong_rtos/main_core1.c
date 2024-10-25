@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -29,9 +29,9 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define TC_TRANSFER_COUNT 10
-#define DATA_LEN 45
-#define TC_LOCAL_EPT_ADDR (30)
+#define TC_TRANSFER_COUNT  10
+#define DATA_LEN           45
+#define TC_LOCAL_EPT_ADDR  (30)
 #define TC_REMOTE_EPT_ADDR (40)
 
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
@@ -41,7 +41,7 @@
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE];
 #elif defined(__CC_ARM) || defined(__ARMCC_VERSION) /* Keil MDK */
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section("rpmsg_sh_mem_section")));
-#elif defined(__GNUC__) /* LPCXpresso */
+#elif defined(__GNUC__)                             /* LPCXpresso */
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_sh_mem")));
 #else
 #error "RPMsg: Please provide your definition of rpmsg_lite_base[]!"
@@ -56,13 +56,13 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
  * Code
  ******************************************************************************/
 struct rpmsg_lite_endpoint *volatile ctrl_ept = NULL;
-rpmsg_queue_handle ctrl_q = NULL;
+rpmsg_queue_handle ctrl_q                     = NULL;
 struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
 
 struct rpmsg_lite_endpoint *endpoints[TC_EPT_COUNT] = {NULL};
-rpmsg_queue_handle qs[TC_EPT_COUNT] = {NULL};
-int32_t ept_num = 0;
-rpmsg_ns_handle ns_handle = NULL;
+rpmsg_queue_handle qs[TC_EPT_COUNT]                 = {NULL};
+int32_t ept_num                                     = 0;
+rpmsg_ns_handle ns_handle                           = NULL;
 
 static void app_nameservice_isr_cb(uint32_t new_ept, const char *new_ept_name, uint32_t flags, void *user_data)
 {
@@ -76,8 +76,10 @@ int32_t ts_init_rpmsg(void)
 #if defined(SDK_OS_FREE_RTOS)
     HeapStats_t xHeapStats;
     void *t;
-    /* static const size_t xHeapStructSize = ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );*/
-    size_t xHeapStructSizeTemp = ( sizeof( uint32_t* ) + sizeof( size_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
+    /* static const size_t xHeapStructSize = ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) ) ) & ~(
+     * ( size_t ) portBYTE_ALIGNMENT_MASK );*/
+    size_t xHeapStructSizeTemp =
+        (sizeof(uint32_t *) + sizeof(size_t) + ((size_t)(portBYTE_ALIGNMENT - 1))) & ~((size_t)portBYTE_ALIGNMENT_MASK);
 #endif /* SDK_OS_FREE_RTOS */
 
     env_init();
@@ -86,28 +88,31 @@ int32_t ts_init_rpmsg(void)
     // Simulate out of heap memory cases
     // Force rpmsg_lite_instance allocation fail
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - xHeapStructSizeTemp - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - xHeapStructSizeTemp - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in first virtqueue_create call
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in second virtqueue_create call
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - sizeof(struct virtqueue) - 8U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - sizeof(struct virtqueue) - 8U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1)
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - (2*sizeof(struct virtqueue)) - 16U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - (2 * sizeof(struct virtqueue)) - 16U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
@@ -117,34 +122,39 @@ int32_t ts_init_rpmsg(void)
     my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
 #else
 #if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
-    my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+    my_rpmsg = rpmsg_lite_remote_init(
+        (void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID,
+        RL_NO_FLAGS);
 #else
 #if defined(SDK_OS_FREE_RTOS)
     // Simulate out of heap memory cases
     // Force rpmsg_lite_instance allocation fail
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - xHeapStructSizeTemp - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - xHeapStructSizeTemp - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in first virtqueue_create call
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in second virtqueue_create call
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - sizeof(struct virtqueue) - 8U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - sizeof(struct virtqueue) - 8U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
 
     // Force allocation fail in env_create_mutex((LOCK *)&rpmsg_lite_dev->lock, 1)
     vPortGetHeapStats(&xHeapStats);
-    t = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2*xHeapStructSizeTemp) - sizeof(struct rpmsg_lite_instance) - 8U - (2*sizeof(struct virtqueue)) - 16U - 1U);
+    t        = env_allocate_memory(xHeapStats.xAvailableHeapSpaceInBytes - (2 * xHeapStructSizeTemp) -
+                                   sizeof(struct rpmsg_lite_instance) - 8U - (2 * sizeof(struct virtqueue)) - 16U - 1U);
     my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
     env_free_memory(t);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "'rpmsg_lite_remote_init' with no free heap failed");
@@ -165,23 +175,24 @@ int32_t ts_init_rpmsg(void)
     // invalid params for rpmsg_ns_bind
     ns_handle = rpmsg_ns_bind(my_rpmsg, RL_NULL, ((void *)0));
     TEST_ASSERT_MESSAGE(RL_NULL == ns_handle, "'rpmsg_ns_bind' with bad app_cb param failed");
-    
+
     /* wait for a while to allow the primary side to bind_ns and register the NS callback */
     env_sleep_msec(200);
 
     ns_handle = rpmsg_ns_bind(my_rpmsg, app_nameservice_isr_cb, ((void *)0));
     TEST_ASSERT_MESSAGE(NULL != ns_handle, "'rpmsg_ns_bind' failed");
-    
+
     // invalid params for rpmsg_ns_announce
     result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, RL_NULL, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_ns_announce' with bad ept_name param failed");
     result = rpmsg_ns_announce(my_rpmsg, RL_NULL, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_ns_announce' with bad new_ept param failed");
 
-    // send invalid NS message to the RL_NS_EPT_ADDR - wrong paylod_len identified in the ns cb and the message is dropped (condition coverage increase)
+    // send invalid NS message to the RL_NS_EPT_ADDR - wrong paylod_len identified in the ns cb and the message is
+    // dropped (condition coverage increase)
     ACKNOWLEDGE_MESSAGE ack_msg = {0};
     rpmsg_lite_send(my_rpmsg, ctrl_ept, RL_NS_EPT_ADDR, (char *)&ack_msg, sizeof(ACKNOWLEDGE_MESSAGE), RL_BLOCK);
-    
+
     /* wait for a while to allow the primary side to bind_ns and register the NS callback */
     env_sleep_msec(200);
     // send correct NS message
@@ -214,9 +225,9 @@ int32_t pattern_cmp(char *buffer, char pattern, int32_t len)
 void responder_task(void)
 {
     int32_t ret_value = 0;
-    void *data_addr = NULL;
+    void *data_addr   = NULL;
     uint32_t num_of_received_control_bytes;
-    uint32_t i = 0;
+    uint32_t i   = 0;
     uint32_t src = 0;
     struct rpmsg_lite_endpoint *my_ept;
     rpmsg_queue_handle q;
@@ -228,8 +239,8 @@ void responder_task(void)
     CONTROL_MESSAGE_DATA_SEND_PARAM data_send_param;
     unsigned char *recv_buffer[BUFFER_MAX_LENGTH];
     void *nocopy_buffer_ptr = NULL; // pointer to receive data in no-copy mode
-    uint32_t buf_size = 0;     /* use to store size of buffer for
-                                       rpmsg_rtos_alloc_tx_buffer() */
+    uint32_t buf_size       = 0;    /* use to store size of buffer for
+                                            rpmsg_rtos_alloc_tx_buffer() */
 
     ret_value = ts_init_rpmsg();
     TEST_ASSERT_MESSAGE(0 == ret_value, "Testing function init rpmsg");
@@ -278,16 +289,17 @@ void responder_task(void)
                     }
                     else
                     {
-                        qs[ept_num] = q;
+                        qs[ept_num]          = q;
                         endpoints[ept_num++] = my_ept;
-                        ret_value = 0;
+                        ret_value            = 0;
                     }
 
                     if (ACK_REQUIRED_YES == msg.ACK_REQUIRED)
                     {
-                        ack_msg.CMD_ACK = CTR_CMD_CREATE_EP;
+                        ack_msg.CMD_ACK      = CTR_CMD_CREATE_EP;
                         ack_msg.RETURN_VALUE = ret_value;
-                        env_memcpy((void *)ack_msg.RESP_DATA, (void *)&(my_ept->addr), sizeof(uint32_t));
+                        uint32_t resp_data   = NULL != my_ept ? my_ept->addr : 0;
+                        env_memcpy((void *)ack_msg.RESP_DATA, (void *)&(resp_data), sizeof(uint32_t));
                         /* Send ack_msg to sender */
                         ret_value = rpmsg_lite_send(my_rpmsg, ctrl_ept, data_create_ept_param.ept_to_ack_addr,
                                                     (char *)&ack_msg, sizeof(ACKNOWLEDGE_MESSAGE), RL_BLOCK);
@@ -320,7 +332,7 @@ void responder_task(void)
 
                     if (ACK_REQUIRED_YES == msg.ACK_REQUIRED)
                     {
-                        ack_msg.CMD_ACK = CTR_CMD_DESTROY_EP;
+                        ack_msg.CMD_ACK      = CTR_CMD_DESTROY_EP;
                         ack_msg.RETURN_VALUE = ret_value;
                         /* Send ack_msg to tea_control_endpoint */
                         ret_value = rpmsg_lite_send(my_rpmsg, ctrl_ept, data_destroy_ept_param.ept_to_ack_addr,
@@ -333,13 +345,13 @@ void responder_task(void)
                                (uint32_t)(sizeof(CONTROL_MESSAGE_DATA_RECV_PARAM)));
 
                     my_ept = NULL;
-                    q = NULL;
+                    q      = NULL;
                     for (i = 0; i < ept_num; i++)
                     {
                         if (endpoints[i]->addr == data_recv_param.responder_ept_addr)
                         {
                             my_ept = endpoints[i];
-                            q = qs[i];
+                            q      = qs[i];
                             break;
                         }
                     }
@@ -357,9 +369,9 @@ void responder_task(void)
                             /* receive function with non-blocking call */
                             do
                             {
-                                ret_value = rpmsg_queue_recv(
-                                    my_rpmsg, q, &src, (char *)recv_buffer, data_recv_param.buffer_size,
-                                    &num_of_received_control_bytes, RL_DONT_BLOCK);
+                                ret_value = rpmsg_queue_recv(my_rpmsg, q, &src, (char *)recv_buffer,
+                                                             data_recv_param.buffer_size,
+                                                             &num_of_received_control_bytes, RL_DONT_BLOCK);
                                 if (ret_value == RL_ERR_PARAM)
                                     break;
                             } while (0 != ret_value);
@@ -381,11 +393,11 @@ void responder_task(void)
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = tick_count * (1000 / configTICK_RATE_HZ);
 #elif defined(FSL_RTOS_XOS)
-                            tick_count = xos_get_system_cycles() - tick_count;
+                            tick_count          = xos_get_system_cycles() - tick_count;
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = xos_cycles_to_msecs(tick_count);
 #elif defined(FSL_RTOS_THREADX)
-                            tick_count = tx_time_get() - tick_count;
+                            tick_count          = tx_time_get() - tick_count;
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = (1000 * tick_count) / TX_TIMER_TICKS_PER_SECOND;
 #endif
@@ -395,18 +407,16 @@ void responder_task(void)
                     {
                         if (RL_BLOCK == data_recv_param.timeout_ms)
                         {
-                            ret_value =
-                                rpmsg_queue_recv_nocopy(my_rpmsg, q, &src, (char **)&nocopy_buffer_ptr,
-                                                        &num_of_received_control_bytes, RL_BLOCK);
+                            ret_value = rpmsg_queue_recv_nocopy(my_rpmsg, q, &src, (char **)&nocopy_buffer_ptr,
+                                                                &num_of_received_control_bytes, RL_BLOCK);
                         }
                         else if (RL_DONT_BLOCK == data_recv_param.timeout_ms)
                         {
                             /* receive function with non-blocking call */
                             do
                             {
-                                ret_value =
-                                    rpmsg_queue_recv_nocopy(my_rpmsg, q, &src, (char **)&nocopy_buffer_ptr,
-                                                            &num_of_received_control_bytes, RL_DONT_BLOCK);
+                                ret_value = rpmsg_queue_recv_nocopy(my_rpmsg, q, &src, (char **)&nocopy_buffer_ptr,
+                                                                    &num_of_received_control_bytes, RL_DONT_BLOCK);
 
                                 if (ret_value == RL_ERR_PARAM)
                                     break;
@@ -417,9 +427,9 @@ void responder_task(void)
 #if defined(SDK_OS_FREE_RTOS)
                             TickType_t tick_count = xTaskGetTickCount();
 #elif defined(FSL_RTOS_XOS)
-                            uint64_t tick_count = xos_get_system_cycles();
+                            uint64_t tick_count  = xos_get_system_cycles();
 #elif defined(FSL_RTOS_THREADX)
-                            uint64_t tick_count = tx_time_get();
+                            uint64_t tick_count  = tx_time_get();
 #endif
                             ret_value =
                                 rpmsg_queue_recv_nocopy(my_rpmsg, q, &src, (char **)&nocopy_buffer_ptr,
@@ -429,11 +439,11 @@ void responder_task(void)
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = tick_count * (1000 / configTICK_RATE_HZ);
 #elif defined(FSL_RTOS_XOS)
-                            tick_count = xos_get_system_cycles() - tick_count;
+                            tick_count           = xos_get_system_cycles() - tick_count;
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = xos_cycles_to_msecs(tick_count);
 #elif defined(FSL_RTOS_THREADX)
-                            tick_count = tx_time_get() - tick_count;
+                            tick_count           = tx_time_get() - tick_count;
                             // Calculate milisecond
                             ack_msg.TIMEOUT_MSEC = (1000 * tick_count) / TX_TIMER_TICKS_PER_SECOND;
 #endif
@@ -449,7 +459,7 @@ void responder_task(void)
 
                     if (ACK_REQUIRED_YES == msg.ACK_REQUIRED)
                     {
-                        ack_msg.CMD_ACK = CTR_CMD_RECV;
+                        ack_msg.CMD_ACK      = CTR_CMD_RECV;
                         ack_msg.RETURN_VALUE = ret_value;
 
                         env_memcpy((void *)ack_msg.RESP_DATA, (void *)recv_buffer, num_of_received_control_bytes);
@@ -492,7 +502,7 @@ void responder_task(void)
 
                     if (ACK_REQUIRED_YES == msg.ACK_REQUIRED)
                     {
-                        ack_msg.CMD_ACK = CTR_CMD_SEND;
+                        ack_msg.CMD_ACK      = CTR_CMD_SEND;
                         ack_msg.RETURN_VALUE = ret_value;
                         /* Send ack_msg to tea_control_endpoint */
                         ret_value = rpmsg_lite_send(my_rpmsg, ctrl_ept, data_send_param.ept_to_ack_addr,

@@ -21,48 +21,48 @@ Building and Running
 
 This application can be built and executed on Supported Multi Core boards as follows:
 
-Building the application for lpcxpresso54114_m4
-***********************************************
+Building the application for lpcxpresso54114/lpc54114/m4
+********************************************************
 
 .. zephyr-app-commands::
    :zephyr-app: samples/rpmsglite_pingpong
-   :board: lpcxpresso54114_m4
+   :board: lpcxpresso54114/lpc54114/m4
    :goals: debug
    :west-args: --sysbuild
 
-Building the application for lpcxpresso55s69_cpu0
-*************************************************
+Building the application for lpcxpresso55s69/lpc55s69/cpu0
+**********************************************************
 
 .. zephyr-app-commands::
    :zephyr-app: samples/rpmsglite_pingpong
-   :board: lpcxpresso55s69_cpu0
+   :board: lpcxpresso55s69/lpc55s69/cpu0
    :goals: debug
    :west-args: --sysbuild
 
-Building the application for mimxrt1160_evk_cm7
-***********************************************
+Building the application for mimxrt1160_evk/mimxrt1166/cm7
+**********************************************************
 
 .. zephyr-app-commands::
    :zephyr-app: samples/rpmsglite_pingpong
-   :board: mimxrt1160_evk_cm7
+   :board: mimxrt1160_evk/mimxrt1166/cm7
    :goals: debug
    :west-args: --sysbuild
 
-Building the application for mimxrt1170_evk_cm7
-***********************************************
+Building the application for mimxrt1170_evk/mimxrt1176/cm7
+**********************************************************
 
 .. zephyr-app-commands::
    :zephyr-app: samples/rpmsglite_pingpong
-   :board: mimxrt1170_evk_cm7
+   :board: mimxrt1170_evk/mimxrt1176/cm7
    :goals: debug
    :west-args: --sysbuild
 
-Building the application for mimxrt1170_evkb_cm7
-***********************************************
+Building the application for mimxrt1170_evk@B/mimxrt1176/cm7
+************************************************************
 
 .. zephyr-app-commands::
    :zephyr-app: samples/rpmsglite_pingpong
-   :board: mimxrt1170_evkb_cm7
+   :board: mimxrt1170_evk@B/mimxrt1176/cm7
    :goals: debug
    :west-args: --sysbuild
 

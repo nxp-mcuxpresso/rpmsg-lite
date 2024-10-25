@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -80,6 +80,8 @@ void platform_time_delay(uint32_t num_msec);
 void platform_map_mem_region(uint32_t vrt_addr, uint32_t phy_addr, uint32_t size, uint32_t flags);
 void platform_cache_all_flush_invalidate(void);
 void platform_cache_disable(void);
+void platform_cache_invalidate(void *data, uint32_t len);
+void platform_cache_flush(void *data, uint32_t len);
 uintptr_t platform_vatopa(void *addr);
 void *platform_patova(uintptr_t addr);
 
