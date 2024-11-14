@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+test_04_ping_pong_rtos_primary_core:
+  use_sysbuild: true
+  section-type: 'application'
+  contents:
+    meta_path: middleware/multicore/rpmsg-lite/tests/04_ping_pong_rtos/primary
+    project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/04_ping_pong_rtos/${multicore_foldername}
+    document:
+      name: test_04_ping_pong_rtos_primary_core
+      category: multicore_tests
+      brief: 04_ping_pong_rtos test suite
+        - FreeRTOS/ThreadX/XOS-based project, covering both the static allocation (#define RL_USE_STATIC_API (1) in rpmsg_config.h) and the dynamic allocation (#define RL_USE_STATIC_API (0) in rpmsg_config.h)
+        - test ping pong functionality in rtos env.
+  boards:
+    mimxrt700evk@cm33_core0:
+    - -armgcc@debug
+    - +armgcc@flash_debug
+    - +armgcc@flash_release
+    - -armgcc@release
+    - -iar@debug
+    - +iar@flash_debug
+    - +iar@flash_release
+    - -iar@release
+    - -mdk@debug
+    - +mdk@flash_debug
+    - +mdk@flash_release
+    - -mdk@release
+    evkmimxrt1160@cm7:
+    - +armgcc@flexspi_nor_debug
+    - +armgcc@flexspi_nor_release
+    - -armgcc@debug
+    - -armgcc@release
+    - -armgcc@sdram_debug
+    - -armgcc@sdram_release
+    - +iar@flexspi_nor_debug
+    - +iar@flexspi_nor_release
+    - -iar@debug
+    - -iar@release
+    - -iar@sdram_debug
+    - -iar@sdram_release
+    - +mdk@flexspi_nor_debug
+    - +mdk@flexspi_nor_release
+    - -mdk@debug
+    - -mdk@release
+    - -mdk@sdram_debug
+    - -mdk@sdram_release
+    evkbmimxrt1170@cm7:
+    - +armgcc@flexspi_nor_debug
+    - +armgcc@flexspi_nor_release
+    - -armgcc@debug
+    - -armgcc@release
+    - -armgcc@sdram_debug
+    - -armgcc@sdram_release
+    - +iar@flexspi_nor_debug
+    - +iar@flexspi_nor_release
+    - -iar@debug
+    - -iar@release
+    - -iar@sdram_debug
+    - -iar@sdram_release
+    - +mdk@flexspi_nor_debug
+    - +mdk@flexspi_nor_release
+    - -mdk@debug
+    - -mdk@release
+    - -mdk@sdram_debug
+    - -mdk@sdram_release
+    evkmimxrt1180@cm33:
+    - +armgcc@flexspi_nor_debug
+    - +armgcc@flexspi_nor_release
+    - -armgcc@debug
+    - -armgcc@release
+    - -armgcc@hyperram_debug
+    - -armgcc@hyperram_release
+    - +iar@flexspi_nor_debug
+    - +iar@flexspi_nor_release
+    - -iar@debug
+    - -iar@release
+    - -iar@hyperram_debug
+    - -iar@hyperram_release
+    - +mdk@flexspi_nor_debug
+    - +mdk@flexspi_nor_release
+    - -mdk@debug
+    - -mdk@release
+    - -mdk@hyperram_debug
+    - -mdk@hyperram_release
+    lpcxpresso55s69@cm33_core0: []
+    mcxn5xxevk@cm33_core0: []
+    mcxn9xxevk@cm33_core0: []
+    mcxw72evk@cm33_core0: []
+    frdmmcxn947@cm33_core0: []
+    frdmmcxw72@cm33_core0: []
+    frdmk32l3a6@cm4: []
+    kw47evk@cm33_core0: []
+    kw47loc@cm33_core0: []
