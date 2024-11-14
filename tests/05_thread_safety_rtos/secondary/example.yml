@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+test_05_thread_safety_rtos_secondary_core:
+  skip_build: true
+  section-type: 'application'
+  contents:
+    meta_path: middleware/multicore/rpmsg-lite/tests/05_thread_safety_rtos/secondary
+    project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/05_thread_safety_rtos/${multicore_foldername}/
+    document:
+      name: test_05_thread_safety_rtos_secondary_core
+      category: multicore_tests
+      brief: 05_thread_safety_rtos test suite
+        - FreeRTOS/ThreadX/XOS-based project, covering both the static allocation (#define RL_USE_STATIC_API (1) in rpmsg_config.h) and the dynamic allocation (#define RL_USE_STATIC_API (0) in rpmsg_config.h)
+        - Thread safety testing
+  boards:
+    mimxrt700evk@cm33_core1: []
+    evkmimxrt1160@cm4:
+    - +armgcc@debug
+    - +armgcc@release
+    - -armgcc@flexspi_nor_debug
+    - -armgcc@flexspi_nor_release
+    - -armgcc@sdram_debug
+    - -armgcc@sdram_release
+    - +iar@debug
+    - +iar@release
+    - -iar@flexspi_nor_debug
+    - -iar@flexspi_nor_release
+    - -iar@sdram_debug
+    - -iar@sdram_release
+    - +mdk@debug
+    - +mdk@release
+    - -mdk@flexspi_nor_debug
+    - -mdk@flexspi_nor_release
+    - -mdk@sdram_debug
+    - -mdk@sdram_release
+    evkbmimxrt1170@cm4:
+    - +armgcc@debug
+    - +armgcc@release
+    - -armgcc@flexspi_nor_debug
+    - -armgcc@flexspi_nor_release
+    - -armgcc@sdram_debug
+    - -armgcc@sdram_release
+    - +iar@debug
+    - +iar@release
+    - -iar@flexspi_nor_debug
+    - -iar@flexspi_nor_release
+    - -iar@sdram_debug
+    - -iar@sdram_release
+    - +mdk@debug
+    - +mdk@release
+    - -mdk@flexspi_nor_debug
+    - -mdk@flexspi_nor_release
+    - -mdk@sdram_debug
+    - -mdk@sdram_release
+    evkmimxrt1180@cm7:
+    - +armgcc@debug
+    - +armgcc@release
+    - -armgcc@flexspi_nor_debug
+    - -armgcc@flexspi_nor_release
+    - -armgcc@hyperram_debug
+    - -armgcc@hyperram_release
+    - +iar@debug
+    - +iar@release
+    - -iar@flexspi_nor_debug
+    - -iar@flexspi_nor_release
+    - -iar@hyperram_debug
+    - -iar@hyperram_release
+    - +mdk@debug
+    - +mdk@release
+    - -mdk@flexspi_nor_debug
+    - -mdk@flexspi_nor_release
+    - -mdk@hyperram_debug
+    - -mdk@hyperram_release
+    lpcxpresso55s69@cm33_core1: []
+    mcxn5xxevk@cm33_core1: []
+    mcxn9xxevk@cm33_core1: []
+    mcxw72evk@cm33_core1: []
+    frdmmcxn947@cm33_core1: []
+    frdmmcxw72@cm33_core1: []
+    frdmk32l3a6@cm0plus: []
+    kw47loc@cm33_core1: []
+    kw47evk@cm33_core1: []

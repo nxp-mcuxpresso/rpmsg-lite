@@ -4,4 +4,4 @@
 
  - test ping pong functionality
 
-- test name service anouncement functionality
+- test name service announcement functionality

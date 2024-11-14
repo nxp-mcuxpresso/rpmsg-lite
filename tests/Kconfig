@@ -1,0 +1,22 @@
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+rsource "../../../../Kconfig.mcuxpresso"
+
+menu "RPMSG-Lite Testing Config"
+
+config RPMSG_TEST_ENABLE
+    bool "RPMSG-Lite Enable Test"
+    default y
+    help
+        "Set this to enable testing."
+
+config _USE_STATIC
+    bool "Static"
+    default n
+    help
+        "Set this to enable testing."
+
+endmenu
