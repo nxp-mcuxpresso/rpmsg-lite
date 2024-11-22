@@ -1,5 +1,5 @@
 #
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -188,6 +188,13 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m7
     depends on MCUX_HW_DEVICE_MIMX9596 && MCUX_HW_CORE_ID_CM7
     help
         "RPMSG-Lite Porting Layer for i.MX 95 EVK M7 core"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx952_m7
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_MIMX95294 && MCUX_HW_CORE_ID_CM7
+    help
+        "RPMSG-Lite Porting Layer for i.MX 952 EVK M7 core"
 
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m33
     bool
