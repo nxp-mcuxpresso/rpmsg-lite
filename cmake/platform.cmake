@@ -414,6 +414,20 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw47b42)
     )
 endif()
 
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw43b43)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/kw43b43/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/kw43b43/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/kw43b43/rpmsg_platform.c
+    )
+endif()
+
 if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxw72x)
     mcux_add_include(
         INCLUDES ../lib/include/platform/mcxw72x/

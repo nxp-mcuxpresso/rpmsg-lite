@@ -230,6 +230,13 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw47b42
     help
         "RPMSG-Lite Porting Layer for KW47B42 EVK"
 
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw43b43
+    bool
+    default y
+    depends on MCUX_HW_DEVICE_KW43B43ZC7 || MCUX_HW_DEVICE_KW43B43ZC7_NBU
+    help
+        "RPMSG-Lite Porting Layer for KW43B43 EVK"
+
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxw71x
     bool
     default y
