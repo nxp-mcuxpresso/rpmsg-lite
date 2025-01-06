@@ -270,6 +270,34 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m33)
     )
 endif()
 
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m7)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/imx943_m7/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/imx943_m7/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m7/rpmsg_platform.c
+    )
+endif()
+
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m33)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/imx943_m33/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/imx943_m33/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m33/rpmsg_platform.c
+    )
+endif()
+
 if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt1160)
     mcux_add_include(
         INCLUDES ../lib/include/platform/imxrt1160/
