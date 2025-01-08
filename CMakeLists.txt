@@ -1,12 +1,12 @@
 #
-# Copyright 2024 NXP
+# Copyright 2024,2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
 # middleware.multicore.rpmsg-lite
 if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite)
-    mcux_component_version(5.1.2)
+    mcux_component_version(5.1.3)
     mcux_add_include(
         INCLUDES lib/include
     )
