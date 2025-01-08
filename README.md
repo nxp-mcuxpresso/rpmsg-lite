@@ -84,9 +84,9 @@ RPMsg_Lite multicore examples are part of NXP MCUXpressoSDK packages. Visit [htt
 
 <MCUXpressoSDK_install_dir>/boards/<board_name>/multicore_examples for RPMsg_Lite multicore examples with 'rpmsg_lite_' name prefix.
 
-Another way of getting NXP MCUXpressoSDK RPMsg_Lite multicore examples is using the [mcux-sdk](https://github.com/nxp-mcuxpresso/mcux-sdk) Github repo. Follow the description how to use the West tool to clone and update the mcuxsdk repo in [readme Overview section](https://github.com/nxp-mcuxpresso/mcux-sdk#overview). Once done the armgcc rpmsg_lite examples can be found in
+Another way of getting NXP MCUXpressoSDK RPMsg_Lite multicore examples is using the [mcuxsdk-manifests](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests) Github repo. Follow the description how to use the West tool to clone and update the mcuxsdk-manifests repo in [readme section](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests?tab=readme-ov-file#readme). Once done the armgcc rpmsg_lite examples can be found in
 
-mcuxsdk/examples/<board_name>/multicore_examples 
+mcuxsdk/examples/_<board_name>/multicore_examples 
 
 You can use the evkmimxrt1170 as the board_name for instance. Similar to MCUXpressoSDK packages the RPMsg_Lite examples use the 'rpmsg_lite_' name prefix.
 ## Notes {#notes}
@@ -133,4 +133,4 @@ This script executes the application named *clang-format.exe*. You need to have 
 [1] M. Novak, M. Cingel, Lockless Shared Memory Based Multicore Communication Protocol
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2024 NXP
+Copyright © 2016-2025 NXP

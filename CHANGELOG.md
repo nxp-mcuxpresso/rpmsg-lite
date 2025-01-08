@@ -7,11 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.3] - 13-Jan-2025
+
 ### Added
 
 - Memory cache management of shared memory. Enable with `#define RL_USE_DCACHE (1)` in `rpmsg_config.h` in case of data cache is used.
+- Cmake/Kconfig support added.
+- Porting layers for imx95, imxrt700, mcmxw71x, mcmxw72x, kw47b42 added.
 
-## [5.1.1] - 19-Jan-2023
+## [5.1.2] - 08-Jul-2024
+
+### Changed
+
+- Zephyr-related changes.
+- Minor Misra corrections.
+
+## [5.1.1] - 19-Jan-2024
 
 ### Added
 
