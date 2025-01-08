@@ -99,10 +99,10 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
             RL_ASSERT(0 <= isr_counter4);
             if (isr_counter4 == 0)
             {
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
                 MU_EnableInterrupts(RPMSG_LITE_M70_A55_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
 #endif
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
                 MU_EnableInterrupts(RPMSG_LITE_M71_A55_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
 #endif
             }
@@ -167,10 +167,10 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
             isr_counter4--;
             if (isr_counter4 == 0)
             {
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
                 MU_DisableInterrupts(RPMSG_LITE_M70_A55_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
 #endif
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
                 MU_DisableInterrupts(RPMSG_LITE_M71_A55_MU, (uint32_t)kMU_Rx0FullInterruptEnable << RPMSG_MU_CHANNEL);
 #endif
             }
@@ -215,10 +215,10 @@ void platform_notify(uint32_t vector_id)
             MU_SendMsg(RPMSG_LITE_M71_M330_MU, RPMSG_MU_CHANNEL, msg);
             break;
         case RL_PLATFORM_IMX943_M7_A55_COM_ID:
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
             MU_SendMsg(RPMSG_LITE_M70_A55_MU, RPMSG_MU_CHANNEL, msg);
 #endif
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
             MU_SendMsg(RPMSG_LITE_M71_A55_MU, RPMSG_MU_CHANNEL, msg);
 #endif
             break;
@@ -412,10 +412,10 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             disable_counter4--;
             if (disable_counter4 == 0)
             {
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
                 NVIC_EnableIRQ(RPMSG_LITE_M70_A55_MU_IRQn);
 #endif
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
                 NVIC_EnableIRQ(RPMSG_LITE_M71_A55_MU_IRQn);
 #endif
             }
@@ -487,10 +487,10 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             disable_counter4++;
             if (disable_counter4 == 0)
             {
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
                 NVIC_DisableIRQ(RPMSG_LITE_M70_A55_MU_IRQn);
 #endif
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
                 NVIC_DisableIRQ(RPMSG_LITE_M71_A55_MU_IRQn);
 #endif
             }
@@ -615,14 +615,14 @@ int32_t platform_init(void)
 #endif
 #if !(defined(RPMSG_M70_MASTER) || defined(RPMSG_M70_REMOTE) ||  \
     defined(RPMSG_M71_MASTER) || defined(RPMSG_M71_REMOTE))
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
     /* interrupt from A55 to M70 */
     MU_Init(RPMSG_LITE_M70_A55_MU);
     NVIC_SetPriority(RPMSG_LITE_M70_A55_MU_IRQn, RPMSG_LITE_MU_IRQ_PRIORITY);
     NVIC_EnableIRQ(RPMSG_LITE_M70_A55_MU_IRQn);
 #endif
 
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
     /* interrupt from A55 to M71 */
     MU_Init(RPMSG_LITE_M71_A55_MU);
     NVIC_SetPriority(RPMSG_LITE_M71_A55_MU_IRQn, RPMSG_LITE_MU_IRQ_PRIORITY);
@@ -668,11 +668,11 @@ int32_t platform_deinit(void)
 
 #if !(defined(RPMSG_M70_MASTER) || defined(RPMSG_M70_REMOTE) ||  \
     defined(RPMSG_M71_MASTER) || defined(RPMSG_M71_REMOTE))
-#if defined(CPU_MIMX9494AVKXM_cm7_core0)
+#if defined(CPU_MIMX94398AVKM_cm7_core0)
     MU_Deinit(RPMSG_LITE_M70_A55_MU);
 #endif
 
-#if defined(CPU_MIMX9494AVKXM_cm7_core1)
+#if defined(CPU_MIMX94398AVKM_cm7_core1)
     MU_Deinit(RPMSG_LITE_M71_A55_MU);
 #endif
 
