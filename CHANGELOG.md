@@ -168,7 +168,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support of static API (without dynamic allocations).
 
 
-[unreleased]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.1...HEAD
+[unreleased]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.3...HEAD
+[5.1.3]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.2...v5.1.3
+[5.1.2]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v4.0.0...v5.0.0
