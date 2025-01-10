@@ -332,3 +332,11 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxnx4x
                MCUX_HW_DEVICE_MCXN947 || MCUX_HW_DEVICE_MCXN946
     help
         "RPMSG-Lite Porting Layer for MCX N94x and N54x"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxl20
+    bool
+    default y
+    select MCUX_COMPONENT_driver.mu1
+    depends on MCUX_HW_DEVICE_MCXL255
+    help
+        "RPMSG-Lite Porting Layer for MCX L20"

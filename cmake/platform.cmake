@@ -512,3 +512,17 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxnx4x)
         SOURCES ../lib/rpmsg_lite/porting/platform/mcxnx4x/rpmsg_platform.c
     )
 endif()
+
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxl20)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/mcxl20/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/mcxl20/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/mcxl20/rpmsg_platform.c
+    )
+endif()
