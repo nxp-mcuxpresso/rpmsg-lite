@@ -1,7 +1,7 @@
 var searchData=
 [
   ['rpmsg_2dlite_20configuration',['RPMsg-Lite Configuration',['../group__config.html',1,'']]],
-  ['rpmsg_20component',['RPMsg Component',['../index.html',1,'']]],
+  ['readme',['README',['../md__d_1_work_sdk-next_mcu-sdk-3_80_middleware_multicore_rpmsg-lite__r_e_a_d_m_e.html',1,'']]],
   ['reserved',['reserved',['../group__rpmsg__lite.html#a2ee5ce6122c116d862b9973f1fb887d6',1,'rpmsg_std_hdr']]],
   ['rfu',['rfu',['../group__rpmsg__lite.html#adae527c972c102f433354448d3ab05a7',1,'rpmsg_lite_endpoint']]],
   ['rl_5fallow_5fconsumed_5fbuffers_5fnotification',['RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION',['../group__config.html#ga5997b4fbd7e8cf22b41b75573e91a243',1,'rpmsg_default_config.h']]],
@@ -15,6 +15,7 @@ var searchData=
   ['rl_5fendpoints',['rl_endpoints',['../group__rpmsg__lite.html#a50ba617e06016bb1ca0d1a4dd7d0ac65',1,'rpmsg_lite_instance']]],
   ['rl_5fept_5frx_5fcb_5ft',['rl_ept_rx_cb_t',['../group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd',1,'rpmsg_lite.h']]],
   ['rl_5fms_5fper_5finterval',['RL_MS_PER_INTERVAL',['../group__config.html#gab1d9d807155917143be3785751c67f79',1,'rpmsg_default_config.h']]],
+  ['rl_5fuse_5fdcache',['RL_USE_DCACHE',['../group__config.html#gade7a5c28ce2c8fd5e229445b63007f1b',1,'rpmsg_default_config.h']]],
   ['rl_5fuse_5fenvironment_5fcontext',['RL_USE_ENVIRONMENT_CONTEXT',['../group__config.html#ga20ac412396689025a366af64b0b8d354',1,'rpmsg_default_config.h']]],
   ['rl_5fuse_5fmcmgr_5fipc_5fisr_5fhandler',['RL_USE_MCMGR_IPC_ISR_HANDLER',['../group__config.html#ga1b30d0352059e95ffe6075ade6373c16',1,'rpmsg_default_config.h']]],
   ['rl_5fuse_5fstatic_5fapi',['RL_USE_STATIC_API',['../group__config.html#ga287167874db5209903c7e391013ab485',1,'rpmsg_default_config.h']]],
