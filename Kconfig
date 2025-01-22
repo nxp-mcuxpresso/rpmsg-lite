@@ -11,14 +11,14 @@ menuconfig MCUX_COMPONENT_middleware.multicore.rpmsg-lite
         This option will enable RPSMG-Lite Middleware Component
 
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.queue
-    bool "RPMSG-Lite Queue"
+    bool "Queue"
     default n
     depends on MCUX_COMPONENT_middleware.multicore.rpmsg-lite
     help
         This option enables RPMSG-Lite Queue support.
 
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.ns
-    bool "RPMSG-Lite Name Service"
+    bool "Name Service"
     default n
     depends on MCUX_COMPONENT_middleware.multicore.rpmsg-lite
     help

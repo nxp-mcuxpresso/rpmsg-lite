@@ -1,17 +1,8 @@
 #
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-
-# TODO: These are in yml but not in here...
-# MIMX8MD6
-# MIMX8MD7
-# MIMX8SL1
-# MIMX8US3
-# MIMX8US5
-# MIMX8UX5
-# MIMX8UX6
 
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.evkmimxrt595
     bool
