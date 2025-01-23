@@ -257,18 +257,6 @@ int32_t MU_E3_A_IRQHandler(void)
     return 0;
 }
 
-int32_t MU7_A_IRQHandler(void)
-{
-    uint32_t channel;
-
-    if ((((uint32_t)kMU_Rx0FullFlag << RPMSG_MU_CHANNEL) & MU_GetStatusFlags(RPMSG_LITE_M71_M330_MU)) != 0UL)
-    {
-        channel = MU_ReceiveMsgNonBlocking(RPMSG_LITE_M71_M330_MU, RPMSG_MU_CHANNEL); // Read message from RX register.
-        env_isr((uint32_t)((channel >> 16) | (RL_PLATFORM_IMX943_M330_M71_COM_ID << 3)));
-    }
-
-    return 0;
-}
 int32_t MU18_A_IRQHandler(void)
 {
     uint32_t channel;
