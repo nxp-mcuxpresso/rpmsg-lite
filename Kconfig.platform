@@ -227,7 +227,8 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw45b41
     bool
     default y
     depends on MCUX_HW_DEVICE_KW45B41Z52 || MCUX_HW_DEVICE_KW45B41Z53 || \
-               MCUX_HW_DEVICE_KW45B41Z82 || MCUX_HW_DEVICE_KW45B41Z83
+               MCUX_HW_DEVICE_KW45B41Z82 || MCUX_HW_DEVICE_KW45B41Z83 || \
+               MCUX_HW_DEVICE_KW45B41Z83_NBU
     help
         "RPMSG-Lite Porting Layer for KW45B41Z EVK/LOC"
 
