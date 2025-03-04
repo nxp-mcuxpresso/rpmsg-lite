@@ -270,31 +270,45 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx95_m33)
     )
 endif()
 
-if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m7)
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m70)
     mcux_add_include(
-        INCLUDES ../lib/include/platform/imx943_m7/
+        INCLUDES ../lib/include/platform/imx943_m70/
     )
 
     mcux_add_source(
-        SOURCES ../lib/include/platform/imx943_m7/rpmsg_platform.h
+        SOURCES ../lib/include/platform/imx943_m70/rpmsg_platform.h
     )
 
     mcux_add_source(
-        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m7/rpmsg_platform.c
+        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m70/rpmsg_platform.c
     )
 endif()
 
-if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m33)
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m71)
     mcux_add_include(
-        INCLUDES ../lib/include/platform/imx943_m33/
+        INCLUDES ../lib/include/platform/imx943_m71/
     )
 
     mcux_add_source(
-        SOURCES ../lib/include/platform/imx943_m33/rpmsg_platform.h
+        SOURCES ../lib/include/platform/imx943_m71/rpmsg_platform.h
     )
 
     mcux_add_source(
-        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m33/rpmsg_platform.c
+        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m71/rpmsg_platform.c
+    )
+endif()
+
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imx943_m33s)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/imx943_m33s/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/imx943_m33s/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/imx943_m33s/rpmsg_platform.c
     )
 endif()
 
