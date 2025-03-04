@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add MCXL20 porting layer and unit testing
 - New utility macro `RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE` to safely determine maximum buffer count within shared memory while preventing integer underflow.
+- RT700 platform add support for MCMGR in DSPs
 
 ### Changed
 
 - Improved input validation in initialization functions to properly handle insufficient memory size conditions.
 - Refactored repeated buffer count calculation pattern for better code maintainability.
+- To make sure that remote has already registered IRQ there is required App level IPC mechanism to notify master about it
 
 ### Fixed
 
@@ -50,12 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Doxygen bump to version 1.9.6
-
-## [5.1.4] - 11-Mar-2025
-
-### Changed
-
-- To make sure that remote has already registered IRQ there is required App level IPC mechanism to notify master about it
 
 ## [5.1.3] - 13-Jan-2025
 

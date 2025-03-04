@@ -51,7 +51,7 @@ static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+static void mcmgr_event_handler(uint16_t vring_idx, void *context, mcmgr_core_t coreNum)
 {
     env_isr((uint32_t)vring_idx);
 }
@@ -295,7 +295,37 @@ void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+    switch (RL_GET_COM_ID(vector_id))
+    {
+        case RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID:
+#if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
+     defined(MIMXRT798S_cm33_core0_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core1);
+#elif (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
+       defined(MIMXRT798S_cm33_core1_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core0);
+#endif
+            break;
+        case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
+#if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
+     defined(MIMXRT798S_cm33_core0_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core2);
+#elif (defined(MIMXRT735S_hifi4_SERIES) || defined(MIMXRT758S_hifi4_SERIES) || defined(MIMXRT798S_hifi4_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core0);
+#endif
+            break;
+        case RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID:
+#if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
+     defined(MIMXRT798S_cm33_core1_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core3);
+#elif (defined(MIMXRT735S_hifi1_SERIES) || defined(MIMXRT758S_hifi1_SERIES) || defined(MIMXRT798S_hifi1_SERIES))
+            (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core1);
+#endif
+            break;
+        default:
+            /* All the cases have been listed above, the default clause should not be reached. */
+            break;
+    }
 #else
     switch (RL_GET_COM_ID(vector_id))
     {
@@ -633,6 +663,14 @@ int32_t platform_init(void)
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     mcmgr_status_t retval = kStatus_MCMGR_Error;
     retval                = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
+
+#if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
+     defined(MIMXRT798S_cm33_core0_SERIES))
+    retval = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
+#elif (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
+       defined(MIMXRT798S_cm33_core1_SERIES))
+
+#endif
     if (kStatus_MCMGR_Success != retval)
     {
         return -1;

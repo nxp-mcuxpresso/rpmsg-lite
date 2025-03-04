@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,6 +21,10 @@
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+#include "mcmgr.h"
+#endif
+
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
@@ -32,6 +36,13 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+static void mcmgr_event_handler(uint16_t vring_idx, void *context, mcmgr_core_t coreNum)
+{
+    env_isr((uint32_t)vring_idx);
+}
+
+#else
 void MU4_B_IRQHandler(void *arg)
 {
     uint32_t flags;
@@ -47,6 +58,7 @@ void MU4_B_IRQHandler(void *arg)
         env_isr((uint32_t)(0x01U | (RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID << 3U)));
     }
 }
+#endif
 
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 {
@@ -102,7 +114,11 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
+#if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)vector_id, kMCMGR_Core0);
+#else
     (void)MU_TriggerInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+#endif
     env_unlock_mutex(platform_lock);
 }
 
@@ -270,24 +286,32 @@ void *platform_patova(uintptr_t addr)
  */
 int32_t platform_init(void)
 {
-    MU_Init(MU4_MUB);
     /* Create lock used in multi-instanced RPMsg */
-#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+    #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_static_ctxt))
-#else
+    #else
     if (0 != env_create_mutex(&platform_lock, 1))
-#endif
+    #endif
     {
         return -1;
     }
 
+    #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
+    mcmgr_status_t retval = kStatus_MCMGR_Error;
+    retval                = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
+    if (kStatus_MCMGR_Success != retval)
+    {
+        return -1;
+    }
+    #else
+    MU_Init(MU4_MUB);
     /* Register interrupt handler for MU_B on HiFi4 */
 #ifdef SDK_OS_BAREMETAL
     _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, MU4_B_IRQHandler);
 #else
     xos_register_interrupt_handler(DSP_INT0_SEL1_IRQn, MU4_B_IRQHandler, ((void *)0));
 #endif
-
+#endif
     return 0;
 }
 
