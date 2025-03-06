@@ -52,8 +52,12 @@ static uint32_t first_time                        = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *context)
 {
+    /* Unused */
+    (void)context;
+    (void)coreNum;
+
     env_isr((uint32_t)vring_idx);
 }
 #else
@@ -157,7 +161,11 @@ void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#if defined(FSL_FEATURE_MU_SIDE_A)
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#elif defined(FSL_FEATURE_MU_SIDE_B)
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#endif
 #else
 /* Write directly into the MU Control Register to trigger General Purpose Interrupt Request (GIR).
    No need to wait until the previous interrupt is processed because the same value

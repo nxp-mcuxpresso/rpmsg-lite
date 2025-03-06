@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Change `rpmsg_platform.c` to support new MCMGR API
 - Improved input validation in initialization functions to properly handle insufficient memory size conditions.
 - Refactored repeated buffer count calculation pattern for better code maintainability.
 - To make sure that remote has already registered IRQ there is required App level IPC mechanism to notify master about it

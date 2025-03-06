@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -30,8 +30,12 @@ static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *context)
 {
+    /* Unused */
+    (void)context;
+    (void)coreNum;
+
     env_isr((uint32_t)vring_idx);
 }
 #else
@@ -125,7 +129,11 @@ void platform_notify(uint32_t vector_id)
 {
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     env_lock_mutex(platform_lock);
-    (void)MCMGR_TriggerEventForce(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#if defined(FSL_FEATURE_MAILBOX_SIDE_A)
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#else
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#endif
     env_unlock_mutex(platform_lock);
 #else
     /* Only single RPMsg-Lite instance (LINK_ID) is defined for this dual core device. Extend

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 NXP
+ * Copyright 2020-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -30,9 +30,11 @@
 #if defined(IMU_CPU_INDEX) && (IMU_CPU_INDEX == 1U)
 #define APP_MU_IRQn  RF_IMU0_IRQn
 #define APP_IMU_LINK kIMU_LinkCpu1Cpu2
+#define RPMSG_BUILD_FOR_CORE_0
 #elif defined(IMU_CPU_INDEX) && (IMU_CPU_INDEX == 2U)
 #define APP_MU_IRQn  CPU2_MSG_RDY_INT_IRQn
 #define APP_IMU_LINK kIMU_LinkCpu2Cpu1
+#define RPMSG_BUILD_FOR_CORE_1
 #endif
 
 /* Generator for CRC calculations. */
@@ -62,8 +64,12 @@ static uint32_t first_time                        = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-static void mcmgr_event_handler(uint16_t vring_idx, void *context)
+static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *context)
 {
+    /* Unused */
+    (void)context;
+    (void)coreNum;
+
     env_isr((uint32_t)vring_idx);
 }
 #else
@@ -159,7 +165,11 @@ void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    (void)MCMGR_TriggerEvent(kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#if defined(RPMSG_BUILD_FOR_CORE_0)
+    (void)MCMGR_TriggerEvent(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#else
+    (void)MCMGR_TriggerEvent(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+#endif
 #else
     /* TO Not support*/
 #endif

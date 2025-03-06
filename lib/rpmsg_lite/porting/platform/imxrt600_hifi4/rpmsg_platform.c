@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -102,7 +102,7 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
 void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
-    (void)MU_TriggerInterrupts(MUB, 1UL << (19UL - RL_GET_Q_ID(vector_id)));
+    (void)MU_TriggerInterrupts(MUB, 1UL << (19UL - RL_GET_Q_ID(vector_id)), kMCMGR_Core0);
     env_unlock_mutex(platform_lock);
 }
 
