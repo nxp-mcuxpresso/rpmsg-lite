@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.4] - 11-Mar-2025
+
+### Changed
+
+- To make sure that remote has already registered IRQ there is required App level IPC mechanism to notify master about it
+
 ## [5.1.3] - 13-Jan-2025
 
 ### Added

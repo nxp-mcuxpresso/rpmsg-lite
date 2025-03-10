@@ -583,20 +583,14 @@ mmmmmmm m    m          mm   mmmmm  mmmmm
 
 uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
 {
-    if (rpmsg_lite_dev == RL_NULL)
-    {
-        return 0U;
-    }
+    RL_ASSERT(rpmsg_lite_dev != RL_NULL);
 
     return (RL_TRUE == rpmsg_lite_dev->link_state ? RL_TRUE : RL_FALSE);
 }
 
 uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t timeout)
 {
-    if (rpmsg_lite_dev == RL_NULL)
-    {
-        return 0U;
-    }
+    RL_ASSERT(rpmsg_lite_dev != RL_NULL);
 
     return env_wait_for_link_up(&rpmsg_lite_dev->link_state, rpmsg_lite_dev->link_id, timeout);
 }
@@ -1271,6 +1265,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 #endif
 
     env_memset(rpmsg_lite_dev, 0, sizeof(struct rpmsg_lite_instance));
+
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
     status = env_init(&rpmsg_lite_dev->env, env_cfg);
 #else
@@ -1370,19 +1365,19 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
 
     /* Install ISRs */
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
-    env_init_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
+    rpmsg_lite_dev->link_state = 0;
     env_init_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
+    env_init_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
     env_disable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index);
     env_disable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 0;
     env_enable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->rvq->vq_queue_index);
     env_enable_interrupt(rpmsg_lite_dev->env, rpmsg_lite_dev->tvq->vq_queue_index);
 #else
-    (void)platform_init_interrupt(rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
+    rpmsg_lite_dev->link_state = 0;
     (void)platform_init_interrupt(rpmsg_lite_dev->tvq->vq_queue_index, rpmsg_lite_dev->tvq);
+    (void)platform_init_interrupt(rpmsg_lite_dev->rvq->vq_queue_index, rpmsg_lite_dev->rvq);
     env_disable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     env_disable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
-    rpmsg_lite_dev->link_state = 0;
     env_enable_interrupt(rpmsg_lite_dev->rvq->vq_queue_index);
     env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 #endif
