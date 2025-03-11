@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016,2022 NXP
+ * Copyright 2016,2022,2025 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,8 @@
 
 #if defined(__ARM_ARCH_8A)
 #define MEM_BARRIER() __asm__ volatile("dsb sy" : : : "memory")
+#elif defined(__riscv)
+#define MEM_BARRIER() mb()
 #else
 #define MEM_BARRIER() __asm__ volatile("dsb" : : : "memory")
 #endif

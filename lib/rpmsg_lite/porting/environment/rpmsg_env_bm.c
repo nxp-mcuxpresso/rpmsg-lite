@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@
 static int32_t env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (12U)
+#define ISR_COUNT (32U)
 /*!
  * Structure to keep track of registered ISR's.
  */

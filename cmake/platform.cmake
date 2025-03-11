@@ -1,5 +1,5 @@
 #
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -99,6 +99,20 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt700_hifi4)
 
     mcux_add_source(
         SOURCES ../lib/rpmsg_lite/porting/platform/imxrt700_hifi4/rpmsg_platform.c
+    )
+endif()
+
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.imxrt700_ezhv)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/imxrt700_ezhv/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/imxrt700_ezhv/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/imxrt700_ezhv/rpmsg_platform.c
     )
 endif()
 
