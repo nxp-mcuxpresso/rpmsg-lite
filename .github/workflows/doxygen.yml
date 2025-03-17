@@ -1,0 +1,53 @@
+name: Doxygen GitHub Pages Deploy Action
+
+on:
+  push:
+    tags:
+      - "v[1-9]+.[0-9]+.[0-9]+"
+
+env:
+  doxygen_version: "1.9.6"
+  branch: "gh-pages"
+  directory: "doc"
+  target_dir: "."
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget graphviz
+        shell: bash
+
+      - name: Install Doxygen
+        run: |
+          transformed_version=$(echo "${{ env.doxygen_version }}" | tr '.' '_')
+          wget https://github.com/doxygen/doxygen/releases/download/Release_${transformed_version}/doxygen-${{ env.doxygen_version }}.linux.bin.tar.gz
+          tar -xzf doxygen-${{ env.doxygen_version }}.linux.bin.tar.gz
+          sudo mv doxygen-${{ env.doxygen_version }}/bin/doxygen /usr/local/bin/doxygen
+        shell: bash
+
+      - name: Generate Doxygen Documentation
+        run: |
+          cd doxygen/
+          doxygen Doxyfile.rpmsglite
+        shell: bash
+
+      - name: Create .nojekyll (ensures pages with underscores work on gh pages)
+        run: touch ${{ env.directory }}/.nojekyll
+        shell: bash
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.branch }}
+          folder: ${{ env.directory }}
+          target-folder: ${{ env.target_dir }}
