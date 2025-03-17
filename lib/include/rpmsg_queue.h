@@ -76,9 +76,10 @@ int32_t rpmsg_queue_rx_cb(void *payload, uint32_t payload_len, uint32_t src, voi
  * for blocking reception.
  *
  * @param rpmsg_lite_dev   RPMsg Lite instance
+ * @if RL_USE_STATIC_API
  * @param queue_storage    RPMsg Lite queue static storage pointer
  * @param queue_ctxt       RPMsg Lite queue static context holder
- *
+ * @endif
  * @return RPMsg queue handle or RL_NULL
  *
  */

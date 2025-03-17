@@ -38,9 +38,11 @@
 //! @addtogroup rpmsg_ns
 //! @{
 
+/*! @brief Name service endpoint address */
 #define RL_NS_EPT_ADDR (0x35u)
 
 /* Up to 32 flags available */
+/*! @brief Flags used during name service announcement */
 enum rpmsg_ns_flags
 {
     RL_NS_CREATE  = 0,
@@ -52,12 +54,24 @@ enum rpmsg_ns_flags
 */
 typedef void (*rpmsg_ns_new_ept_cb)(uint32_t new_ept, const char *new_ept_name, uint32_t flags, void *user_data);
 
+/*!
+ * @brief Nameservice callback data structure
+ *
+ * This structure holds the callback function and user data used
+ * for nameservice notifications.
+ */
 struct rpmsg_ns_callback_data
 {
     rpmsg_ns_new_ept_cb cb;
     void *user_data;
 };
 
+/*!
+ * @brief Nameservice context structure
+ *
+ * This structure contains the nameservice endpoint and callback data
+ * used for nameservice announcement handling.
+ */
 struct rpmsg_ns_context
 {
     struct rpmsg_lite_endpoint *ept;
@@ -66,6 +80,12 @@ struct rpmsg_ns_context
 
 typedef struct rpmsg_ns_context *rpmsg_ns_handle;
 
+/*!
+ * @brief Static nameservice context container
+ *
+ * This structure provides memory for all nameservice contexts
+ * when static API is used (RL_USE_STATIC_API).
+ */
 struct rpmsg_ns_static_context_container
 {
     struct rpmsg_lite_ept_static_context ept_ctxt;
@@ -91,9 +111,10 @@ extern "C" {
  * @param rpmsg_lite_dev    RPMsg-Lite instance
  * @param app_cb            Application nameservice callback
  * @param user_data         Application nameservice callback data
+ * @if RL_USE_STATIC_API
  * @param ns_ept_ctxt       Nameservice endpoint preallocated context pointer, used in case of static api
  * (RL_USE_STATIC_API)
- *
+ * @endif
  * @return RL_NULL on error, NameService handle on success.
  *
  */

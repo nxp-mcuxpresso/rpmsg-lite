@@ -55,48 +55,72 @@ extern "C" {
 #define RL_VERSION "5.1.4" /*!< Current RPMsg Lite version */
 
 /* Shared memory "allocator" parameters */
+/*! @brief Word size used for alignment */
 #define RL_WORD_SIZE (sizeof(uint32_t))
+/*! @brief Align a value up to the next multiple of the word size */
 #define RL_WORD_ALIGN_UP(a)                                                                                  \
     (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
                                                         ((uintptr_t)(a)))
+/*! @brief Align a value down to a multiple of the word size */
 #define RL_WORD_ALIGN_DOWN(a) \
     (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uintptr_t)(a)))
 
 /* Definitions for device types , null pointer, etc.*/
+/*! @brief Success status code */
 #define RL_SUCCESS    (0)
+/*! @brief NULL pointer definition */
 #define RL_NULL       ((void *)0)
+/*! @brief Remote device identifier */
 #define RL_REMOTE     (0)
+/*! @brief Master device identifier */
 #define RL_MASTER     (1)
+/*! @brief Boolean true value */
 #define RL_TRUE       (1UL)
+/*! @brief Boolean false value */
 #define RL_FALSE      (0UL)
+/*! @brief Special address indicating any address */
 #define RL_ADDR_ANY   (0xFFFFFFFFU)
+/*! @brief Flag to release the buffer */
 #define RL_RELEASE    (0)
+/*! @brief Flag to hold the buffer */
 #define RL_HOLD       (1)
+/*! @brief Don't block and return immediately */
 #define RL_DONT_BLOCK (0)
+/*! @brief Block until the operation is complete */
 #define RL_BLOCK      (~0UL)
 
 /* Error macros. */
+/*! @brief Base value for all RPMsg-Lite error codes */
 #define RL_ERRORS_BASE   (-5000)
+/*! @brief Error code: Out of memory */
 #define RL_ERR_NO_MEM    (RL_ERRORS_BASE - 1)
+/*! @brief Error code: Buffer size too small */
 #define RL_ERR_BUFF_SIZE (RL_ERRORS_BASE - 2)
+/*! @brief Error code: Invalid parameter */
 #define RL_ERR_PARAM     (RL_ERRORS_BASE - 3)
+/*! @brief Error code: Invalid device ID */
 #define RL_ERR_DEV_ID    (RL_ERRORS_BASE - 4)
+/*! @brief Error code: Maximum number of VirtQueues reached */
 #define RL_ERR_MAX_VQ    (RL_ERRORS_BASE - 5)
+/*! @brief Error code: No buffer available */
 #define RL_ERR_NO_BUFF   (RL_ERRORS_BASE - 6)
+/*! @brief Error code: System not ready */
 #define RL_NOT_READY     (RL_ERRORS_BASE - 7)
+/*! @brief Error code: Operation already completed */
 #define RL_ALREADY_DONE  (RL_ERRORS_BASE - 8)
 
 /* Init flags */
+/*! @brief No initialization flags */
 #define RL_NO_FLAGS (0U)
 
-/* rpmsg_std_hdr contains a reserved field,
- * this implementation of RPMSG uses this reserved
- * field to hold the idx and totlen of the buffer
- * not being returned to the vring in the receive
- * callback function. This way, the no-copy API
- * can use this field to return the buffer later.
+/*!
+ * @brief Reserved field structure used in rpmsg_std_hdr
+ *
+ * This structure holds the idx and totlen of a buffer that is not immediately
+ * returned to the vring in the receive callback function. This allows the no-copy API
+ * to use this field to return the buffer later.
  */
-struct rpmsg_hdr_reserved
+ struct rpmsg_hdr_reserved
 {
     uint16_t rfu; /* reserved for future usage */
     uint16_t idx;
@@ -114,7 +138,7 @@ struct rpmsg_std_hdr
     struct rpmsg_hdr_reserved reserved; /*!< reserved for future use */
     uint16_t len;                       /*!< length of payload (in bytes) */
     uint16_t flags;                     /*!< message flags */
-} RL_PACKED_END;
+} /*! @brief End of packed structure */ RL_PACKED_END;
 
 RL_PACKED_BEGIN
 /*!
@@ -198,9 +222,13 @@ struct rpmsg_lite_instance
  * @param shmem_length     Length of memory area given by previous parameter
  * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
+ * @if RL_USE_ENVIRONMENT_CONTEXT
  * @param env_cfg          Initialization data for the environement RPMsg-Lite layer, used when
  *                         the environment layer uses its own context (RL_USE_ENVIRONMENT_CONTEXT)
+ * @endif
+ * @if RL_USE_STATIC_API
  * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
+ * @endif
  *
  * @return  New RPMsg-Lite instance pointer or RL_NULL.
  *
@@ -229,10 +257,13 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
  * @param shmem_addr       Shared memory base used for this instance of RPMsg-Lite
  * @param link_id          Link ID used to define the rpmsg-lite instance, see rpmsg_platform.h
  * @param init_flags       Initialization flags
+ * @if RL_USE_ENVIRONMENT_CONTEXT
  * @param env_cfg          Initialization data for the environement RPMsg-Lite layer, used when
  *                         the environment layer uses its own context (RL_USE_ENVIRONMENT_CONTEXT)
+ * @endif
+ * @if RL_USE_STATIC_API
  * @param static_context   RPMsg-Lite preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
- *
+ * @endif
  * @return  New RPMsg-Lite instance pointer or RL_NULL.
  *
  */
@@ -271,8 +302,9 @@ int32_t rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev);
  * @param addr              Desired address, RL_ADDR_ANY for automatic selection
  * @param rx_cb             Callback function called on receive
  * @param rx_cb_data        Callback data pointer, passed to rx_cb
+ * @if RL_USE_STATIC_API
  * @param ept_context       Endpoint preallocated context pointer, used in case of static api (RL_USE_STATIC_API)
- *
+ * @endif
  * @return RL_NULL on error, new endpoint pointer on success.
  *
  */
