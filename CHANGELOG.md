@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Doxygen bump to version 1.9.6
 
 
+### Security
+- Fixed CERT-C INT31-C violation by adding compile-time check to ensure `RL_PLATFORM_HIGHEST_LINK_ID` remains within safe range for 16-bit casting in virtqueue ID creation.
+- Fixed CERT-C INT30-C violations by adding protection against unsigned integer underflow in shared memory calculations, specifically in `shmem_length - (uint32_t)RL_VRING_OVERHEAD` and `shmem_length - 2U * shmem_config.vring_size` expressions.
+
+### Added
+- New utility macro `RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE` to safely determine maximum buffer count within shared memory while preventing integer underflow.
+
+### Changed
+- Improved input validation in initialization functions to properly handle insufficient memory size conditions.
+- Refactored repeated buffer count calculation pattern for better code maintainability.
+
 ## [5.1.4] - 11-Mar-2025
 
 ### Changed

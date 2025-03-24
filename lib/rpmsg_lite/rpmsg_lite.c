@@ -48,6 +48,21 @@ struct virtqueue_ops
 /* Zero-Copy extension macros */
 #define RPMSG_STD_MSG_FROM_BUF(buf) (struct rpmsg_std_msg *)(void *)((char *)(buf)-offsetof(struct rpmsg_std_msg, data))
 
+/**
+ * @brief Safely calculate the maximum number of buffers that can fit in the shared memory
+ *
+ * This macro calculates how many buffers of a given size can fit in the shared memory
+ * after accounting for the overhead. Returns 0 if the overhead is larger than the length.
+ *
+ * @param length     Total length of shared memory
+ * @param overhead   Overhead size to subtract
+ * @param buff_size  Size of each buffer
+ *
+ * @return Number of buffers that can fit, or 0 if overhead > length
+ */
+#define RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(length, overhead, buff_size) \
+    (((length) < (overhead)) ? 0U : ((RL_WORD_ALIGN_DOWN((length) - (overhead))) / (buff_size)))
+
 #if !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1))
 /* Check RL_BUFFER_COUNT and RL_BUFFER_SIZE only when RL_ALLOW_CUSTOM_SHMEM_CONFIG is not set to 1 */
 #if (!RL_BUFFER_COUNT) || (RL_BUFFER_COUNT & (RL_BUFFER_COUNT - 1))
@@ -63,6 +78,16 @@ struct virtqueue_ops
        "RL_BUFFER_PAYLOAD_SIZE must be equal to (240, 496, 1008, ...) [2^n - 16]."
 #endif
 #endif /* !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)) */
+
+/* Add compile-time check to ensure RL_PLATFORM_HIGHEST_LINK_ID won't cause overflow when shifted
+ * The check uses 0x7FFF (32767) as the maximum allowed value because:
+ * When link_id is shifted left by 1 in RL_GET_VQ_ID: (link_id << 1)
+ * The largest link_id that would still fit in a uint16_t after shifting would be 0x7FFF
+ * 0x7FFF << 1 = 0xFFFE, which is still within uint16_t range
+ */
+#if (RL_PLATFORM_HIGHEST_LINK_ID > 0x7FFF)
+    #error "RL_PLATFORM_HIGHEST_LINK_ID must be <= 0x7FFF to ensure compatibility with 16-bit VQ IDs"
+#endif
 
 /*!
  * @brief
@@ -953,14 +978,17 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     }
 
     if ((2U * (uint32_t)shmem_config.buffer_count) >
-        ((RL_WORD_ALIGN_DOWN(shmem_length - 2U * shmem_config.vring_size)) /
-         (uint32_t)(shmem_config.buffer_payload_size + 16UL)))
+        RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
+                                            2U * shmem_config.vring_size,
+                                            (uint32_t)(shmem_config.buffer_payload_size + 16UL)))
     {
         return RL_NULL;
     }
 #else
     if ((2U * (uint32_t)RL_BUFFER_COUNT) >
-        ((RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE))
+        RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
+                                            (uint32_t)RL_VRING_OVERHEAD,
+                                            (uint32_t)RL_BUFFER_SIZE))
     {
         return RL_NULL;
     }
@@ -1004,12 +1032,14 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
     rpmsg_lite_dev->sh_mem_base =
         (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
-    rpmsg_lite_dev->sh_mem_remaining = (RL_WORD_ALIGN_DOWN(shmem_length - 2U * shmem_config.vring_size)) /
-                                       (uint32_t)(shmem_config.buffer_payload_size + 16UL);
+    rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
+                                                                           2U * shmem_config.vring_size,
+                                                                           (uint32_t)(shmem_config.buffer_payload_size + 16UL)));
 #else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
-    rpmsg_lite_dev->sh_mem_remaining =
-        (RL_WORD_ALIGN_DOWN(shmem_length - (uint32_t)RL_VRING_OVERHEAD)) / (uint32_t)RL_BUFFER_SIZE;
+    rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
+                                                                           (uint32_t)RL_VRING_OVERHEAD,
+                                                                           (uint32_t)RL_BUFFER_SIZE);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
     rpmsg_lite_dev->sh_mem_total = rpmsg_lite_dev->sh_mem_remaining;
 
