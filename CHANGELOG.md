@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.1.4] - 27-Mar-2025
+
+### Added
+
+- Add KW43B43 porting layer
+
+### Changed
+
+- Doxygen bump to version 1.9.6
+
 
 ## [5.1.3] - 13-Jan-2025
 
@@ -168,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support of static API (without dynamic allocations).
 
 
-[unreleased]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.3...HEAD
+[unreleased]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.4...HEAD
+[5.1.4]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.3...v5.1.4
 [5.1.3]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.2...v5.1.3
 [5.1.2]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/nxp-mcuxpresso/rpmsg-lite/compare/v5.1.0...v5.1.1
