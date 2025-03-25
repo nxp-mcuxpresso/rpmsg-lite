@@ -1034,7 +1034,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
     rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
                                                                            2U * shmem_config.vring_size,
-                                                                           (uint32_t)(shmem_config.buffer_payload_size + 16UL)));
+                                                                           (uint32_t)(shmem_config.buffer_payload_size + 16UL));
 #else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
     rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
