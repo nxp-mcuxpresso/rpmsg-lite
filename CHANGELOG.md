@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed unsigned integer underflow in `rpmsg_lite_alloc_tx_buffer()` where subtracting header size from buffer size could wrap around if buffer was too small, potentially leading to incorrect buffer sizing.
+- Fixed CERT-C INT31-C violation in rpmsg_lite.c where `size` parameter was cast from `uint32_t` to `uint16_t` without proper validation
+- Applied consistent masking approach to both `size` and `flags` parameters: `(uint16_t)(value & 0xFFFFU)`
+- This fix prevents potential data loss when size values exceed 65535
 
 ## [5.1.4] - 27-Mar-2025
 

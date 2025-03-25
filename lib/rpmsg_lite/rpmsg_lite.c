@@ -694,7 +694,7 @@ static int32_t rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_
     /* Initialize RPMSG header. */
     rpmsg_msg->hdr.dst   = dst;
     rpmsg_msg->hdr.src   = src;
-    rpmsg_msg->hdr.len   = (uint16_t)size;
+    rpmsg_msg->hdr.len   = (uint16_t)(size & 0xFFFFU);
     rpmsg_msg->hdr.flags = (uint16_t)(flags & 0xFFFFU);
 
     /* Copy data to rpmsg buffer. */
@@ -849,7 +849,7 @@ int32_t rpmsg_lite_send_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     /* Initialize RPMSG header. */
     rpmsg_msg->hdr.dst   = dst;
     rpmsg_msg->hdr.src   = src;
-    rpmsg_msg->hdr.len   = (uint16_t)size;
+    rpmsg_msg->hdr.len   = (uint16_t)(size & 0xFFFFU);
     rpmsg_msg->hdr.flags = (uint16_t)(RL_NO_FLAGS & 0xFFFFU);
 
     env_lock_mutex(rpmsg_lite_dev->lock);
