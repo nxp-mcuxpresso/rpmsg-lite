@@ -339,7 +339,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             break;
     }
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
@@ -381,7 +381,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     }
 
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**

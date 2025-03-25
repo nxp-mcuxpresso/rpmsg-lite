@@ -163,7 +163,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     xos_interrupt_enable(DSP_INT0_SEL1_IRQn);
 #endif
     disable_counter--;
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
@@ -186,7 +186,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     xos_interrupt_disable(DSP_INT0_SEL1_IRQn);
 #endif
     disable_counter++;
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**

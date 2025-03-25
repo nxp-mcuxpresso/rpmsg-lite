@@ -178,7 +178,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
         NVIC_EnableIRQ(APP_M4_MU_NVIC_IRQn);
     }
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
@@ -204,7 +204,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     }
     disable_counter++;
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**

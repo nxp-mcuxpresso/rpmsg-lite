@@ -146,7 +146,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
         ipm_set_enabled(ipm_handle, 1);
     }
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
@@ -173,7 +173,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
 
     disable_counter++;
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**

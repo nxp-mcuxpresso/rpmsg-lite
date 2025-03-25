@@ -198,7 +198,7 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
      defined(MIMXRT798S_cm33_core0_SERIES))
                     EZHV_EnableEzhv2ArmIntChan(kEZHV_EzhvToArmIntChan0);
                     EZHV_EnableEzhv2ArmIntChan(kEZHV_EzhvToArmIntChan1);
-#endif          
+#endif
                 }
                 isr_counter3++;
                 break;
@@ -450,7 +450,7 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             break;
     }
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
@@ -522,7 +522,7 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             break;
     }
     platform_global_isr_enable();
-    return ((int32_t)vector_id);
+    return 0;
 }
 
 /**
