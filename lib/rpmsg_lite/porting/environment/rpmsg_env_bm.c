@@ -179,7 +179,8 @@ void env_free_memory(void *ptr)
  */
 void env_memset(void *ptr, int32_t value, uint32_t size)
 {
-    (void)memset(ptr, value, size);
+    /* Explicitly convert value to unsigned char range to ensure consistent behavior */
+    (void)memset(ptr, (unsigned char)(value & 0xFF), size);
 }
 
 /*!

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CERT-C INT31-C violation in rpmsg_lite.c where `size` parameter was cast from `uint32_t` to `uint16_t` without proper validation
 - Applied consistent masking approach to both `size` and `flags` parameters: `(uint16_t)(value & 0xFFFFU)`
 - This fix prevents potential data loss when size values exceed 65535
+- Fixed CERT INT31-C violation in env_memset functions by explicitly converting int32_t values to unsigned char using bit masking. This prevents potential data loss or misinterpretation when passing values outside the unsigned char range (0-255) to the standard memset() function.
 
 ## [5.1.4] - 27-Mar-2025
 
