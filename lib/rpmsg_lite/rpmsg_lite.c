@@ -789,7 +789,15 @@ void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uin
     rpmsg_msg->hdr.reserved.idx = idx;
 
     /* return the maximum payload size */
-    *size -= sizeof(struct rpmsg_std_hdr);
+    if (*size >= sizeof(struct rpmsg_std_hdr))
+    {
+        *size -= sizeof(struct rpmsg_std_hdr);
+    }
+    else
+    {
+        /* Handle the error case - size is too small for a valid message */
+        *size = 0;
+    }
 
     return rpmsg_msg->data;
 }
