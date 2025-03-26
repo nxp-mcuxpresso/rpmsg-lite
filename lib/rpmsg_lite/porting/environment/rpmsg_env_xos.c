@@ -665,6 +665,12 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
     char *queue_ptr = ((void *)0);
 
+    /* Length and size should not be negative */
+    if (length < 0 || element_size < 0)
+    {
+        return -1;
+    }
+
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     queue_ptr = (char *)queue_static_storage;
 #else

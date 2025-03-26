@@ -17,11 +17,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed CERT INT31-C violation in `platform_interrupt_disable()` and similar functions by replacing unsafe cast from `uint32_t` to `int32_t` with a return of `0` constant.
 - Fixed unsigned integer underflow in `rpmsg_lite_alloc_tx_buffer()` where subtracting header size from buffer size could wrap around if buffer was too small, potentially leading to incorrect buffer sizing.
 - Fixed CERT-C INT31-C violation in rpmsg_lite.c where `size` parameter was cast from `uint32_t` to `uint16_t` without proper validation
 - Applied consistent masking approach to both `size` and `flags` parameters: `(uint16_t)(value & 0xFFFFU)`
 - This fix prevents potential data loss when size values exceed 65535
 - Fixed CERT INT31-C violation in env_memset functions by explicitly converting int32_t values to unsigned char using bit masking. This prevents potential data loss or misinterpretation when passing values outside the unsigned char range (0-255) to the standard memset() function.
+- Fixed CERT-C INT31-C violations in RPMsg-Lite environment porting: Added validation checks for signed-to-unsigned integer conversions to prevent data loss and misinterpretation
+  - rpmsg_env_freertos.c: Added validation before converting int32_t to UBaseType_t
+  - rpmsg_env_qnx.c: Fixed format string and added validation before assigning to mqstat fields
+  - rpmsg_env_threadx.c: Added validation to prevent integer overflow and negative values
+  - rpmsg_env_xos.c: Added range checking before casting to uint16_t
+  - rpmsg_env_zephyr.c: Added validation before passing values to k_msgq_init
 
 ## [5.1.4] - 27-Mar-2025
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>  /* For INT32_MAX */
 
 #if defined(RL_USE_ENVIRONMENT_CONTEXT) && (RL_USE_ENVIRONMENT_CONTEXT == 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
@@ -639,6 +640,18 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
     struct k_msgq *queue_ptr = ((void *)0);
     char *msgq_buffer_ptr    = ((void *)0);
+
+    /* Length and size should not be negative */
+    if (length < 0 || element_size < 0)
+    {
+        return -1;
+    }
+
+    /* Additional integer overflow protection */
+    if (length > INT32_MAX / element_size)
+    {
+        return -1; /* Multiplication would overflow */
+    }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     queue_ptr       = (struct k_msgq *)queue_static_context;

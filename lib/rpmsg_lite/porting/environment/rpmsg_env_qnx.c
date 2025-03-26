@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -663,6 +663,14 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 {
     char name[100];
     struct mq_attr mqstat;
+
+    if (length < 0 || element_size < 0)
+    {
+        /* Length and size should not be negative */
+        *queue = NULL;
+        return -1;
+    }
+
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
     env_queue_t *q = (env_queue_t *)queue_static_context;
 #else
@@ -673,7 +681,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
         return -1;
     }
     /* Creates a unique queue in /dev/mq/PID_virtaddr_length */
-    sprintf(name, "/%u_0x%lx_%u", getpid(), (uint64_t)q, length);
+    sprintf(name, "/%u_0x%lx_%d", getpid(), (uint64_t)q, length);
     mqstat.mq_maxmsg   = length;
     mqstat.mq_msgsize  = element_size;
     mqstat.mq_flags    = 0;
