@@ -431,8 +431,8 @@ static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_conf
     uint8_t byte = 0U;
 
     uint8_t *ptr = (uint8_t *)(&protec_shmem_struct->config);
-    uint16_t len = (uint16_t)((uint32_t)(uint8_t *)(&protec_shmem_struct->shmemConfigCrc) -
-                              (uint32_t)(uint8_t *)(&protec_shmem_struct->config));
+    uint32_t len = ((uint32_t)(uint8_t *)(&protec_shmem_struct->shmemConfigCrc) -
+                    (uint32_t)(uint8_t *)(&protec_shmem_struct->config));
     while (len != 0U)
     {
         byte = *ptr;
