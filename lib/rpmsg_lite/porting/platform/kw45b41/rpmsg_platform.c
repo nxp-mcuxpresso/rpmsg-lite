@@ -403,7 +403,7 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
         shmem_config.vring_align         = 0x10U;
 
         if (memcmp(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH) !=
-            0U)
+            0)
         {
             break;
         }

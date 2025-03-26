@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - rpmsg_env_xos.c: Added range checking before casting to uint16_t
   - rpmsg_env_zephyr.c: Added validation before passing values to k_msgq_init
 - Fixed a CERT INT31-C compliance issue in `env_get_current_queue_size()` function where an unsigned queue count was cast to a signed int32_t without proper validation, which could lead to lost or misinterpreted data if queue size exceeded INT32_MAX.
+- Fixed CERT INT31-C violation in `rpmsg_platform.c` where `memcmp()` return value (signed int) was compared with unsigned constant without proper type handling.
 
 ## [5.1.4] - 27-Mar-2025
 
