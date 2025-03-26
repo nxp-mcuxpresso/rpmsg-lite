@@ -845,12 +845,16 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 
 int32_t env_get_current_queue_size(void *queue)
 {
+    UBaseType_t messages = 0;
+
     if (env_in_isr() != 0)
     {
-        return ((int32_t)uxQueueMessagesWaitingFromISR(queue));
+        messages = uxQueueMessagesWaitingFromISR(queue);
     }
     else
     {
-        return ((int32_t)uxQueueMessagesWaiting(queue));
+        messages = uxQueueMessagesWaiting(queue);
     }
+
+    return (messages > INT32_MAX) ? INT32_MAX : (int32_t)messages;
 }

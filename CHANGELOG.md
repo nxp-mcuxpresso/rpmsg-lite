@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - rpmsg_env_threadx.c: Added validation to prevent integer overflow and negative values
   - rpmsg_env_xos.c: Added range checking before casting to uint16_t
   - rpmsg_env_zephyr.c: Added validation before passing values to k_msgq_init
+- Fixed a CERT INT31-C compliance issue in `env_get_current_queue_size()` function where an unsigned queue count was cast to a signed int32_t without proper validation, which could lead to lost or misinterpreted data if queue size exceeded INT32_MAX.
 
 ## [5.1.4] - 27-Mar-2025
 
