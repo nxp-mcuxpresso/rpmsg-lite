@@ -388,8 +388,9 @@ void *platform_patova(uint32_t addr)
         }
     }
     /* M33S as master, M70 as remote or M71 as master, M70 as remote */
-    else if (((addr >= RPMSG_M70_DTCM_BEGIN_FROM_M33S_VIEW) && (addr <= RPMSG_M70_DTCM_END_FROM_M33S_VIEW)) || \
-             ((addr >= RPMSG_M70_DTCM_BEGIN_FROM_M71_VIEW) && (addr <= RPMSG_M70_DTCM_END_FROM_M71_VIEW)))
+    else if ((addr >= RPMSG_M70_DTCM_BEGIN_FROM_M33S_VIEW) && (addr <= RPMSG_M70_DTCM_END_FROM_M33S_VIEW))
+    /* RPMSG_M70_DTCM_BEGIN_FROM_M33S_VIEW, RPMSG_M70_DTCM_END_FROM_M33S_VIEW are equal to RPMSG_M70_DTCM_BEGIN_FROM_M71_VIEW, RPMSG_M70_DTCM_END_FROM_M71_VIEW */
+    //         ((addr >= RPMSG_M70_DTCM_BEGIN_FROM_M71_VIEW) && (addr <= RPMSG_M70_DTCM_END_FROM_M71_VIEW)))
     {
         if ((addr >= RPMSG_SHMEM_M33S_M70_DTCM_BEGIN_FROM_M33S_VIEW) && (addr <= RPMSG_SHMEM_M33S_M70_DTCM_END_FROM_M33S_VIEW))
         {
@@ -423,10 +424,8 @@ void *platform_patova(uint32_t addr)
             assert(false);
         }
     }
-    else
-    {
-        return ((void *)(char *)addr);
-    }
+
+    return ((void *)(char *)addr);
 }
 
 /**
