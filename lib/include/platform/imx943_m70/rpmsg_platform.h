@@ -57,7 +57,7 @@
  *
  * vring_size = vring_size(4, VRING_ALIGN) = size3 + size4 = 80 +46 = 126
  * RL_VRING_OVERHEAD = 2 * vring_size =  256bytes
- * RL_BUFFER_PAYLOAD_SIZE = 496 
+ * RL_BUFFER_PAYLOAD_SIZE = 496
  * memsize = 4 * (496 + 16) * 2 + 0x200 = 4K + 0.5K =4.5K
  * */
 
@@ -67,7 +67,7 @@
 /* define shared memory space for VRINGS per one channel
  * #define SH_MEM_TOTAL_SIZE (6144U) in main_master.c
  * remain 4K for buffers, vring overhead occupy 2Kbytes*/
-#define RL_VRING_OVERHEAD ((2UL * VRING_SIZE + 0x7FF) & (~0x7FF))
+#define RL_VRING_OVERHEAD ((2UL * VRING_SIZE + 0x7FFUL) & (~0x7FFUL))
 #else
 #define VRING_SIZE (0x8000UL)
 /* define shared memory space for VRINGS per one channel */
