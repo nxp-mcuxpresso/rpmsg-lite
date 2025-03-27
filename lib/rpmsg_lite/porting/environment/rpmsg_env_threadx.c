@@ -498,7 +498,9 @@ void env_release_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000);
+    // (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000);
+    (void)tx_thread_sleep((num_msec / 1000) * TX_TIMER_TICKS_PER_SECOND +
+                          ((num_msec % 1000) * TX_TIMER_TICKS_PER_SECOND) / 1000);
 }
 
 /*!
