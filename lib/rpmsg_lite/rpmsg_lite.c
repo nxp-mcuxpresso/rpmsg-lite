@@ -63,10 +63,39 @@ struct virtqueue_ops
 #define RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(length, overhead, buff_size) \
     (((length) < (overhead)) ? 0U : ((RL_WORD_ALIGN_DOWN((length) - (overhead))) / (buff_size)))
 
+/*! @brief Maximum number of buffers allowed per virtqueue.
+ *
+ * This value is defined by the VirtIO specification which limits virtqueues to 32768 descriptors.
+ * The limit ensures memory efficiency and prevents potential integer overflow in vring_size()
+ * calculations. Any value used for RL_BUFFER_COUNT in the application must be:
+ * - A power of two (2, 4, 8, 16, etc.)
+ * - Less than or equal to this maximum (32768)
+ * Exceeding this limit would violate the VirtIO specification and could cause unpredictable behavior.
+ */
+#define RL_MAX_BUFFER_COUNT (32768U)
+
+/*! @brief Maximum allowed alignment value for virtqueues (vrings).
+ *
+ * This limit prevents potential integer overflow in vring_size() calculations
+ * while still accommodating practical alignment requirements (up to 64KB alignment).
+ * The value is large enough for page alignment needs on virtually all systems
+ * but small enough to prevent numeric errors when computing memory layouts.
+ */
+#define RL_MAX_VRING_ALIGN (65536U)
+
 #if !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1))
 /* Check RL_BUFFER_COUNT and RL_BUFFER_SIZE only when RL_ALLOW_CUSTOM_SHMEM_CONFIG is not set to 1 */
 #if (!RL_BUFFER_COUNT) || (RL_BUFFER_COUNT & (RL_BUFFER_COUNT - 1))
 #error "RL_BUFFER_COUNT must be power of two (2, 4, ...)"
+#endif
+
+/* Add check for maximum buffer count according to VirtIO specification */
+#if (RL_BUFFER_COUNT > RL_MAX_BUFFER_COUNT)
+#error "RL_BUFFER_COUNT exceeds maximum allowed by VirtIO specification (32768)"
+#endif
+
+#if (VRING_ALIGN > RL_MAX_VRING_ALIGN)
+#error "VRING_ALIGN exceeds maximum allowed value (65536)"
 #endif
 
 /* Buffer is formed by payload and struct rpmsg_std_hdr */
@@ -971,6 +1000,18 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     if (RL_SUCCESS != platform_get_custom_shmem_config(link_id, &shmem_config))
     {
         return RL_NULL;
+    }
+
+    /* VirtIO specification limits number of buffers */
+    if (shmem_config.buffer_count > RL_MAX_BUFFER_COUNT)
+    {
+        return RL_NULL;
+    }
+
+    /* Cap alignment to maximum safe value */
+    if (shmem_config.vring_align > RL_MAX_VRING_ALIGN)
+    {
+        shmem_config.vring_align = RL_MAX_VRING_ALIGN;
     }
 
     /* shmem_config.buffer_count must be power of two (2, 4, ...) */

@@ -136,6 +136,7 @@ static inline int32_t vring_size(uint32_t num, uint32_t align)
     size += sizeof(struct vring_avail) + (num * sizeof(uint16_t)) + sizeof(uint16_t);
     size = (size + align - 1UL) & ~(align - 1UL);
     size += sizeof(struct vring_used) + (num * sizeof(struct vring_used_elem)) + sizeof(uint16_t);
+
     return ((int32_t)size);
 }
 
