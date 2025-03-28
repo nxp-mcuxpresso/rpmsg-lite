@@ -30,6 +30,8 @@ The RPMsg-Lite is an open-source component developed by NXP Semiconductors and r
 
 For Further documentation, please look at doxygen documentation at: https://nxp-mcuxpresso.github.io/rpmsg-lite/
 
+For overview please read [RPMSG-Lite VirtIO Overview](doxygen/rpmsg_lite_overview.md).
+
 ## Motivation to create RPMsg-Lite
 
 There are multiple reasons why RPMsg-Lite was developed. One reason is the need for the small footprint of the RPMsg protocol-compatible communication component, another reason is the simplification of extensive API of OpenAMP RPMsg implementation.
