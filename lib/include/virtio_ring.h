@@ -159,7 +159,7 @@ static inline int32_t vring_need_event(uint16_t event_idx, uint16_t new_idx, uin
 {
     /* coco begin validated: This function does not need to be tested because it is not used in rpmsg_lite
      * implementation (only called from unused part of vq_ring_must_notify_host() ). */
-    if ((uint16_t)(new_idx - event_idx - 1U) < (uint16_t)(new_idx - old))
+    if (((uint16_t)new_idx - (uint16_t)event_idx - (uint16_t)1U) < ((uint16_t)new_idx - (uint16_t)old))
     {
         return 1;
     }
