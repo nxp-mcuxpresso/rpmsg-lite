@@ -1,9 +1,6 @@
 var group__rpmsg__lite =
 [
-    [ "rpmsg_hdr_reserved", "group__rpmsg__lite.html#structrpmsg__hdr__reserved", [
-      [ "rfu", "group__rpmsg__lite.html#a4b739bc00139577af55861df9315cd7f", null ],
-      [ "idx", "group__rpmsg__lite.html#adcda7009bd4bf219f3413b50faf5c2a0", null ]
-    ] ],
+    [ "rpmsg_hdr_reserved", "group__rpmsg__lite.html#structrpmsg__hdr__reserved", null ],
     [ "rpmsg_std_hdr", "group__rpmsg__lite.html#structrpmsg__std__hdr", [
       [ "src", "group__rpmsg__lite.html#aa94ab1943458cc2ac98352363b0cc4d4", null ],
       [ "dst", "group__rpmsg__lite.html#a1d938174c63348eb5c1ebedf07239181", null ],
@@ -38,16 +35,41 @@ var group__rpmsg__lite =
       [ "link_id", "group__rpmsg__lite.html#a5fe45ceaad9bb289e2efa45b0204be41", null ]
     ] ],
     [ "RL_VERSION", "group__rpmsg__lite.html#ga96a544c91ab6dd353867256e1deb9917", null ],
+    [ "RL_WORD_SIZE", "group__rpmsg__lite.html#ga267570e79fefba2931b08a58d0ad917e", null ],
+    [ "RL_WORD_ALIGN_UP", "group__rpmsg__lite.html#gac084058ac1f8dee1930ceaaeee5120d6", null ],
+    [ "RL_WORD_ALIGN_DOWN", "group__rpmsg__lite.html#gaa2a4c7812526634cbb739d998094cc7c", null ],
+    [ "RL_SUCCESS", "group__rpmsg__lite.html#ga13a8e0903b54495e9a33241d03bbfb47", null ],
+    [ "RL_NULL", "group__rpmsg__lite.html#ga5f78659bc25fce23f4274fb1d62a42c9", null ],
+    [ "RL_REMOTE", "group__rpmsg__lite.html#ga21fb50e285d91ee553b37ed858aa0302", null ],
+    [ "RL_MASTER", "group__rpmsg__lite.html#ga58a656b3bd10dcc25306d051113f5c30", null ],
+    [ "RL_TRUE", "group__rpmsg__lite.html#gac7eb86ebf1a5b5954f724d66c4937a90", null ],
+    [ "RL_FALSE", "group__rpmsg__lite.html#gab9c174250e3a4c1f51d9371c3842ad31", null ],
+    [ "RL_ADDR_ANY", "group__rpmsg__lite.html#ga008641695ba0de89008e7e87c0abbd11", null ],
+    [ "RL_RELEASE", "group__rpmsg__lite.html#ga544813da8a32f3b1212612198432c3e5", null ],
+    [ "RL_HOLD", "group__rpmsg__lite.html#gaf82e3df072be54083a6b97d69c398805", null ],
+    [ "RL_DONT_BLOCK", "group__rpmsg__lite.html#ga962eb9fa88a9a649b319e7cebd2ff484", null ],
+    [ "RL_BLOCK", "group__rpmsg__lite.html#ga9fa9e3f383362e932f2dc98d09e91350", null ],
+    [ "RL_ERRORS_BASE", "group__rpmsg__lite.html#ga9b5604fa76df1fb282c7cc1a050f8cac", null ],
+    [ "RL_ERR_NO_MEM", "group__rpmsg__lite.html#ga9415fd1584985438d979a8e32576c4d8", null ],
+    [ "RL_ERR_BUFF_SIZE", "group__rpmsg__lite.html#ga767a6b68a3e4d0d2a275e3436cf413ab", null ],
+    [ "RL_ERR_PARAM", "group__rpmsg__lite.html#gae85355e0c2198eeff5f75c45d207485f", null ],
+    [ "RL_ERR_DEV_ID", "group__rpmsg__lite.html#gab059442a24f3617e1df871a4fb7e2811", null ],
+    [ "RL_ERR_MAX_VQ", "group__rpmsg__lite.html#gad0c253824df699e944e497f8de7392cb", null ],
+    [ "RL_ERR_NO_BUFF", "group__rpmsg__lite.html#ga6d989b855b6f9dcdc7620709c868bc2c", null ],
+    [ "RL_NOT_READY", "group__rpmsg__lite.html#ga64d09b4e17f7114cc638344126435410", null ],
+    [ "RL_ALREADY_DONE", "group__rpmsg__lite.html#ga35bfe5b0aec1dd39a1c05c3ff77508ae", null ],
+    [ "RL_NO_FLAGS", "group__rpmsg__lite.html#ga006151a658954fcaa252aa787835c25d", null ],
     [ "rl_ept_rx_cb_t", "group__rpmsg__lite.html#ga40d0f39ccf0df3c73ac65bd18da02bfd", null ],
-    [ "rpmsg_lite_master_init", "group__rpmsg__lite.html#ga79d57a0d47c1843c96530505a92a1018", null ],
-    [ "rpmsg_lite_remote_init", "group__rpmsg__lite.html#ga134f3fd8e6817dd2ae80148948dee3ae", null ],
+    [ "rpmsg_lite_master_init", "group__rpmsg__lite.html#gadd1358b092b054711ed71ea2482c8c8b", null ],
+    [ "rpmsg_lite_remote_init", "group__rpmsg__lite.html#gaae74478eecba4c3d3fcb9c1e11d25891", null ],
     [ "rpmsg_lite_deinit", "group__rpmsg__lite.html#ga974c3cb2c613f24a6d951b0aead1852a", null ],
-    [ "rpmsg_lite_create_ept", "group__rpmsg__lite.html#gad9b5d23e549a4f2adce7a79fd932568d", null ],
+    [ "rpmsg_lite_create_ept", "group__rpmsg__lite.html#gadab572229a911302c0ccc211fcb372e0", null ],
     [ "rpmsg_lite_destroy_ept", "group__rpmsg__lite.html#gabd04a23b464f1ba3360d9970b0d09c94", null ],
     [ "rpmsg_lite_send", "group__rpmsg__lite.html#ga64dd2dd9b0681e1551c83f325daf19fb", null ],
     [ "rpmsg_lite_is_link_up", "group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d", null ],
     [ "rpmsg_lite_wait_for_link_up", "group__rpmsg__lite.html#gad692e103ca4220e224f65f2f18c77569", null ],
     [ "rpmsg_lite_release_rx_buffer", "group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2", null ],
-    [ "rpmsg_lite_alloc_tx_buffer", "group__rpmsg__lite.html#ga81e74325c36223e08a5c2a9d888c34e3", null ],
-    [ "rpmsg_lite_send_nocopy", "group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31", null ]
+    [ "rpmsg_lite_alloc_tx_buffer", "group__rpmsg__lite.html#ga5ef10752df7885f0ff1fcd34f322173a", null ],
+    [ "rpmsg_lite_send_nocopy", "group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31", null ],
+    [ "RL_PACKED_END", "group__rpmsg__lite.html#ga105067104fa5500b9c00c77598fe7bb7", null ]
 ];

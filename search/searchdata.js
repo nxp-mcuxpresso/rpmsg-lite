@@ -7,7 +7,9 @@ var indexSectionsWithContent =
   4: "adefhlnrstv",
   5: "r",
   6: "r",
-  7: "r"
+  7: "r",
+  8: "r",
+  9: "r"
 };
 
 var indexSectionNames =
@@ -18,8 +20,10 @@ var indexSectionNames =
   3: "functions",
   4: "variables",
   5: "typedefs",
-  6: "groups",
-  7: "pages"
+  6: "enums",
+  7: "defines",
+  8: "groups",
+  9: "pages"
 };
 
 var indexSectionLabels =
@@ -30,7 +34,9 @@ var indexSectionLabels =
   3: "Functions",
   4: "Variables",
   5: "Typedefs",
-  6: "Modules",
-  7: "Pages"
+  6: "Enumerations",
+  7: "Macros",
+  8: "Modules",
+  9: "Pages"
 };
 
