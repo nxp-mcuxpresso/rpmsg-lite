@@ -1,3 +1,20 @@
+# MCUXpresso SDK : mcuxsdk-middleware-rpmsg-lite
+
+## Overview
+This repository is for MCUXpresso SDK RPMSG-Lite middleware delivery and it contains RPMSG-Lite component officially provided in NXP MCUXpresso SDK. This repository is part of the MCUXpresso SDK overall delivery which is composed of several sub-repositories/projects. Navigate to the top/parent repository [mcuxsdk](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests/) for the complete delivery of MCUXpresso SDK to be able to build and run RPMSG-Lite examples that are based on mcux-sdk-middleware-rpmsg-lite component.
+
+## Documentation
+Overall details can be reviewed here: [MCUXpresso SDK Online Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/introduction/README.html)
+
+Visit [RPMSG-Lite - Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/middleware/multicore/rpmsg-lite/README.html) to review details on the contents in this sub-repo.
+
+## Setup
+Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest [Getting Started with SDK - Detailed Installation Instructions](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/installation.html#installation)
+
+## Contribution
+We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.
+
+---------------------------------
 [![Version](https://img.shields.io/github/v/release/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/nxp-mcuxpresso/rpmsg-lite)](https://github.com/nxp-mcuxpresso/rpmsg-lite/issues)
@@ -12,6 +29,7 @@ Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (Op
 The RPMsg-Lite is an open-source component developed by NXP Semiconductors and released under the BSD-compatible license.
 
 For Further documentation, please look at doxygen documentation at: https://nxp-mcuxpresso.github.io/rpmsg-lite/
+
 ## Motivation to create RPMsg-Lite
 
 There are multiple reasons why RPMsg-Lite was developed. One reason is the need for the small footprint of the RPMsg protocol-compatible communication component, another reason is the simplification of extensive API of OpenAMP RPMsg implementation.
@@ -122,9 +140,6 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 |RL_ALLOW_CONSUMED_BUFFERS_NOTIFICATION        | (0)           | When enabled the opposite side is notified each time received buffers are consumed and put into the queue of available buffers. Enable this option in RPMsg-Lite to Linux configuration to allow unblocking of the Linux blocking send. The default value is 0 (RPMsg-Lite to RPMsg-Lite communication).    |
 |RL_ALLOW_CUSTOM_SHMEM_CONFIG  | (0)           | It allows to define custom shared memory configuration and replacing the shared memory related global settings from rpmsg_config.h This is useful when multiple instances are running in parallel but different shared memory arrangement (vring size & alignment, buffers size & count) is required. The default value is 0 (all RPMsg_Lite instances use the same shared memory arrangement as defined by common config macros). |
 |RL_ASSERT                     | see rpmsg_default_config.h | Assert implementation.    |
-
-## Contributing to the rpmsg-lite project
-We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.
 
 ### How to format rpmsg-lite code
 To format code, use the application developed by Google, named *clang-format*. This tool is part of the [llvm](http://llvm.org/) project. Currently, the clang-format 10.0.0 version is used for rpmsg-lite.
