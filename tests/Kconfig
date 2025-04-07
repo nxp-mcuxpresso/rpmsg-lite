@@ -11,12 +11,18 @@ config RPMSG_TEST_ENABLE
     bool "RPMSG-Lite Enable Test"
     default y
     help
-        "Set this to enable testing."
+        Set this to enable testing.
 
 config _USE_STATIC
     bool "Static"
     default n
     help
         "Set this to enable testing."
+
+config RL_ASSERT(cond)
+    string "Override RL_ASSERT for testing"
+    default "do { if (!(cond)) { } } while(0)"
+    help
+        No prefix in generated macro
 
 endmenu

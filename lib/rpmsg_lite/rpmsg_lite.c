@@ -639,12 +639,22 @@ uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev)
 {
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
 
+    if (rpmsg_lite_dev == RL_NULL)
+    {
+        return 0U;
+    }
+
     return (RL_TRUE == rpmsg_lite_dev->link_state ? RL_TRUE : RL_FALSE);
 }
 
 uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t timeout)
 {
     RL_ASSERT(rpmsg_lite_dev != RL_NULL);
+
+    if (rpmsg_lite_dev == RL_NULL)
+    {
+        return 0U;
+    }
 
     return env_wait_for_link_up(&rpmsg_lite_dev->link_state, rpmsg_lite_dev->link_id, timeout);
 }
