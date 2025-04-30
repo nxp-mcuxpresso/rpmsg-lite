@@ -1,5 +1,5 @@
 #
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,3 +13,15 @@ mcux_add_source(
 mcux_add_include(
     INCLUDES .
 )
+
+if(CONFIG_MCUX_COMPONENT_utilities.gcov)
+    # Get all source files in the directory
+    file(GLOB_RECURSE RPMSG_LITE_SOURCES "${SdkRootDirPath}/middleware/multicore/rpmsg-lite/lib/*.c")
+
+    # Set properties for all those files
+    foreach(SOURCE_FILE ${RPMSG_LITE_SOURCES})
+        message("GCOV: Adding coverage flags for ${SOURCE_FILE}")
+        set_source_files_properties(${SOURCE_FILE} PROPERTIES
+            COMPILE_FLAGS "-g3 -ftest-coverage -fprofile-arcs -fkeep-inline-functions -fkeep-static-functions")
+    endforeach()
+endif()

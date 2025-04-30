@@ -1,0 +1,54 @@
+#
+# Copyright 2024-2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+output_dir: "gcov_output"
+
+# Build configuration
+build:
+  # Target board
+  board: mimxrt700evk
+
+  # Build configuration (debug, release, etc.)
+  build_config: flash_debug
+
+  # Target core
+  core: cm33_core0
+
+  # Build directory template (uses Python's format string)
+  # {counter} will be replaced with iteration number
+  build_dir_template: b_{counter}
+
+  # Template for test path
+  # {test} will be replaced with the test name
+  test_path_template: middleware/multicore/rpmsg-lite/tests/{test}/primary
+  test_paths: "middleware/multicore/rpmsg-lite/tests/"
+
+  # Path to GCOV configuration files
+  primary_gcov_conf: middleware/multicore/rpmsg-lite/tests/prj-gcov-primary.conf
+  secondary_gcov_conf: middleware/multicore/rpmsg-lite/tests/prj-gcov-secondary.conf
+
+# Coverage configuration
+coverage:
+  # Pattern for filtering files in coverage reports
+  lcov_filter_pattern: "*/middleware/multicore/rpmsg-lite/lib/*"
+  gcovr_filter_pattern: ".*rpmsg-lite/lib/.*"
+
+  # Tool to use for generating coverage reports (gcovr, lcov, or both)
+  report_tool: gcovr
+
+  # Directory for storing coverage data
+  data_dir: coverage_data
+
+# List of tests to run
+tests:
+  - 01_rpmsg_init
+  - 01_rpmsg_init_rtos
+  - 02_epts_channels
+  - 02_epts_channels_rtos
+  - 03_send_receive
+  - 03_send_receive_rtos
+  - 04_ping_pong
+  - 04_ping_pong_rtos
+  - 05_thread_safety_rtos

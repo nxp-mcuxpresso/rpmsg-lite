@@ -30,12 +30,19 @@ mcux_add_configuration(
 )
 
 mcux_add_linker_symbol(
-    SYMBOLS "__stack_size__=0x400 \
-             __heap_size__=0x2000 \
-             __use_shmem__=1 \
+    SYMBOLS "__use_shmem__=1 \
              __multicore__=1 \
             "
 )
+
+# In case GCov is enabled the stack and heap size is set in gcov component
+if(NOT CONFIG_MCUX_COMPONENT_utilities.gcov)
+mcux_add_linker_symbol(
+    SYMBOLS "__stack_size__=0x400 \
+             __heap_size__=0x2000 \
+            "
+)
+endif()
 
 mcux_add_iar_configuration(
     LD "--image_input=${APPLICATION_BINARY_DIR}/../test_03_send_receive_secondary_core/iar/core1_image.bin,_core1_image,__core1_image,4 \
