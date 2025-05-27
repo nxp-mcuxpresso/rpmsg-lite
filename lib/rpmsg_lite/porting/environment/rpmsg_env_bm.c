@@ -44,6 +44,7 @@
 
 #include "rpmsg_compiler.h"
 #include "rpmsg_env.h"
+#include "rpmsg_lite.h"
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
 
@@ -71,14 +72,31 @@ static struct isr_info isr_table[ISR_COUNT];
  * env_wait_for_link_up
  *
  * Wait until the link_state parameter of the rpmsg_lite_instance is set.
- * Busy loop implementation for BM, timeout_ms parameter ignored for now.
+ * Busy loop implementation for BM.
  *
  */
 uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, uint32_t timeout_ms)
 {
+    uint32_t tick_count = 0U;
+    uint32_t tick_temp;
+
     while (*link_state != 1U)
     {
+        env_sleep_msec(RL_MS_PER_INTERVAL);
+
+        if (RL_BLOCK != timeout_ms)
+        {
+            tick_temp = tick_count + (uint32_t)RL_MS_PER_INTERVAL;
+
+            if ((tick_temp < tick_count) || (tick_temp >= timeout_ms))
+            {
+                return 0U;
+            }
+
+            tick_count = tick_temp;
+        }
     }
+
     return 1U;
 }
 
