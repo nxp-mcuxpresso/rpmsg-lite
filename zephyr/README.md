@@ -2,7 +2,7 @@
 
 ## Adding RPMSG-Lite to Zephyr as module
 
-RPMSG-Lite was tested with [Zephyr 3.6.0](https://docs.zephyrproject.org/latest/releases/release-notes-3.6.html) version.
+RPMSG-Lite was tested with [Zephyr 4.1.0](https://docs.zephyrproject.org/latest/releases/release-notes-4.1.html) version.
 
 To include RPMSG-Lite into Zephyr, update Zephyr's west.yml:
 
