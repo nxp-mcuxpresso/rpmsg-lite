@@ -14,13 +14,10 @@ jobs:
       - name: Build
         id: build
         run: |
-          # TODO: add `v` to changelog versions
-          # Then remote this and directly use `github.ref_name`.
-          new_tag="${{ github.ref_name }}"
-          new_tag="${new_tag:1}"
-          echo "New Tag: ${new_tag}"
+          tag="${{ github.ref_name }}"
+          echo "Tag: ${tag}"
           # Extacts Keep a Changelog format. Credits https://stackoverflow.com/a/68119286
-          awk -v ver="${new_tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" > rel_changelog.txt
+          awk -v ver="${tag}" '/^#+ \[/ { if (p) { exit }; if ($2 == "["ver"]") { p=1; next} } p && NF' "CHANGELOG.md" > rel_changelog.txt
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
