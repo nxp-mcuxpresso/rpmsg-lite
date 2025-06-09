@@ -166,7 +166,7 @@ void platform_time_delay(uint32_t num_msec)
     }
 }
 
-#if (!defined(CPU_MIMXRT798SGAWAR_ezhv) && !defined(CPU_MIMXRT798SGFOA_ezhv))
+#if (!defined(MIMXRT735S_ezhv_SERIES))
 /**
  * platform_in_isr
  *
