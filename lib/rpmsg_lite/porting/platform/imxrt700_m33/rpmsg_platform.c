@@ -300,26 +300,26 @@ void platform_notify(uint32_t vector_id)
         case RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID:
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #elif (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
        defined(MIMXRT798S_cm33_core1_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #endif
             break;
         case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core2, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core2, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #elif (defined(MIMXRT735S_hifi4_SERIES) || defined(MIMXRT758S_hifi4_SERIES) || defined(MIMXRT798S_hifi4_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #endif
             break;
         case RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID:
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
      defined(MIMXRT798S_cm33_core1_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core3, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core3, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #elif (defined(MIMXRT735S_hifi1_SERIES) || defined(MIMXRT758S_hifi1_SERIES) || defined(MIMXRT798S_hifi1_SERIES))
-            (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFF));
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
 #endif
             break;
         default:
