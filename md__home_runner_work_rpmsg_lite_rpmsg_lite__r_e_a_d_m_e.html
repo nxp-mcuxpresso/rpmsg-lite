@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.6"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>RPMsg-Lite User&#39;s Guide: README</title>
+<title>RPMsg-Lite User&#39;s Guide: MCUXpresso SDK : mcuxsdk-middleware-rpmsg-lite</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign">
-   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. 5.1.4</span>
+   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.2.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -91,17 +91,31 @@ $(document).ready(function(){initNavTree('md__home_runner_work_rpmsg_lite_rpmsg_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">README </div></div>
+  <div class="headertitle"><div class="title">MCUXpresso SDK : mcuxsdk-middleware-rpmsg-lite </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/releases/latest"><img src="https://img.shields.io/github/v/release/nxp-mcuxpresso/rpmsg-lite" alt="Version" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/graphs/contributors"><img src="https://img.shields.io/github/contributors/nxp-mcuxpresso/rpmsg-lite" alt="Contributors" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/issues"><img src="https://img.shields.io/github/issues/nxp-mcuxpresso/rpmsg-lite" alt="Issues" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" style="pointer-events: none;" class="inline"/></a></p>
-<h1><a class="anchor" id="autotoc_md0"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md1"></a>
+Overview</h1>
+<p>This repository is for MCUXpresso SDK RPMSG-Lite middleware delivery and it contains RPMSG-Lite component officially provided in NXP MCUXpresso SDK. This repository is part of the MCUXpresso SDK overall delivery which is composed of several sub-repositories/projects. Navigate to the top/parent repository <a href="https://github.com/nxp-mcuxpresso/mcuxsdk-manifests/">mcuxsdk</a> for the complete delivery of MCUXpresso SDK to be able to build and run RPMSG-Lite examples that are based on mcux-sdk-middleware-rpmsg-lite component.</p>
+<h1><a class="anchor" id="autotoc_md2"></a>
+Documentation</h1>
+<p>Overall details can be reviewed here: <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/introduction/README.html">MCUXpresso SDK Online Documentation</a></p>
+<p>Visit <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/middleware/multicore/rpmsg-lite/README.html">RPMSG-Lite - Documentation</a> to review details on the contents in this sub-repo.</p>
+<h1><a class="anchor" id="autotoc_md3"></a>
+Setup</h1>
+<p>Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/installation.html#installation">Getting Started with SDK - Detailed Installation Instructions</a></p>
+<h1><a class="anchor" id="autotoc_md4"></a>
+Contribution</h1>
+<p>We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.</p>
+<hr  />
+<p> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/releases/latest"><img src="https://img.shields.io/github/v/release/nxp-mcuxpresso/rpmsg-lite" alt="Version" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/graphs/contributors"><img src="https://img.shields.io/github/contributors/nxp-mcuxpresso/rpmsg-lite" alt="Contributors" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/issues"><img src="https://img.shields.io/github/issues/nxp-mcuxpresso/rpmsg-lite" alt="Issues" class="inline"/></a> <a href="https://github.com/nxp-mcuxpresso/rpmsg-lite/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" style="pointer-events: none;" class="inline"/></a></p>
+<h1><a class="anchor" id="autotoc_md6"></a>
 RPMSG-Lite</h1>
 <p>This documentation describes the RPMsg-Lite component, which is a lightweight implementation of the Remote Processor Messaging (RPMsg) protocol. The RPMsg protocol defines a standardized binary interface used to communicate between multiple cores in a heterogeneous multicore system.</p>
 <p>Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (OpenAMP) framework (<a href="https://github.com/OpenAMP/open-amp">https://github.com/OpenAMP/open-amp</a>), the RPMsg-Lite offers a code size reduction, API simplification, and improved modularity. On smaller Cortex-M0+ based systems, it is recommended to use RPMsg-Lite.</p>
 <p>The RPMsg-Lite is an open-source component developed by NXP Semiconductors and released under the BSD-compatible license.</p>
-<p>For Further documentation, please look at doxygen documentation at: <a href="https://nxp-mcuxpresso.github.io/rpmsg-lite/">https://nxp-mcuxpresso.github.io/rpmsg-lite/</a> </p>
-<h2><a class="anchor" id="autotoc_md1"></a>
+<p>For Further documentation, please look at doxygen documentation at: <a href="https://nxp-mcuxpresso.github.io/rpmsg-lite/">https://nxp-mcuxpresso.github.io/rpmsg-lite/</a></p>
+<h2><a class="anchor" id="autotoc_md7"></a>
 Motivation to create RPMsg-Lite</h2>
 <p>There are multiple reasons why RPMsg-Lite was developed. One reason is the need for the small footprint of the RPMsg protocol-compatible communication component, another reason is the simplification of extensive API of OpenAMP RPMsg implementation.</p>
 <p>RPMsg protocol was not documented, and its only definition was given by the Linux Kernel and legacy OpenAMP implementations. This has changed with [1] which is a standardization protocol allowing multiple different implementations to coexist and still be mutually compatible.</p>
@@ -120,7 +134,7 @@ Motivation to create RPMsg-Lite</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Relative Difference [%]   </td><td class="markdownTableBodyNone">~52.7%   </td><td class="markdownTableBodyNone">~77.2%   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md2"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Implementation</h2>
 <p>The implementation of RPMsg-Lite can be divided into three sub-components, from which two are optional. The core component is situated in <em>rpmsg_lite.c</em>. Two optional components are used to implement a blocking receive API (in <em>rpmsg_queue.c</em>) and dynamic "named" endpoint creation and deletion announcement service (in <em>rpmsg_ns.c</em>).</p>
 <p>The actual "media access" layer is implemented in <em>virtqueue.c</em>, which is one of the few files shared with the OpenAMP implementation. This layer mainly defines the shared memory model, and internally defines used components such as vring or virtqueue.</p>
@@ -129,20 +143,20 @@ Implementation</h2>
 <img src="rpmsg_lite_arch.png" alt=""/>
 <div class="caption">
 RPMsg-Lite Architecture</div></div>
-    <h3><a class="anchor" id="autotoc_md3"></a>
+    <h3><a class="anchor" id="autotoc_md9"></a>
 RPMsg-Lite core sub-component</h3>
 <p>This subcomponent implements a blocking send API and callback-based receive API. The RPMsg protocol is part of the transport layer. This is realized by using so-called endpoints. Each endpoint can be assigned a different receive callback function. However, it is important to notice that the callback is executed in an interrupt environment in current design. Therefore, certain actions like memory allocation are discouraged to execute in the callback. The following figure shows the role of RPMsg in an ISO/OSI-like layered model:</p>
 <div class="image">
 <img src="rpmsg_isoosi.png" alt=""/>
 <div class="caption">
 RPMsg ISO/OSI Layered Model</div></div>
-    <h3><a class="anchor" id="autotoc_md4"></a>
+    <h3><a class="anchor" id="autotoc_md10"></a>
 Queue sub-component (optional)</h3>
 <p>This subcomponent is optional and requires implementation of the env_*_queue() functions in the environment porting layer. It uses a blocking receive API, which is common in RTOS-environments. It supports both copy and nocopy blocking receive functions.</p>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md11"></a>
 Name Service sub-component (optional)</h3>
 <p>This subcomponent is a minimum implementation of the name service which is present in the Linux Kernel implementation of RPMsg. It allows the communicating node both to send announcements about "named" endpoint (in other words, channel) creation or deletion and to receive these announcement taking any user-defined action in an application callback. The endpoint address used to receive name service announcements is arbitrarily fixed to be 53 (0x35).</p>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Usage</h2>
 <p>The application should put the /rpmsg_lite/lib/include directory to the include path and in the application, include either the <a class="el" href="rpmsg__lite_8h_source.html">rpmsg_lite.h</a> header file, or optionally also include the <a class="el" href="rpmsg__queue_8h_source.html">rpmsg_queue.h</a> and/or <a class="el" href="rpmsg__ns_8h_source.html">rpmsg_ns.h</a> files. Both porting sublayers should be provided for you by NXP, but if you plan to use your own RTOS, all you need to do is to implement your own environment layer (in other words, rpmsg_env_myrtos.c) and to include it in the project build.</p>
 <p>The initialization of the stack is done by calling the <a class="el" href="group__rpmsg__lite.html#gadd1358b092b054711ed71ea2482c8c8b" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMSG lite API....">rpmsg_lite_master_init()</a> on the master side and the <a class="el" href="group__rpmsg__lite.html#gaae74478eecba4c3d3fcb9c1e11d25891" title="Initializes the RPMsg-Lite communication stack. Must be called prior to any other RPMsg-Lite API....">rpmsg_lite_remote_init()</a> on the remote side. This initialization function must be called prior to any RPMsg-Lite API call. After the init, it is wise to create a communication endpoint, otherwise communication is not possible. This can be done by calling the <a class="el" href="group__rpmsg__lite.html#gadab572229a911302c0ccc211fcb372e0" title="Create a new rpmsg endpoint, which can be used for communication.">rpmsg_lite_create_ept()</a> function. It optionally accepts a last argument, where an internal context of the endpoint is created, just in case the RL_USE_STATIC_API option is set to 1. If not, the stack internally calls env_alloc() to allocate dynamic memory for it. In case a callback-based receiving is to be used, an ISR-callback is registered to each new endpoint with user-defined callback data pointer. If a blocking receive is desired (in case of RTOS environment), the <a class="el" href="group__rpmsg__queue.html#gaf2b13335342ec06d8c264bbb6e27c88f" title="Create a RPMsg queue which can be used for blocking reception.">rpmsg_queue_create()</a> function must be called before calling <a class="el" href="group__rpmsg__lite.html#gadab572229a911302c0ccc211fcb372e0" title="Create a new rpmsg endpoint, which can be used for communication.">rpmsg_lite_create_ept()</a>. The queue handle is passed to the endpoint creation function as a callback data argument and the callback function is set to <a class="el" href="group__rpmsg__queue.html#gaeb7cba094390762f1131884b2c7e89ce" title="This callback needs to be registered with an endpoint.">rpmsg_queue_rx_cb()</a>. Then, it is possible to use rpmsg_queue_receive() function to listen on a queue object for incoming messages. The <a class="el" href="group__rpmsg__lite.html#ga64dd2dd9b0681e1551c83f325daf19fb" title="Sends a message contained in data field of length size to the remote endpoint with address dst....">rpmsg_lite_send()</a> function is used to send messages to the other side.</p>
@@ -162,16 +176,16 @@ Usage</h2>
 <img src="rpmsg_lite_send_receive.png" alt=""/>
 <div class="caption">
 RPMsg Lite copy and no-copy interface, multiple scenarios</div></div>
-    <h2><a class="anchor" id="autotoc_md7"></a>
+    <h2><a class="anchor" id="autotoc_md13"></a>
 Examples</h2>
 <p>RPMsg_Lite multicore examples are part of NXP MCUXpressoSDK packages. Visit <a href="https://mcuxpresso.nxp.com">https://mcuxpresso.nxp.com</a> to configure, build and download these packages. To get the board list with multicore support (RPMsg_Lite included) use filtering based on Middleware and search for 'multicore' string. Once the selected package with the multicore middleware is downloaded, see</p>
 <p><code>&lt;MCUXpressoSDK_install_dir&gt;</code>/boards/<code>&lt;board_name&gt;</code>/multicore_examples for RPMsg_Lite multicore examples with 'rpmsg_lite_' name prefix.</p>
 <p>Another way of getting NXP MCUXpressoSDK RPMsg_Lite multicore examples is using the <a href="https://github.com/nxp-mcuxpresso/mcuxsdk-manifests">mcuxsdk-manifests</a> Github repo. Follow the description how to use the West tool to clone and update the mcuxsdk-manifests repo in <a href="https://github.com/nxp-mcuxpresso/mcuxsdk-manifests?tab=readme-ov-file#readme">readme section</a>. Once done the armgcc rpmsg_lite examples can be found in</p>
 <p>mcuxsdk/examples/_<code>&lt;board_name&gt;</code>/multicore_examples</p>
 <p>You can use the evkmimxrt1170 as the board_name for instance. Similar to MCUXpressoSDK packages the RPMsg_Lite examples use the 'rpmsg_lite_' name prefix. </p>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md14"></a>
 Notes</h2>
-<h3><a class="anchor" id="autotoc_md9"></a>
+<h3><a class="anchor" id="autotoc_md15"></a>
 Environment layers implementation</h3>
 <p>Several environment layers are provided in lib/rpmsg_lite/porting/environment folder. Not all of them are fully tested however. Here is the list of environment layers that passed testing:</p><ul>
 <li>rpmsg_env_bm.c</li>
@@ -180,10 +194,10 @@ Environment layers implementation</h3>
 <li>rpmsg_env_threadx.c</li>
 </ul>
 <p>The rest of environment layers has been created and used in some experimental projects, it has been running well at the time of creation but due to the lack of unit testing there is no guarantee it is still fully functional.</p>
-<h3><a class="anchor" id="autotoc_md10"></a>
+<h3><a class="anchor" id="autotoc_md16"></a>
 Shared memory configuration</h3>
 <p>It is important to correctly initialize/configure the shared memory for data exchange in the application. The shared memory must be accessible from both the master and the remote core and it needs to be configured as Non-Cacheable memory. Dedicated shared memory section in liker file is also a good practise, it is recommended to use linker files from MCUXpressSDK packages for NXP devices based applications. It needs to be ensured no other application part/component is unintentionally accessing this part of memory.</p>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 Configuration options</h2>
 <p>The RPMsg-Lite can be configured at the compile time. The default configuration is defined in the <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> header file. This configuration can be customized by the user by including rpmsg_config.h file with custom settings. The following table summarizes all possible RPMsg-Lite configuration options.</p>
 <table class="markdownTable">
@@ -216,15 +230,12 @@ Configuration options</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">RL_ASSERT   </td><td class="markdownTableBodyNone">see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a>   </td><td class="markdownTableBodyNone">Assert implementation.   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md12"></a>
-Contributing to the rpmsg-lite project</h2>
-<p>We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.</p>
-<h3><a class="anchor" id="autotoc_md13"></a>
+<h3><a class="anchor" id="autotoc_md18"></a>
 How to format rpmsg-lite code</h3>
 <p>To format code, use the application developed by Google, named <em>clang-format</em>. This tool is part of the <a href="http://llvm.org/">llvm</a> project. Currently, the clang-format 10.0.0 version is used for rpmsg-lite. The set of style settings used for clang-format is defined in the <code>.clang-format</code> file, placed in a root of the rpmsg-lite directory where Python script <code>run_clang_format.py</code> can be executed. This script executes the application named <em>clang-format.exe</em>. You need to have the path of this application in the OS's environment path, or you need to change the script. </p>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
 References</h2>
-<h2><a class="anchor" id="autotoc_md15"></a>
+<h2><a class="anchor" id="autotoc_md20"></a>
 [1] M. Novak, M. Cingel, Lockless Shared Memory Based Multicore Communication Protocol</h2>
 <p>Copyright © 2016 Freescale Semiconductor, Inc. Copyright © 2016-2025 NXP </p>
 </div></div><!-- contents -->

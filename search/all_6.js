@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['node_0',['node',['../group__rpmsg__lite.html#aac24ffeec310481457938c02b916c426',1,'rpmsg_lite_ept_static_context']]]
+  ['mcuxpresso_20sdk_20_3a_20mcuxsdk_2dmiddleware_2drpmsg_2dlite_0',['MCUXpresso SDK : mcuxsdk-middleware-rpmsg-lite',['../md__home_runner_work_rpmsg_lite_rpmsg_lite__r_e_a_d_m_e.html',1,'']]]
 ];

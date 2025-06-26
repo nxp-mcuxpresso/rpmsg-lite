@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['vq_5fops_0',['vq_ops',['../group__rpmsg__lite.html#a0004491e023ed2e999182ba302fa32e5',1,'rpmsg_lite_instance']]]
+  ['tvq_0',['tvq',['../group__rpmsg__lite.html#ae1d9d59636e550051ebce42bd0b58816',1,'rpmsg_lite_instance']]]
 ];
