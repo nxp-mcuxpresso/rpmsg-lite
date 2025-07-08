@@ -32,6 +32,8 @@ For Further documentation, please look at doxygen documentation at: https://nxp-
 
 For overview please read [RPMSG-Lite VirtIO Overview](doxygen/rpmsg_lite_overview.md).
 
+For RPMSG-Lite Design Considerations please read [RPMSG-Lite Design Considerations](doxygen/rpmsg_lite_design_considerations.md).
+
 ## Motivation to create RPMsg-Lite
 
 There are multiple reasons why RPMsg-Lite was developed. One reason is the need for the small footprint of the RPMsg protocol-compatible communication component, another reason is the simplification of extensive API of OpenAMP RPMsg implementation.
