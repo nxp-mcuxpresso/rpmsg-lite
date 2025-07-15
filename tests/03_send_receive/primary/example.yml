@@ -87,6 +87,25 @@ test_03_send_receive_primary_core:
     - -mdk@release
     - -mdk@hyperram_debug
     - -mdk@hyperram_release
+    frdmimxrt1186@cm33:
+    - +armgcc@flexspi_nor_debug
+    - +armgcc@flexspi_nor_release
+    - -armgcc@debug
+    - -armgcc@release
+    - -armgcc@hyperram_debug
+    - -armgcc@hyperram_release
+    - +iar@flexspi_nor_debug
+    - +iar@flexspi_nor_release
+    - -iar@debug
+    - -iar@release
+    - -iar@hyperram_debug
+    - -iar@hyperram_release
+    - +mdk@flexspi_nor_debug
+    - +mdk@flexspi_nor_release
+    - -mdk@debug
+    - -mdk@release
+    - -mdk@hyperram_debug
+    - -mdk@hyperram_release
     lpcxpresso55s69@cm33_core0: []
     mcxn5xxevk@cm33_core0: []
     mcxn9xxevk@cm33_core0: []

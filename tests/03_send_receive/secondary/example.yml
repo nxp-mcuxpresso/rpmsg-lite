@@ -75,6 +75,25 @@ test_03_send_receive_secondary_core:
     - -mdk@flexspi_nor_release
     - -mdk@hyperram_debug
     - -mdk@hyperram_release
+    frdmimxrt1186@cm7:
+    - +armgcc@debug
+    - +armgcc@release
+    - -armgcc@flexspi_nor_debug
+    - -armgcc@flexspi_nor_release
+    - -armgcc@hyperram_debug
+    - -armgcc@hyperram_release
+    - +iar@debug
+    - +iar@release
+    - -iar@flexspi_nor_debug
+    - -iar@flexspi_nor_release
+    - -iar@hyperram_debug
+    - -iar@hyperram_release
+    - +mdk@debug
+    - +mdk@release
+    - -mdk@flexspi_nor_debug
+    - -mdk@flexspi_nor_release
+    - -mdk@hyperram_debug
+    - -mdk@hyperram_release
     lpcxpresso55s69@cm33_core1: []
     mcxn5xxevk@cm33_core1: []
     mcxn9xxevk@cm33_core1: []
