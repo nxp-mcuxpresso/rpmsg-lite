@@ -37,6 +37,8 @@ jobs:
       - name: Generate Doxygen Documentation
         run: |
           cd doxygen/
+          mkdir -p images
+          wget https://mcuxpresso.nxp.com/mcuxsdk/latest/html/_static/nxp_logo_small.png -O images/nxp_logo_small.png
           doxygen Doxyfile.rpmsglite
         shell: bash
 
