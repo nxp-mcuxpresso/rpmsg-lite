@@ -340,3 +340,10 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxl20
     depends on MCUX_HW_DEVICE_MCXL255
     help
         "RPMSG-Lite Porting Layer for MCX L20"
+
+config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.aarch64
+    bool
+    default y
+    depends on CPU_CORTEX_A
+    help
+        "RPMSG-Lite Porting Layer for ARM aarch64"
