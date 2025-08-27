@@ -99,12 +99,14 @@ struct virtqueue_ops
 #endif
 
 /* Buffer is formed by payload and struct rpmsg_std_hdr */
-#define RL_BUFFER_SIZE (RL_BUFFER_PAYLOAD_SIZE + 16UL)
+#define RL_BUFFER_SIZE_RAW (RL_BUFFER_PAYLOAD_SIZE + 16UL)
 
-#if (!RL_BUFFER_SIZE) || (RL_BUFFER_SIZE & (RL_BUFFER_SIZE - 1))
-#error \
-    "RL_BUFFER_SIZE must be power of two (256, 512, ...)"\
-       "RL_BUFFER_PAYLOAD_SIZE must be equal to (240, 496, 1008, ...) [2^n - 16]."
+/* Auto-align to word boundary (round up to next multiple of word size) */
+#define RL_BUFFER_SIZE RL_WORD_ALIGN_UP(RL_BUFFER_SIZE_RAW)
+
+#if (!RL_BUFFER_SIZE_RAW) || (RL_BUFFER_SIZE_RAW <= 16UL)
+#error "RL_BUFFER_SIZE must be more than 16 bytes." \
+       "RL_BUFFER_PAYLOAD_SIZE must more than 0 bytes."
 #endif
 #endif /* !(defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)) */
 
@@ -1085,14 +1087,14 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
-    /* buffer size must be power of two (256, 512, ...) */
+    /* buffer size must be more than 0 bytes */
     /*
      * $Branch Coverage Justification$
      * Not able to force the application to reach the condition below.
      * platform_get_custom_shmem_config() can be adjusted per application needs.
      * The default implementation returns shmem_config struct. members in correct ranges.
      */
-    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U))) /* GCOVR_EXCL_BR_LINE */
+    if (shmem_config.buffer_payload_size <= 0UL) /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Line Coverage Justification$
@@ -1111,7 +1113,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     if ((2U * (uint32_t)shmem_config.buffer_count) >
         RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
                                             2U * shmem_config.vring_size,
-                                            (uint32_t)(shmem_config.buffer_payload_size + 16UL))) /* GCOVR_EXCL_BR_LINE */
+                                            (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL))) /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Line Coverage Justification$
@@ -1443,14 +1445,14 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
         return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
-    /* buffer size must be power of two (256, 512, ...) */
+    /* buffer size must be more than 0 bytes */
     /*
      * $Branch Coverage Justification$
      * Not able to force the application to reach the condition below.
      * platform_get_custom_shmem_config() can be adjusted per application needs.
      * The default implementation returns shmem_config struct. members in correct ranges.
      */
-    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))  /* GCOVR_EXCL_BR_LINE */
+    if (shmem_config.buffer_payload_size <= 0UL)  /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Line Coverage Justification$

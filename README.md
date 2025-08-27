@@ -132,7 +132,7 @@ The RPMsg-Lite can be configured at the compile time. The default configuration 
 | Configuration option         | Default value | Usage     |
 |------------------------------|---------------|-----------|
 |RL_MS_PER_INTERVAL            | (1)           | Delay in milliseconds used in non-blocking API functions for polling.      |
-|RL_BUFFER_PAYLOAD_SIZE        | (496)         | Size of the buffer payload, it must be equal to (240, 496, 1008, ...) [2^n - 16]   |
+|RL_BUFFER_PAYLOAD_SIZE        | (496)         | Size of the buffer payload, it must be more than 1 byte, and has to be word align (including rpmsg header size 16 bytes), if not it will be aligned up   |
 |RL_BUFFER_COUNT               | (2)           | Number of the buffers, it must be power of two (2, 4, ...)      |
 |RL_API_HAS_ZEROCOPY           | (1)           | Zero-copy API functions enabled/disabled.          |
 |RL_USE_STATIC_API             | (0)           | Static API functions (no dynamic allocation) enabled/disabled.    |

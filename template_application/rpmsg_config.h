@@ -32,9 +32,11 @@
 
 //! @def RL_BUFFER_PAYLOAD_SIZE
 //!
-//! Size of the buffer payload, it must be equal to (240, 496, 1008, ...)
-//! [2^n - 16]. Ensure the same value is defined on both sides of rpmsg
-//! communication. The default value is 496U.
+//! Size of the buffer payload, it must be more then 0.
+//! And should be word aligned with added plus 16 for rpmsg header.
+//! Value will be word align up if not already aligned.
+//! Ensure the same value is defined on both sides of rpmsg
+//! communication.
 #define RL_BUFFER_PAYLOAD_SIZE (496U)
 
 //! @def RL_BUFFER_COUNT
