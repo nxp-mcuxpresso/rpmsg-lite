@@ -117,7 +117,11 @@ int32_t ts_init_rpmsg(void)
 #endif
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
     TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "init function failed");
-    rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
+
+    // allow env_wait_for_link_up() timeout mechanism
+    while(0 == rpmsg_lite_wait_for_link_up(my_rpmsg, RL_MS_PER_INTERVAL))
+    {
+    };
     
     /* wait for a while to allow the primary side to bind_ns and register the NS callback */
     env_sleep_msec(200);

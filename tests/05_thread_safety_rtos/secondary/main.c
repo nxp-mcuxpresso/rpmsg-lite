@@ -36,11 +36,11 @@
 #define WORKER_NUMBER (2) /* Number of concurrent threads, needs enough heap... */
 #define TEST_EPT_NUM_BASE (60)
 #define REMOTE_DEFAULT_EPT (TC_REMOTE_EPT_ADDR)
-#if defined (CPU_LPC54102J512BD64_cm0plus)
-#define TEST_THREAD_SAFETY_TASK_STACK_SIZE (192) /* Verified for Niobe1/2 boards */
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+#define TEST_THREAD_SAFETY_TASK_STACK_SIZE (350)
 #else
 #define TEST_THREAD_SAFETY_TASK_STACK_SIZE (250)
-#endif
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
 #define TC_LOCAL_EPT_ADDR (30)
 #define TC_REMOTE_EPT_ADDR (40)

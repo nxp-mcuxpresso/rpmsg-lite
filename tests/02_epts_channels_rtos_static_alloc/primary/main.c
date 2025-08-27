@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,20 +13,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #endif
-
-#include "fsl_common.h"
-#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
-#include "fsl_memory.h"
-#endif
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 #define TC_INIT_COUNT 10
 #define TC_TRANSFER_COUNT 10
 #define TC_EPT_COUNT 3
-#define TC_LOCAL_EPT_ADDR (30)
-#define TC_REMOTE_EPT_ADDR (40)
+#define TC_LOCAL_EPT_ADDR (40)
+#define TC_REMOTE_EPT_ADDR (30)
 
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #define SH_MEM_TOTAL_SIZE (6144)
@@ -64,14 +58,11 @@ struct rpmsg_lite_instance rpmsg_ctxt = {0};
 int32_t ts_init_rpmsg(void)
 {
     env_init();
+    env_sleep_msec(200);
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
-    my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
+    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
 #else
-#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
-    my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
-#else
-    my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
-#endif
+    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
     TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "init function failed");
     rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
@@ -125,6 +116,8 @@ int32_t ts_destroy_epts(rpmsg_queue_handle queues[], struct rpmsg_lite_endpoint 
         rpmsg_queue_destroy(my_rpmsg, queues[i]);
         rpmsg_lite_destroy_ept(my_rpmsg, epts[i]);
     }
+    /* Destroying an endpoint again when all endpoints are already destroyed */
+    TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_destroy_ept(my_rpmsg, epts[0]), "'rpmsg_lite_destroy_ept' being called when all endpoints are alrady destroyed failed");
     /* Test bad args */
     /* Wrong rpmsg_lite_dev param */
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_destroy_ept(RL_NULL, epts[0]), "'rpmsg_lite_destroy_ept' with bad rpmsg_lite_dev param failed");
@@ -155,16 +148,18 @@ void tc_1_defchnl_1(void)
     if (result)
         goto end1;
 
+    // wait some time to allow remote side to create epts and be ready for messages handling
+    env_sleep_msec(200);
+
     for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
     {
-        int32_t received = 0;
+        int32_t received = 0, send = i;
         uint32_t len = 0;
         uint32_t remote_addr = 0;
+        rpmsg_lite_send(my_rpmsg, default_ept, TC_REMOTE_EPT_ADDR, (char *)&send, sizeof(send), RL_BLOCK);
         rpmsg_queue_recv(my_rpmsg, default_queue, &remote_addr, (char *)&received, sizeof(received), &len, RL_BLOCK);
-        TEST_ASSERT_MESSAGE(received == i, "'rpmsg_queue_recv' failed");
-        TEST_ASSERT_MESSAGE(len == sizeof(received), "'rpmsg_queue_recv' failed");
-        received += 10;
-        rpmsg_lite_send(my_rpmsg, default_ept, remote_addr, (char *)&received, sizeof(received), RL_BLOCK);
+        TEST_ASSERT_MESSAGE(received == i + 10, "'rpmsg_queue_recv' failed");
+        TEST_ASSERT_MESSAGE(len == sizeof(send), "'rpmsg_queue_recv' failed");
     }
 
 end1:
@@ -197,16 +192,18 @@ void tc_1_defchnl_2(void)
     if (result)
         goto end1;
 
+    // wait some time to allow remote side to create epts and be ready for messages handling
+    env_sleep_msec(200);
+
     for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
     {
-        int32_t *received = 0;
+        int32_t *received = NULL, send = i;
         uint32_t len = 0;
         uint32_t remote_addr = 0;
+        rpmsg_lite_send(my_rpmsg, default_ept, TC_REMOTE_EPT_ADDR, (char *)&send, sizeof(send), RL_BLOCK);
         rpmsg_queue_recv_nocopy(my_rpmsg, default_queue, &remote_addr, (char **)&received, &len, RL_BLOCK);
-        TEST_ASSERT_MESSAGE(*received == i, "'rpmsg_queue_recv_nocopy' failed");
-        TEST_ASSERT_MESSAGE(len == sizeof(int), "'rpmsg_queue_recv_nocopy' failed");
-        (*received) += 10;
-        rpmsg_lite_send(my_rpmsg, default_ept, remote_addr, (char *)received, sizeof(received), RL_BLOCK);
+        TEST_ASSERT_MESSAGE(*received == i + 10, "'rpmsg_queue_recv_nocopy' failed");
+        TEST_ASSERT_MESSAGE(len == sizeof(send), "'rpmsg_queue_recv_nocopy' failed");
         rpmsg_queue_nocopy_free(my_rpmsg, received);
     }
 
@@ -245,19 +242,22 @@ void tc_1_defchnl_3(void)
     if (result)
         goto end1;
 
+    // wait some time to allow remote side to create epts and be ready for messages handling
+    env_sleep_msec(200);
+
     for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         for (int32_t j = 0; j < TC_EPT_COUNT; j++)
         {
-            int32_t received = 123;
+            int32_t received = 0, send = 0;
             uint32_t len = 0;
+            send = 0;
             uint32_t remote_addr = 0;
+            rpmsg_lite_send(my_rpmsg, epts[j], TC_REMOTE_EPT_ADDR + j, (char *)&send, sizeof(send), RL_BLOCK);
             rpmsg_queue_recv(my_rpmsg, queues[j], &remote_addr, (char *)&received, sizeof(received), &len, RL_BLOCK);
-            TEST_ASSERT_MESSAGE(received == 0, "'rpmsg_queue_recv' failed");
+            TEST_ASSERT_MESSAGE(received == send + 10, "'rpmsg_queue_recv' failed");
             TEST_ASSERT_MESSAGE(remote_addr == (TC_REMOTE_EPT_ADDR + j), "'rpmsg_queue_recv' failed");
             TEST_ASSERT_MESSAGE(len == sizeof(received), "'rpmsg_queue_recv' failed");
-            received += 10;
-            rpmsg_lite_send(my_rpmsg, epts[j], remote_addr, (char *)&received, sizeof(received), RL_BLOCK);
         }
     }
 
@@ -289,19 +289,21 @@ void tc_1_defchnl_4(void)
     if (result)
         goto end1;
 
+    // wait some time to allow remote side to create epts and be ready for messages handling
+    env_sleep_msec(200);
+
     for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         for (int32_t j = 0; j < TC_EPT_COUNT; j++)
         {
-            int32_t *received = NULL;
+            int32_t *received = NULL, send = 0;
             uint32_t len = 0;
             uint32_t remote_addr = 0;
+            rpmsg_lite_send(my_rpmsg, epts[j], TC_REMOTE_EPT_ADDR + j, (char *)&send, sizeof(send), RL_BLOCK);
             rpmsg_queue_recv_nocopy(my_rpmsg, queues[j], &remote_addr, (char **)&received, &len, RL_BLOCK);
-            TEST_ASSERT_MESSAGE(*received == 0, "'rpmsg_rtos_recv' failed");
+            TEST_ASSERT_MESSAGE(*received == send + 10, "'rpmsg_rtos_recv' failed");
             TEST_ASSERT_MESSAGE(remote_addr == (TC_REMOTE_EPT_ADDR + j), "'rpmsg_rtos_recv' failed");
             TEST_ASSERT_MESSAGE(len == sizeof(received), "'rpmsg_rtos_recv' failed");
-            (*received) += 10;
-            rpmsg_lite_send(my_rpmsg, epts[j], remote_addr, (char *)received, sizeof(received), RL_BLOCK);
             rpmsg_queue_nocopy_free(my_rpmsg, received);
         }
     }
@@ -337,8 +339,8 @@ void tc_1_defchnl(void)
 void run_tests(void *unused)
 {
 #ifdef __COVERAGESCANNER__
-    __coveragescanner_testname("02_epts_channels_rtos_sec_core");
-    __coveragescanner_install("02_epts_channels_rtos_sec_core.csexe");
+    __coveragescanner_testname("02_epts_channels_rtos");
+    __coveragescanner_install("02_epts_channels_rtos.csexe");
 #endif /*__COVERAGESCANNER__*/
     RUN_EXAMPLE(tc_1_defchnl, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2025 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -212,7 +212,12 @@ int32_t rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void
     }
 
     /* Release used buffer. */
-    return ((RL_SUCCESS == rpmsg_lite_release_rx_buffer(rpmsg_lite_dev, data)) ? RL_SUCCESS : RL_ERR_PARAM);
+    /*
+     * $Branch Coverage Justification$
+     * rpmsg_lite_release_rx_buffer returns always success once input params are ok, 
+     * when calling from rpmsg_queue_recv/rpmsg_queue_recv_nocopy correct params are provided.
+     */
+    return ((RL_SUCCESS == rpmsg_lite_release_rx_buffer(rpmsg_lite_dev, data)) ? RL_SUCCESS : RL_ERR_PARAM); /* GCOVR_EXCL_BR_LINE */
 }
 
 int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle q)

@@ -121,11 +121,17 @@ int32_t env_init(void)
 {
     // verify 'env_init_counter'
     RL_ASSERT(env_init_counter >= 0);
-    if (env_init_counter < 0)
+    /*
+     * $Branch Coverage Justification$
+     * (env_init_counter < 0) condition will never met unless RAM is corrupted.
+     */
+    if (env_init_counter < 0) /* GCOVR_EXCL_BR_LINE */
     {
-        /* coco begin validated: (env_init_counter < 0) condition will never met unless RAM is corrupted */
-        return -1;
-        /* coco end */
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, (env_init_counter < 0) condition will never met unless RAM is corrupted.
+         */
+        return -1; /* GCOVR_EXCL_LINE */
     }
     env_init_counter++;
     // multiple call of 'env_init' - return ok

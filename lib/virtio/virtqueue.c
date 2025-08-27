@@ -1,7 +1,7 @@
 /*-
  * Copyright (c) 2011, Bryan Venteicher <bryanv@FreeBSD.org>
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  * All rights reserved.
  *
  *
@@ -197,7 +197,13 @@ int32_t virtqueue_add_buffer(struct virtqueue *vq, uint16_t head_idx)
 
     VQUEUE_BUSY(vq, avail_write);
 
-    if (status == VQUEUE_SUCCESS)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the false condition because when VQUEUE_DEBUG 
+     * is not set status is not modified and when VQUEUE_DEBUG is set and 
+     * incorrect vq param is passed assert in VQUEUE_BUSY is reached.
+     */
+    if (status == VQUEUE_SUCCESS) /* GCOVR_EXCL_BR_LINE */
     {
         VQ_RING_ASSERT_VALID_IDX(vq, head_idx);
 
@@ -233,7 +239,13 @@ int32_t virtqueue_fill_avail_buffers(struct virtqueue *vq, void *buffer, uint32_
 
     VQUEUE_BUSY(vq, avail_write);
 
-    if (status == VQUEUE_SUCCESS)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the false condition because when VQUEUE_DEBUG 
+     * is not set status is not modified and when VQUEUE_DEBUG is set and 
+     * incorrect vq param is passed assert in VQUEUE_BUSY is reached.
+     */
+    if (status == VQUEUE_SUCCESS) /* GCOVR_EXCL_BR_LINE */
     {
         head_idx = vq->vq_desc_head_idx;
 
@@ -289,12 +301,24 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
     /* Invalidate used->ring before it is read */
     VQUEUE_INVALIDATE(&vq->vq_ring.used->ring[used_idx], sizeof(vq->vq_ring.used->ring[used_idx]));
     desc_idx = (uint16_t)uep->id;
-    if (len != VQ_NULL)
+    /*
+     * $Branch Coverage Justification$
+     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and 
+     * rpmsg_lite_send() API and in both cases the len pointer is checked and 
+     * can’t be passed as null pointers.
+     */
+    if (len != VQ_NULL) /* GCOVR_EXCL_BR_LINE */
     {
         *len = uep->len;
     }
 
-    if (idx != VQ_NULL)
+    /*
+     * $Branch Coverage Justification$
+     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and 
+     * rpmsg_lite_send() API and in both cases the idx pointer is checked and 
+     * can’t be passed as null pointers.
+     */
+    if (idx != VQ_NULL) /* GCOVR_EXCL_BR_LINE */
     {
         *idx = desc_idx;
     }
@@ -464,6 +488,14 @@ int32_t virtqueue_fill_used_buffers(struct virtqueue *vq, void *buffer, uint32_t
     return (VQUEUE_SUCCESS);
 }
 
+
+/*
+ * $Line Coverage Justification$
+ * This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+ * implementation.
+ */
+/* GCOVR_EXCL_START */
+
 /*!
  * virtqueue_enable_cb  - Enables callback generation
  *
@@ -473,11 +505,9 @@ int32_t virtqueue_fill_used_buffers(struct virtqueue *vq, void *buffer, uint32_t
  */
 int32_t virtqueue_enable_cb(struct virtqueue *vq)
 {
-    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
-     * implementation */
     return (vq_ring_enable_interrupt(vq, 0));
 }
-/* coco end */
+/* GCOVR_EXCL_STOP */
 /*!
  * virtqueue_enable_cb - Disables callback generation
  *
@@ -488,14 +518,23 @@ void virtqueue_disable_cb(struct virtqueue *vq)
 {
     VQUEUE_BUSY(vq, avail_write);
 
-    if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * is not being utilized in rpmsg_lite implementation.
+     */
+    if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL) /* GCOVR_EXCL_BR_LINE */
     {
-        /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
-         * utilized in rpmsg_lite implementation */
+        /*
+         * $Line Coverage Justification$
+         * This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
+         * utilized in rpmsg_lite implementation.
+         */
+        /* GCOVR_EXCL_START */
         vring_used_event(&vq->vq_ring) = vq->vq_used_cons_idx - vq->vq_nentries - 1U;
         VQUEUE_FLUSH(&vring_used_event(&vq->vq_ring), sizeof(vring_used_event(&vq->vq_ring)));
     }
-    /* coco end */
+    /* GCOVR_EXCL_STOP */
     else
     {
         vq->vq_ring.avail->flags |= (uint16_t)VRING_AVAIL_F_NO_INTERRUPT;
@@ -517,7 +556,12 @@ void virtqueue_kick(struct virtqueue *vq)
     /* Ensure updated avail->idx is visible to host. */
     env_mb();
 
-    if (0 != vq_ring_must_notify_host(vq))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * is not being utilized in rpmsg_lite implementation.
+     */
+    if (0 != vq_ring_must_notify_host(vq)) /* GCOVR_EXCL_BR_LINE */
     {
         vq_ring_notify_host(vq);
     }
@@ -526,6 +570,13 @@ void virtqueue_kick(struct virtqueue *vq)
     VQUEUE_IDLE(vq, avail_write);
 }
 
+/*
+ * $Line Coverage Justification$
+ * This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+ * implementation.
+ */
+/* GCOVR_EXCL_START */
+
 /*!
  * virtqueue_dump Dumps important virtqueue fields , use for debugging purposes
  *
@@ -533,8 +584,6 @@ void virtqueue_kick(struct virtqueue *vq)
  */
 void virtqueue_dump(struct virtqueue *vq)
 {
-    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
-     * implementation */
     if (vq == VQ_NULL)
     {
         return;
@@ -551,7 +600,14 @@ void virtqueue_dump(struct virtqueue *vq)
         vq->vq_ring.avail->idx, vq->vq_used_cons_idx, vq->vq_ring.used->idx, vq->vq_ring.avail->flags,
         vq->vq_ring.used->flags);
 }
-/* coco end */
+/* GCOVR_EXCL_STOP */
+
+/*
+ * $Line Coverage Justification$
+ * This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+ * implementation.
+ */
+/* GCOVR_EXCL_START */
 
 /*!
  * virtqueue_get_desc_size - Returns vring descriptor size
@@ -562,8 +618,6 @@ void virtqueue_dump(struct virtqueue *vq)
  */
 uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
 {
-    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
-     * implementation */
     uint16_t head_idx;
     uint16_t avail_idx;
     uint32_t len;
@@ -590,7 +644,7 @@ uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
 
     return (len);
 }
-/* coco end */
+/* GCOVR_EXCL_STOP */
 
 /**************************************************************************
  *                            Helper Functions                            *
@@ -606,11 +660,19 @@ static uint16_t vq_ring_add_buffer(
 {
     struct vring_desc *dp;
 
-    if (buffer == VQ_NULL)
+    /*
+     * $Branch Coverage Justification$
+     * vq_ring_add_buffer() is called from rpmsg_lite_master_init() only and the buffer 
+     * parameter not being null check is done before passing the parameter.
+     */
+    if (buffer == VQ_NULL) /* GCOVR_EXCL_BR_LINE */
     {
-        return head_idx; /* coco validated: line never reached, vq_ring_add_buffer() is called from
-                            rpmsg_lite_master_init() only and the buffer parameter not being null check is done before
-                            passing the parameter */
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, vq_ring_add_buffer() is called from rpmsg_lite_master_init() only 
+         * and the buffer parameter not being null check is done before passing the parameter.
+         */
+        return head_idx; /* GCOVR_EXCL_LINE */
     }
 
     VQASSERT(vq, head_idx != VQ_RING_DESC_CHAIN_END, "premature end of free desc chain");
@@ -720,6 +782,13 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
     VQUEUE_FLUSH(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
 }
 
+/*
+ * $Line Coverage Justification$
+ * This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+ * implementation.
+ */
+/* GCOVR_EXCL_START */
+
 /*!
  *
  * vq_ring_enable_interrupt
@@ -727,8 +796,6 @@ static void vq_ring_update_used(struct virtqueue *vq, uint16_t head_idx, uint32_
  */
 static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
 {
-    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
-     * implementation */
     /*
      * Enable interrupts, making sure we get the latest index of
      * what's already been consumed.
@@ -758,7 +825,7 @@ static int32_t vq_ring_enable_interrupt(struct virtqueue *vq, uint16_t ndesc)
 
     return (0);
 }
-/* coco end */
+/* GCOVR_EXCL_STOP */
 
 /*!
  *
@@ -786,10 +853,19 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
     uint16_t new_idx, prev_idx;
     uint16_t event_idx;
 
-    if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * is not being utilized in rpmsg_lite implementation.
+     */
+    if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL) /* GCOVR_EXCL_BR_LINE */
     {
-        /* coco begin validated: This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
-         * utilized in rpmsg_lite implementation */
+        /*
+         * $Line Coverage Justification$
+         * This part does not need to be tested because VIRTQUEUE_FLAG_EVENT_IDX is not being
+         * utilized in rpmsg_lite implementation.
+         */
+        /* GCOVR_EXCL_START */
         /* Invalidate avail->idx before read */
         VQUEUE_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
         new_idx  = vq->vq_ring.avail->idx;
@@ -799,7 +875,7 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
 
         return ((vring_need_event(event_idx, new_idx, prev_idx) != 0) ? 1 : 0);
     }
-    /* coco end */
+    /* GCOVR_EXCL_STOP */
 
     /* Invalidate flags before read */
     VQUEUE_INVALIDATE(&vq->vq_ring.used->flags, sizeof(vq->vq_ring.used->flags));
@@ -819,6 +895,13 @@ static void vq_ring_notify_host(struct virtqueue *vq)
     }
 }
 
+/*
+ * $Line Coverage Justification$
+ * This virtqueue function does not need to be tested because it is not used in rpmsg_lite
+ * implementation.
+ */
+/* GCOVR_EXCL_START */
+
 /*!
  *
  * virtqueue_nused
@@ -826,8 +909,6 @@ static void vq_ring_notify_host(struct virtqueue *vq)
  */
 static uint16_t virtqueue_nused(struct virtqueue *vq)
 {
-    /* coco begin validated: This virtqueue function does not need to be tested because it is not used in rpmsg_lite
-     * implementation */
     uint16_t used_idx, nused;
 
     /* Invalidate used-idx before read */
@@ -839,4 +920,4 @@ static uint16_t virtqueue_nused(struct virtqueue *vq)
 
     return (nused);
 }
-/* coco end */
+/* GCOVR_EXCL_STOP */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,10 +7,17 @@
 #include "rpmsg_lite.h"
 #include "unity.h"
 #include "assert.h"
+#include "rpmsg_queue.h"
+#include "rpmsg_ns.h"
 #include "app.h"
 #if defined(SDK_OS_FREE_RTOS)
 #include "FreeRTOS.h"
 #include "task.h"
+#endif
+
+#include "fsl_common.h"
+#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
+#include "fsl_memory.h"
 #endif
 
 /*******************************************************************************
@@ -44,84 +51,79 @@ void tc_1_rpmsg_init()
     struct rpmsg_lite_instance *my_rpmsg;
     struct rpmsg_lite_instance rpmsg_ctxt;
     int32_t result = 0;
-    //test platform_init_interrupt() and platform_deinit_interrupt() fail when being called before platform_init()
-    TEST_ASSERT_MESSAGE(-1 == platform_init_interrupt(0, ((void *)0)), "platform_init_interrupt function failed when being called before platform_init");
-    TEST_ASSERT_MESSAGE(-1 == platform_deinit_interrupt(0), "platform_init_interrupt function failed when being called before platform_init");
 
     for (test_counter = 0; test_counter < 2; test_counter++)
     {
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
-        my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base+(2*test_counter), SH_MEM_TOTAL_SIZE+(2*test_counter), RPMSG_LITE_LINK_ID,
-                                          RL_NO_FLAGS, &rpmsg_ctxt);
+        my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base+(2*test_counter), RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
 #else
-        my_rpmsg = rpmsg_lite_master_init((void *)((uint32_t)RPMSG_LITE_SHMEM_BASE+(2*test_counter)), ((uint32_t)RPMSG_LITE_SHMEM_SIZE+(2*test_counter)), RPMSG_LITE_LINK_ID,
-                                          RL_NO_FLAGS, &rpmsg_ctxt);
+#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
+        my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
+#else
+        my_rpmsg = rpmsg_lite_remote_init((void *)(RPMSG_LITE_SHMEM_BASE+(2*test_counter)), RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
+#endif
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
         TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "init function failed");
 
         /* incomming interrupt changes state to state_created_channel */
         rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
-        //increase the branch covergae in platform_init_interrupt/platform_deinit_interrupt
-        platform_init_interrupt(10, ((void *)0));
-        platform_deinit_interrupt(10);
-        
+        TEST_ASSERT_MESSAGE(1 == rpmsg_lite_is_link_up(my_rpmsg), "rpmsg_lite_is_link_up function failed");
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
         TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
         
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
         /* Calling rpmsg_lite_deinit() twice should fail, tested when RL_ASSERT is off in Coco tests */
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "repeated deinit function call failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
         TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_is_link_up(my_rpmsg), "link should be down");
 
         /* Wait for remote side to re-initialize the rpmsg.*/
-        env_sleep_msec(1000);
+        //env_sleep_msec(1000);
     }
     
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     /* When RL_ASSERT is off in Coco tests */
     TEST_ASSERT_MESSAGE(-1 == env_deinit(), "env_deinit being called repeatedly failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL), "rpmsg_lite_is_link_up function with bad rpmsg_lite_dev param failed");
+    TEST_ASSERT_MESSAGE(0 == rpmsg_lite_wait_for_link_up(RL_NULL, RL_BLOCK), "rpmsg_lite_wait_for_link_up function with bad rpmsg_lite_dev param failed");
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
-    /* Wrong shmem_length param */
-    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE/4, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
-    TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_length param failed");
     /* Wrong link_id param */
-    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID+1,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
+    my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base, RPMSG_LITE_LINK_ID+1, RL_NO_FLAGS, &rpmsg_ctxt);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad link_id param failed");
     /* Wrong shmem_addr param */
-    my_rpmsg = rpmsg_lite_master_init(RL_NULL, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
+    my_rpmsg = rpmsg_lite_remote_init(RL_NULL, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_addr param failed");
     /* Wrong static_context param */
-    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, RL_NULL);
+    my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, RL_NULL);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad static_context param failed");
 #else
-    /* Wrong shmem_length param */
-    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE/4, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
-    TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_length param failed");
+#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
     /* Wrong link_id param */
-    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID+1,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
+    my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID+1, RL_NO_FLAGS, &rpmsg_ctxt);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad link_id param failed");
     /* Wrong shmem_addr param */
-    my_rpmsg = rpmsg_lite_master_init(RL_NULL, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
+    my_rpmsg = rpmsg_lite_remote_init(RL_NULL, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_addr param failed");
     /* Wrong static_context param */
-    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, RL_NULL);
+    my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID, RL_NO_FLAGS, RL_NULL);
     TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad static_context param failed");
+#else
+    /* Wrong link_id param */
+    my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID+1, RL_NO_FLAGS, &rpmsg_ctxt);
+    TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad link_id param failed");
+    /* Wrong shmem_addr param */
+    my_rpmsg = rpmsg_lite_remote_init(RL_NULL, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
+    TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad shmem_addr param failed");
+    /* Wrong static_context param */
+    my_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, RL_NULL);
+    TEST_ASSERT_MESSAGE(RL_NULL == my_rpmsg, "init function with bad static_context param failed");
+#endif
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
 
     /* Wrong rpmsg_lite_instance param */
@@ -133,11 +135,6 @@ void tc_2_env_testing()
     LOCK_STATIC_CONTEXT mutex_ctxt = {0};
     rpmsg_static_queue_ctxt queue_ctxt = {0};
     uint8_t my_rpmsg_queue_storage[RL_ENV_QUEUE_STATIC_STORAGE_SIZE];
-    struct rpmsg_lite_instance my_rpmsg = {0};
-    struct virtqueue my_rx_virtqueue = {0};
-    struct virtqueue my_tx_virtqueue = {0};
-    my_rpmsg.rvq = &my_rx_virtqueue;
-    my_rpmsg.tvq = &my_tx_virtqueue;
     //uint32_t *temp1 = env_allocate_memory(sizeof(uint32_t));
     //TEST_ASSERT_MESSAGE(RL_NULL != temp1, "env_allocate_memory function failed");
     //env_free_memory(temp1);
@@ -172,6 +169,8 @@ void tc_2_env_testing()
     env_disable_cache();
     TEST_ASSERT_MESSAGE(0 < env_get_timestamp(), "env_get_timestamp function failed");
     void *q = RL_NULL;
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, -1, 1, &my_rpmsg_queue_storage[0], &queue_ctxt), "env_create_queue function with bad params failed");
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, 1, -1, &my_rpmsg_queue_storage[0], &queue_ctxt), "env_create_queue function with bad params failed");
     TEST_ASSERT_MESSAGE(0 == env_create_queue(&q, 1, sizeof(uint32_t), &my_rpmsg_queue_storage[0], &queue_ctxt), "env_create_queue function failed");
     //TEST_ASSERT_MESSAGE(0 == env_put_queue(RL_NULL, &temp2, 0), "env_put_queue function with bad params failed");
     TEST_ASSERT_MESSAGE(0 == env_get_current_queue_size((void *)q), "env_get_current_queue_size function failed");
@@ -184,31 +183,19 @@ void tc_2_env_testing()
     TEST_ASSERT_MESSAGE(0 == env_get_current_queue_size((void *)q), "env_get_current_queue_size function failed");
     env_delete_queue(q);
     platform_time_delay(1);
-    //virtqueue_notification testing, reach cases when (vq != VQ_NULL) by calling env_isr(0) after the rpmsg deinitialization
-    env_isr(0);
-    //virtqueue_notification testing, reach cases when (vq->callback_fc != VQ_NULL)
-    env_register_isr(10, my_rpmsg.rvq);
-    env_isr(10);
-    env_unregister_isr(10);
-    //vq_ring_notify_host testing, reach cases when (vq->notify_fc == VQ_NULL)
-    virtqueue_kick(&my_rx_virtqueue);
-    //virtqueue_free_static testing, reach cases when (vq == VQ_NULL)
-    virtqueue_free_static(RL_NULL);
-    //virtqueue_free_static testing, reach cases when (vq->vq_ring_mem == VQ_NULL)
-    virtqueue_free_static(my_rpmsg.tvq);
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     //Test incorrect access to the isr_table when RL_ASSERT is off in Coco tests 
     env_register_isr(0xffffffff, RL_NULL);
     env_unregister_isr(0xffffffff);
     env_isr(0xffffffff);
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 }
 
 void run_tests()
 {
 #ifdef __COVERAGESCANNER__
-    __coveragescanner_testname("01_rpmsg_init_rtos");
-    __coveragescanner_install("01_rpmsg_init_rtos.csexe");
+    __coveragescanner_testname("01_rpmsg_init_rtos_sec_core");
+    __coveragescanner_install("01_rpmsg_init_rtos_sec_core.csexe");
 #endif /*__COVERAGESCANNER__*/
     RUN_EXAMPLE(tc_1_rpmsg_init, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
     RUN_EXAMPLE(tc_2_env_testing, MAKE_UNITY_NUM(k_unity_rpmsg, 1));

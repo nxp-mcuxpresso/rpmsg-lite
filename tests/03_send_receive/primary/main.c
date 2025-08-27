@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -19,8 +19,8 @@
 #define TC_LOCAL_EPT_ADDR (40)
 #define TC_REMOTE_EPT_ADDR (30)
 
-#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #define SH_MEM_TOTAL_SIZE (6144)
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #if defined(__ICCARM__) /* IAR Workbench */
 #pragma location = "rpmsg_sh_mem_section"
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE];
@@ -32,6 +32,12 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 #error "RPMsg: Please provide your definition of rpmsg_lite_base[]!"
 #endif
 #endif /*SH_MEM_NOT_TAKEN_FROM_LINKER */
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+#if defined(__ICCARM__) /* IAR Workbench */
+__weak char rpmsg_sh_mem_start[SH_MEM_TOTAL_SIZE]@RPMSG_LITE_SHMEM_BASE;
+#endif
+#endif
 
 /*******************************************************************************
  * Prototypes

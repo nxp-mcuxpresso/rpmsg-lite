@@ -443,27 +443,6 @@ void env_delete_sync_lock(void *lock)
 }
 
 /*!
- * env_acquire_sync_lock
- *
- * Tries to acquire the lock, if lock is not available then call to
- * this function waits for lock to become available.
- */
-void env_acquire_sync_lock(void *lock)
-{
-    env_lock_mutex(lock);
-}
-
-/*!
- * env_release_sync_lock
- *
- * Releases the given lock.
- */
-void env_release_sync_lock(void *lock)
-{
-    env_unlock_mutex(lock);
-}
-
-/*!
  * env_sleep_msec
  *
  * Suspends the calling thread for given time , in msecs.

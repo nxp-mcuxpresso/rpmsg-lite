@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -162,19 +162,20 @@ int32_t pattern_cmp(char *buffer, char pattern, int32_t len)
  *****************************************************************************/
 void tc_1_send_receive(void)
 {
-    int32_t result = 0;
+    volatile int32_t result = 0;
     char data[DATA_LEN] = {0};
     void *data_addr = NULL;
     uint32_t src;
     uint32_t len;
+    volatile uint32_t i = 0;
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         env_memset(data, i, DATA_LEN);
         while(RL_SUCCESS != rpmsg_lite_send(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, DATA_LEN, 1));
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         env_memset(data, i, DATA_LEN);
         while(RL_SUCCESS != rpmsg_lite_send(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, DATA_LEN, RL_DONT_BLOCK));
@@ -230,7 +231,7 @@ void tc_1_send_receive(void)
     result = rpmsg_queue_get_current_size(RL_NULL);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_queue_get_current_size' with bad q param failed");
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv(my_rpmsg, my_queue, &src, data, DATA_LEN, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -238,7 +239,7 @@ void tc_1_send_receive(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv_nocopy(my_rpmsg, my_queue, &src, (char **)&data_addr, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -259,15 +260,16 @@ void tc_1_send_receive(void)
  *****************************************************************************/
 void tc_2_send_receive(void)
 {
-    int32_t result = 0;
+    volatile int32_t result = 0;
     char data[DATA_LEN] = {0};
     void *data_addr = NULL;
     uint32_t buf_size = 0;
     uint32_t src;
     uint32_t len;
+    volatile uint32_t i = 0;
     my_rpmsg_queue_rx_cb_data_t fake_msg = {0};
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, 1);
         while(RL_NULL == data_addr)
@@ -282,7 +284,7 @@ void tc_2_send_receive(void)
         data_addr = NULL;
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, RL_DONT_BLOCK);
         while(RL_NULL == data_addr)
@@ -309,7 +311,7 @@ void tc_2_send_receive(void)
     result = rpmsg_lite_send_nocopy(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, 0xFFFFFFFF);
     TEST_ASSERT_MESSAGE(0 != result, "negative number");
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv(my_rpmsg, my_queue, &src, data, DATA_LEN, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -317,7 +319,7 @@ void tc_2_send_receive(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv_nocopy(my_rpmsg, my_queue, &src, (char **)&data_addr, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -327,8 +329,11 @@ void tc_2_send_receive(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
     
-    // put fake message into the queue to allow queue full state and incomming messages dropping
-    TEST_ASSERT_MESSAGE(1 == env_put_queue(my_queue, &fake_msg, 0), "env_put_queue function failed");
+    // put fake messages into the queue to allow queue full state and incomming messages dropping
+    for (i = 0; i < RL_BUFFER_COUNT + 1; i++)
+    {
+        TEST_ASSERT_MESSAGE(1 == env_put_queue(my_queue, &fake_msg, 0), "env_put_queue function failed");
+    }
     // send a message to the secondary side to trigger messages sending from the secondary side to the primary side
     data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, RL_BLOCK);
     TEST_ASSERT_MESSAGE(NULL != data_addr, "negative number");
@@ -338,7 +343,7 @@ void tc_2_send_receive(void)
     TEST_ASSERT_MESSAGE(0 == result, "negative number");
     data_addr = NULL;
     //wait a while to allow the secondary side to send all messages and made the receive queue full
-    env_sleep_msec(200);
+    env_sleep_msec(5000);
     // invalid src and len pointer params for receive
     result = rpmsg_queue_recv(my_rpmsg, my_queue, RL_NULL, data, DATA_LEN, RL_NULL, RL_BLOCK);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_queue_recv' with bad src and len pointer param failed");

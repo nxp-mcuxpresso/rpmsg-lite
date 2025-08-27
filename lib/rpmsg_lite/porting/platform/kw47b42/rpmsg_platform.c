@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "rpmsg_platform.h"
-#include "rpmsg_default_config.h"
 #include "rpmsg_lite.h"
 
 #include "rpmsg_env.h"
@@ -47,6 +45,8 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+
 /* This structure is used to validate that shmem config that is stored in SMU2 is valid */
 typedef struct rpmsg_platform_shmem_config_protected
 {
@@ -62,6 +62,7 @@ static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_conf
 
 static uint32_t first_time                        = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *context)
@@ -211,11 +212,8 @@ void platform_time_delay(uint32_t num_msec)
  */
 int32_t platform_in_isr(void)
 {
-    /* coco begin validated: This platform-dependent function is used in OS-based environments only, not used in
-     * baremetal app */
     return (((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0UL) ? 1 : 0);
 }
-/* coco end */
 
 /**
  * platform_interrupt_enable
@@ -298,6 +296,7 @@ void platform_cache_disable(void)
 {
 }
 
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
 /**
  * platform_cache_flush
  *
@@ -317,6 +316,7 @@ void platform_cache_flush(void *data, uint32_t len)
 void platform_cache_invalidate(void *data, uint32_t len)
 {
 }
+#endif /* defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1) */
 
 /**
  * platform_init
@@ -328,10 +328,19 @@ int32_t platform_init(void)
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     mcmgr_status_t retval = kStatus_MCMGR_Error;
     retval                = MCMGR_RegisterEvent(kMCMGR_RemoteRPMsgEvent, mcmgr_event_handler, ((void *)0));
-    if (kStatus_MCMGR_Success != retval)
+    /*
+     * $Branch Coverage Justification$
+     * MCMGR_RegisterEvent() fails only when the type parameter is
+     * out of scope, here the correct kMCMGR_RemoteRPMsgEvent is passed.
+     */
+    if (kStatus_MCMGR_Success != retval) /* GCOVR_EXCL_BR_LINE */
     {
-        return -1; /* coco validated: line never reached, MCMGR_RegisterEvent() fails only when the type parameter is
-                      out of scope, here the correct kMCMGR_RemoteRPMsgEvent is passed */
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, MCMGR_RegisterEvent() fails only when the type parameter is
+         * out of scope, here the correct kMCMGR_RemoteRPMsgEvent is passed.
+         */
+        return -1; /* GCOVR_EXCL_LINE */
     }
 #else
     IMU_Init(APP_IMU_LINK);
@@ -340,13 +349,22 @@ int32_t platform_init(void)
 #endif
 
     /* Create lock used in multi-instanced RPMsg */
+
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the branch with env_create_mutex() function call fail.
+     */
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_static_ctxt))
+    if (0 != env_create_mutex(&platform_lock, 1, &platform_lock_static_ctxt)) /* GCOVR_EXCL_BR_LINE */
 #else
-    if (0 != env_create_mutex(&platform_lock, 1))
+    if (0 != env_create_mutex(&platform_lock, 1)) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
-        return -1; /* coco validated: not able to force the application to reach this line */
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, not able to force the application to reach this line.
+         */
+        return -1; /* GCOVR_EXCL_LINE */
     }
 
     return 0;
@@ -367,6 +385,8 @@ int32_t platform_deinit(void)
     return 0;
 }
 
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
 void platform_set_static_shmem_config(void)
 {
     extern uint32_t rpmsg_sh_mem_start[];
@@ -376,10 +396,10 @@ void platform_set_static_shmem_config(void)
     memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
 
     /* Fill shared memory structure with setting from the app core */
-    protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
-    protec_shmem_struct.config.buffer_count        = RL_BUFFER_COUNT;
-    protec_shmem_struct.config.vring_size          = VRING_SIZE;
-    protec_shmem_struct.config.vring_align         = VRING_ALIGN;
+    protec_shmem_struct.config.buffer_payload_size = RL_PLATFORM_BUFFER_PAYLOAD_SIZE_M33_M33_COM;
+    protec_shmem_struct.config.buffer_count        = RL_PLATFORM_BUFFER_COUNT_M33_M33_COM;
+    protec_shmem_struct.config.vring_size          = RL_PLATFORM_VRING_SIZE_M33_M33_COM;
+    protec_shmem_struct.config.vring_align         = RL_PLATFORM_VRING_ALIGN_M33_M33_COM;
 
     /* Calculate and set CRC of the strucuture */
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
@@ -464,3 +484,4 @@ static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_conf
     }
     return computedCRC;
 }
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */

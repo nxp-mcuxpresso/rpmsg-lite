@@ -166,7 +166,10 @@ int32_t ts_init_rpmsg(void)
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
     TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "init function failed");
 
-    rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
+    // allow env_wait_for_link_up() timeout mechanism
+    while(0 == rpmsg_lite_wait_for_link_up(my_rpmsg, 1))
+    {
+    };
     ctrl_q = rpmsg_queue_create(my_rpmsg);
     TEST_ASSERT_MESSAGE(NULL != ctrl_q, "'rpmsg_queue_create' failed");
     ctrl_ept = rpmsg_lite_create_ept(my_rpmsg, TC_LOCAL_EPT_ADDR, rpmsg_queue_rx_cb, ctrl_q);

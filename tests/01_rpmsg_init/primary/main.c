@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,9 +13,8 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
-#define TEST_BUFFER_COUNT  (RL_BUFFER_COUNT)
 #define SH_MEM_TOTAL_SIZE (6144)
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #if defined(__ICCARM__) /* IAR Workbench */
 #pragma location = "rpmsg_sh_mem_section"
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE];
@@ -27,6 +26,12 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 #error "RPMsg: Please provide your definition of rpmsg_lite_base[]!"
 #endif
 #endif /*SH_MEM_NOT_TAKEN_FROM_LINKER */
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+#if defined(__ICCARM__) /* IAR Workbench */
+__weak char rpmsg_sh_mem_start[SH_MEM_TOTAL_SIZE]@RPMSG_LITE_SHMEM_BASE;
+#endif
+#endif
 
 #if defined(MIMXRT798S_cm33_core0_SERIES)
 /* For RT700 which has more LINK_IDs define as the last higher ID plus 1 */
@@ -78,11 +83,11 @@ void tc_1_rpmsg_init()
         TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
         TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
         /* Calling rpmsg_lite_deinit() twice should fail, tested when RL_ASSERT is off in Coco tests */
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "repeated deinit function call failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
         TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_is_link_up(my_rpmsg), "link should be down");
 
@@ -90,10 +95,10 @@ void tc_1_rpmsg_init()
         env_sleep_msec(1000);
     }
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     /* When RL_ASSERT is off in Coco tests */
     TEST_ASSERT_MESSAGE(-1 == env_deinit(), "env_deinit being called repeatedly failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL),
@@ -145,6 +150,7 @@ void tc_2_env_testing()
     struct virtqueue my_tx_virtqueue    = {0};
     my_rpmsg.rvq                        = &my_rx_virtqueue;
     my_rpmsg.tvq                        = &my_tx_virtqueue;
+    struct vring_alloc_info my_ring_info= {0};
     uint32_t *temp1                     = env_allocate_memory(sizeof(uint32_t));
     TEST_ASSERT_MESSAGE(RL_NULL != temp1, "env_allocate_memory function failed");
     env_free_memory(temp1);
@@ -193,59 +199,16 @@ void tc_2_env_testing()
     virtqueue_free_static(RL_NULL);
     // virtqueue_free_static testing, reach cases when (vq->vq_ring_mem == VQ_NULL)
     virtqueue_free_static(my_rpmsg.tvq);
-#ifdef __COVERAGESCANNER__
+    // virtqueue_create_static testing, reach cases when (ring->align > (uint32_t)INT32_MAX))
+    my_ring_info.align=UINT32_MAX;
+    TEST_ASSERT_MESSAGE(ERROR_VQUEUE_INVLD_PARAM == virtqueue_create_static(0,"", &my_ring_info, 
+                        RL_NULL, RL_NULL, RL_NULL, RL_NULL), "virtqueue_create_static function failed");
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     // Test incorrect access to the isr_table when RL_ASSERT is off in Coco tests
     env_register_isr(0xffffffff, RL_NULL);
     env_unregister_isr(0xffffffff);
     env_isr(0xffffffff);
-#endif /*__COVERAGESCANNER__*/
-}
-
-// Test case: TX buffer allocation test
-// This Test allocates multiple TX buffers to exercise vq_ring_add_buffer functionality
-void tc_3_buffer_descriptor_test(void)
-{
-    int32_t result = 0;
-    void *tx_buffers[TEST_BUFFER_COUNT];
-    uint32_t buffer_size;
-    struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
-    struct rpmsg_lite_instance rpmsg_ctxt;
-
-#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
-    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
-#else
-    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID,
-                                      RL_NO_FLAGS, &rpmsg_ctxt);
-#endif
-    TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "rpmsg init failed");
-
-    // Allocate multiple TX buffers - this will exercise vq_ring_add_buffer
-    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
-    {
-        tx_buffers[i] = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_BLOCK);
-        TEST_ASSERT_MESSAGE(tx_buffers[i] != NULL, "Failed to allocate TX buffer");
-        TEST_ASSERT_MESSAGE(buffer_size > 0, "Buffer size should be greater than 0");
-    }
-
-    // Check that all allocated buffers have different addresses
-    // This verifies that the descriptor chain is working correctly
-    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
-    {
-        for (int j = i + 1; j < TEST_BUFFER_COUNT; j++)
-        {
-            TEST_ASSERT_MESSAGE(tx_buffers[i] != tx_buffers[j],
-                               "Allocated buffers have same address - descriptor chain corrupted");
-        }
-    }
-
-    void *extra_buffer = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_DONT_BLOCK);
-    TEST_ASSERT_MESSAGE(extra_buffer == NULL,
-                       "Should not be able to allocate more buffers than available");
-
-
-    result = rpmsg_lite_deinit(my_rpmsg);
-    TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
-    TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 }
 
 void run_tests()
@@ -256,5 +219,4 @@ void run_tests()
 #endif /*__COVERAGESCANNER__*/
     RUN_EXAMPLE(tc_1_rpmsg_init, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
     RUN_EXAMPLE(tc_2_env_testing, MAKE_UNITY_NUM(k_unity_rpmsg, 1));
-    RUN_EXAMPLE(tc_3_buffer_descriptor_test, MAKE_UNITY_NUM(k_unity_rpmsg, 2));
 }

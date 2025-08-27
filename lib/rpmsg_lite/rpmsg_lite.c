@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -526,11 +526,20 @@ struct rpmsg_lite_endpoint *rpmsg_lite_create_ept(struct rpmsg_lite_instance *rp
                     break;
                 }
             }
-            if (addr == RL_ADDR_ANY)
+            /*
+            * $Branch Coverage Justification$
+            * Not able to reach the true condition, 
+            * not possible to use all 2^32 endpoints/addresses.
+            */
+            if (addr == RL_ADDR_ANY) /* GCOVR_EXCL_BR_LINE */
             {
                 /* no address is free, cannot happen normally */
-                env_unlock_mutex(rpmsg_lite_dev->lock);
-                return RL_NULL;
+                /*
+                 * $Line Coverage Justification$
+                 * Lines never reached, not possible to use all 2^32 endpoints/addresses.
+                 */
+                env_unlock_mutex(rpmsg_lite_dev->lock); /* GCOVR_EXCL_LINE */
+                return RL_NULL; /* GCOVR_EXCL_LINE */
             }
         }
         else
@@ -689,11 +698,6 @@ static int32_t rpmsg_lite_format_message(struct rpmsg_lite_instance *rpmsg_lite_
     uint32_t tick_count = 0U;
     uint32_t buff_len;
 
-    if (rpmsg_lite_dev == RL_NULL)
-    {
-        return RL_ERR_PARAM;
-    }
-
     if (data == RL_NULL)
     {
         return RL_ERR_PARAM;
@@ -757,6 +761,11 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                         uintptr_t timeout)
 {
     if (ept == RL_NULL)
+    {
+        return RL_ERR_PARAM;
+    }
+
+    if (rpmsg_lite_dev == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
@@ -828,14 +837,24 @@ void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uin
     rpmsg_msg->hdr.reserved.idx = idx;
 
     /* return the maximum payload size */
-    if (*size >= sizeof(struct rpmsg_std_hdr))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to reach the false condition unless internal structs are corrupted,
+     * the minimum size of rpmsg buffers is checked during the initialization.
+     */
+    if (*size >= sizeof(struct rpmsg_std_hdr)) /* GCOVR_EXCL_BR_LINE */
     {
         *size -= sizeof(struct rpmsg_std_hdr);
     }
     else
     {
         /* Handle the error case - size is too small for a valid message */
-        *size = 0;
+        /*
+         * $Line Coverage Justification$
+         * Lines never reached, unless internal structs are corrupted,
+         * the minimum size of rpmsg buffers is checked during the initialization.
+         */
+        *size = 0; /* GCOVR_EXCL_LINE */
     }
 
     return rpmsg_msg->data;
@@ -1013,35 +1032,93 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     }
 
     /* VirtIO specification limits number of buffers */
-    if (shmem_config.buffer_count > RL_MAX_BUFFER_COUNT)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the
+     * (shmem_config.buffer_count > RL_MAX_BUFFER_COUNT) condition.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (shmem_config.buffer_count > RL_MAX_BUFFER_COUNT) /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
     /* Cap alignment to maximum safe value */
-    if (shmem_config.vring_align > RL_MAX_VRING_ALIGN)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the
+     * (shmem_config.vring_align > RL_MAX_VRING_ALIGN) condition.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (shmem_config.vring_align > RL_MAX_VRING_ALIGN) /* GCOVR_EXCL_BR_LINE */
     {
-        shmem_config.vring_align = RL_MAX_VRING_ALIGN;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        shmem_config.vring_align = RL_MAX_VRING_ALIGN; /* GCOVR_EXCL_LINE */
     }
 
     /* shmem_config.buffer_count must be power of two (2, 4, ...) */
-    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the
+     * (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)) condition.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U))) /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
     /* buffer size must be power of two (256, 512, ...) */
-    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the condition below.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U))) /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the condition below.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
     if ((2U * (uint32_t)shmem_config.buffer_count) >
         RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
                                             2U * shmem_config.vring_size,
-                                            (uint32_t)(shmem_config.buffer_payload_size + 16UL)))
+                                            (uint32_t)(shmem_config.buffer_payload_size + 16UL))) /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 #else
     if ((2U * (uint32_t)RL_BUFFER_COUNT) >
@@ -1074,12 +1151,20 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #else
     status                      = env_init();
 #endif
-    if (status != RL_SUCCESS)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the branch with env_init() function call fail.
+     */
+    if (status != RL_SUCCESS) /* GCOVR_EXCL_BR_LINE */
     {
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, not able to force the application to reach this line.
+         */
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-        env_free_memory(rpmsg_lite_dev); /* coco validated: not able to force the application to reach this line */
+        env_free_memory(rpmsg_lite_dev); /* GCOVR_EXCL_LINE */
 #endif
-        return RL_NULL;                  /* coco validated: not able to force the application to reach this line */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
     rpmsg_lite_dev->link_id = link_id;
@@ -1195,6 +1280,12 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         for (idx = 0U; ((idx < vqs[j]->vq_nentries) && (idx < rpmsg_lite_dev->sh_mem_total)); idx++)
         {
             /* Initialize TX virtqueue buffers for remote device */
+            /*
+             * $Branch Coverage Justification$
+             * Condition when (rpmsg_lite_dev->sh_mem_remaining > 0U) is not true can�t be reached, 
+             * otherwise the input parameters checking is not implemented correctly at the beginning 
+             * of the initialization function and the assert is reached.
+             */
             buffer = (rpmsg_lite_dev->sh_mem_remaining > 0U) ?
                          (rpmsg_lite_dev->sh_mem_base +
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
@@ -1204,7 +1295,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                           (uint32_t)RL_BUFFER_SIZE *
                               (rpmsg_lite_dev->sh_mem_total - rpmsg_lite_dev->sh_mem_remaining--)) :
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
-                         (RL_NULL);
+                         (RL_NULL); /* GCOVR_EXCL_BR_LINE */
 
             RL_ASSERT(buffer != RL_NULL);
             uint32_t buff_size = 0;
@@ -1226,7 +1317,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
                 status = virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)RL_BUFFER_SIZE);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
             }
-            else if (vqs[j] == rpmsg_lite_dev->tvq)
+            /*
+             * $Branch Coverage Justification$
+             * Not able to reach the false condition unless RAM is corrupted.
+             */
+            else if (vqs[j] == rpmsg_lite_dev->tvq) /* GCOVR_EXCL_BR_LINE */
             {
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
                 status =
@@ -1237,7 +1332,11 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             }
             else
             {
-                /* coco begin validated: this branch will never met unless RAM is corrupted */
+                /*
+                 * $Line Coverage Justification$
+                 * This branch will never met unless RAM is corrupted.
+                 */
+                /* GCOVR_EXCL_START */
             }
 
             if (status != RL_SUCCESS)
@@ -1253,7 +1352,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
 #endif
                 return RL_NULL;
             }
-            /* coco end */
+            /* GCOVR_EXCL_STOP */
         }
     }
 
@@ -1327,15 +1426,38 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     }
 
     /* shmem_config.buffer_count must be power of two (2, 4, ...) */
-    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the
+     * (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)) condition.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (0U != (shmem_config.buffer_count & (shmem_config.buffer_count - 1U)))  /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
     /* buffer size must be power of two (256, 512, ...) */
-    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the condition below.
+     * platform_get_custom_shmem_config() can be adjusted per application needs.
+     * The default implementation returns shmem_config struct. members in correct ranges.
+     */
+    if (0U != ((shmem_config.buffer_payload_size + 16UL) & ((shmem_config.buffer_payload_size + 16UL) - 1U)))  /* GCOVR_EXCL_BR_LINE */
     {
-        return RL_NULL;
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * returns shmem_config struct. members in correct ranges.
+         */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
@@ -1361,12 +1483,20 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     status                      = env_init();
 #endif
 
-    if (status != RL_SUCCESS)
+    /*
+     * $Branch Coverage Justification$
+     * Not able to force the application to reach the branch with env_init() function call fail.
+     */
+    if (status != RL_SUCCESS) /* GCOVR_EXCL_BR_LINE */
     {
+        /*
+         * $Line Coverage Justification$
+         * Line never reached, not able to force the application to reach this line.
+         */
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
-        env_free_memory(rpmsg_lite_dev); /* coco validated: not able to force the application to reach this line */
+        env_free_memory(rpmsg_lite_dev); /* GCOVR_EXCL_LINE */
 #endif
-        return RL_NULL;                  /* coco validated: not able to force the application to reach this line */
+        return RL_NULL; /* GCOVR_EXCL_LINE */
     }
 
     rpmsg_lite_dev->link_id = link_id;

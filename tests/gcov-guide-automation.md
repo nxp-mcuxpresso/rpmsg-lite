@@ -71,13 +71,18 @@ coverage:
 tests:
   - "01_rpmsg_init"
   - "01_rpmsg_init_rtos"
+  - "01_rpmsg_init_rtos_static_alloc"
   - "02_epts_channels"
   - "02_epts_channels_rtos"
+  - "02_epts_channels_rtos_static_alloc"
   - "03_send_receive"
   - "03_send_receive_rtos"
+  - "03_send_receive_rtos_static_alloc"
   - "04_ping_pong"
   - "04_ping_pong_rtos"
+  - "04_ping_pong_rtos_static_alloc"
   - "05_thread_safety_rtos"
+  - "05_thread_safety_rtos_static_alloc"
 ```
 
 ## Step-by-Step Usage

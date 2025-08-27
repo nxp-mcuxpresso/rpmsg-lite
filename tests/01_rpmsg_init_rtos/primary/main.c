@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -16,6 +16,7 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define TEST_BUFFER_COUNT (RL_BUFFER_COUNT)
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #define SH_MEM_TOTAL_SIZE (6144)
 #if defined(__ICCARM__) /* IAR Workbench */
@@ -45,6 +46,21 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
  * Code
  ******************************************************************************/
 uint32_t test_counter = 0;
+void *q = RL_NULL;
+
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+extern volatile uint16_t McmgrAppEventData;
+void McmgrAppEventHandler(mcmgr_core_t coreNum, uint16_t eventData, void *context)
+{
+    uint16_t *data = (uint16_t *)context;
+    uint32_t msg = 0;
+    TEST_ASSERT_MESSAGE(kMCMGR_Core1 == coreNum, "checking coreNum in McmgrAppEventHandler failed");
+    TEST_ASSERT_MESSAGE(0 == env_get_queue(q, &msg, 0), "env_get_queue from ISR failed when the queue is empty");
+    TEST_ASSERT_MESSAGE(1 == env_put_queue(q, &msg, 0), "env_put_queue from ISR failed");
+    TEST_ASSERT_MESSAGE(1 == env_get_queue(q, &msg, 0), "env_get_queue from ISR failed");
+    *data = eventData;
+}
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
 void tc_1_rpmsg_init()
 {
@@ -79,11 +95,11 @@ void tc_1_rpmsg_init()
         TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
         TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
         /* Calling rpmsg_lite_deinit() twice should fail, tested when RL_ASSERT is off in Coco tests */
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "repeated deinit function call failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
         TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_is_link_up(my_rpmsg), "link should be down");
 
@@ -91,10 +107,10 @@ void tc_1_rpmsg_init()
         env_sleep_msec(1000);
     }
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     /* When RL_ASSERT is off in Coco tests */
     TEST_ASSERT_MESSAGE(-1 == env_deinit(), "env_deinit being called repeatedly failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL),
@@ -130,13 +146,60 @@ void tc_1_rpmsg_init()
                         "deinit function with bad rpmsg_lite_instance param failed");
 }
 
-void tc_2_env_testing()
+// Test case: TX buffer allocation test
+// This Test allocates multiple TX buffers to exercise vq_ring_add_buffer functionality
+void tc_2_buffer_descriptor_test(void)
+{
+    int32_t result = 0;
+    void *tx_buffers[TEST_BUFFER_COUNT];
+    uint32_t buffer_size;
+    struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
+
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
+    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#else
+    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID,
+                                      RL_NO_FLAGS);
+#endif
+    TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "rpmsg init failed");
+
+    // Allocate multiple TX buffers - this will exercise vq_ring_add_buffer
+    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
+    {
+        tx_buffers[i] = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_BLOCK);
+        TEST_ASSERT_MESSAGE(tx_buffers[i] != NULL, "Failed to allocate TX buffer");
+        TEST_ASSERT_MESSAGE(buffer_size > 0, "Buffer size should be greater than 0");
+    }
+
+    // Check that all allocated buffers have different addresses
+    // This verifies that the descriptor chain is working correctly
+    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
+    {
+        for (int j = i + 1; j < TEST_BUFFER_COUNT; j++)
+        {
+            TEST_ASSERT_MESSAGE(tx_buffers[i] != tx_buffers[j],
+                               "Allocated buffers have same address - descriptor chain corrupted");
+        }
+    }
+
+    void *extra_buffer = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_DONT_BLOCK);
+    TEST_ASSERT_MESSAGE(extra_buffer == NULL,
+                       "Should not be able to allocate more buffers than available");
+
+
+    result = rpmsg_lite_deinit(my_rpmsg);
+    TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
+    TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
+}
+
+void tc_3_env_testing()
 {
     struct rpmsg_lite_instance my_rpmsg = {0};
     struct virtqueue my_rx_virtqueue    = {0};
     my_rpmsg.rvq                        = &my_rx_virtqueue;
     my_rpmsg.tvq                        = (struct virtqueue *)env_allocate_memory(sizeof(struct virtqueue));
     env_memset(my_rpmsg.tvq, 0x00, sizeof(struct virtqueue));
+    struct vring_alloc_info my_ring_info= {0};
 #if defined(SDK_OS_FREE_RTOS)
     HeapStats_t xHeapStats;
     void *t;
@@ -189,7 +252,8 @@ void tc_2_env_testing()
     env_map_memory(temp2, temp3, sizeof(uint32_t), 0);
     env_disable_cache();
     TEST_ASSERT_MESSAGE(0 < env_get_timestamp(), "env_get_timestamp function failed");
-    void *q = RL_NULL;
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, -1, 1), "env_create_queue function with bad params failed");
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, 1, -1), "env_create_queue function with bad params failed");
     // force env_create_queue() call to fail - request to allocate too much memory
     TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, 0xfffe, 0x20), "env_create_queue function with bad params failed");
     TEST_ASSERT_MESSAGE(0 == env_create_queue(&q, 1, sizeof(uint32_t)), "env_create_queue function failed");
@@ -202,6 +266,25 @@ void tc_2_env_testing()
     TEST_ASSERT_MESSAGE(1 == env_get_queue(q, &temp3, 0), "env_get_queue function failed");
     TEST_ASSERT_MESSAGE(0 == env_get_queue(q, &temp3, 0), "env_get_queue failed when the queue is empty");
     TEST_ASSERT_MESSAGE(0 == env_get_current_queue_size((void *)q), "env_get_current_queue_size function failed");
+
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+    // Re-initialize the rpmsg instance to enable MCMGR-related IRQs (MU/IMU) and to allow McmgrAppEventHandler callback processing
+    struct rpmsg_lite_instance *my_rpmsg_valid;
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
+    my_rpmsg_valid = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#else
+    my_rpmsg_valid = rpmsg_lite_master_init((void *)((uint32_t)RPMSG_LITE_SHMEM_BASE),
+                                           ((uint32_t)RPMSG_LITE_SHMEM_SIZE), RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
+    // request MCMGR app. event being trigerred from the secondary core at this point - before the queue handler "q" is cleared
+    (void)MCMGR_TriggerEvent(kMCMGR_Core1, kMCMGR_RemoteApplicationEvent, 1U);
+
+    // wait untill McmgrAppEventHandler callback is processed
+    while (McmgrAppEventData != 1U)
+    {
+    };
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
+
     env_delete_queue(q);
     platform_time_delay(1);
     // virtqueue_notification testing, reach cases when (vq != VQ_NULL) by calling env_isr(0) after the rpmsg
@@ -217,12 +300,18 @@ void tc_2_env_testing()
     virtqueue_free(RL_NULL);
     // virtqueue_free testing, reach cases when (vq->vq_ring_mem == VQ_NULL)
     virtqueue_free(my_rpmsg.tvq);
-#ifdef __COVERAGESCANNER__
+    // virtqueue_create testing, reach cases when (ring->align > (uint32_t)INT32_MAX))
+    my_ring_info.align=UINT32_MAX;
+    TEST_ASSERT_MESSAGE(ERROR_VQUEUE_INVLD_PARAM == virtqueue_create(0,"", &my_ring_info, 
+                        RL_NULL, RL_NULL, RL_NULL), "virtqueue_create function failed");
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+    env_init();
+    env_tx_callback(RPMSG_LITE_LINK_ID);
     // Test incorrect access to the isr_table when RL_ASSERT is off in Coco tests
     env_register_isr(0xffffffff, RL_NULL);
     env_unregister_isr(0xffffffff);
     env_isr(0xffffffff);
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 }
 
 void run_tests()
@@ -232,5 +321,6 @@ void run_tests()
     __coveragescanner_install("01_rpmsg_init_rtos.csexe");
 #endif /*__COVERAGESCANNER__*/
     RUN_EXAMPLE(tc_1_rpmsg_init, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
-    RUN_EXAMPLE(tc_2_env_testing, MAKE_UNITY_NUM(k_unity_rpmsg, 1));
+    RUN_EXAMPLE(tc_2_buffer_descriptor_test, MAKE_UNITY_NUM(k_unity_rpmsg, 1));
+    RUN_EXAMPLE(tc_3_env_testing, MAKE_UNITY_NUM(k_unity_rpmsg, 2));
 }

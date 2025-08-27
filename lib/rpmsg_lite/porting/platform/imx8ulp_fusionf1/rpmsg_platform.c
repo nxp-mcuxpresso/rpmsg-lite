@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -306,8 +306,8 @@ void *platform_patova(uintptr_t addr)
 int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *cfg)
 {
     /* Only MU instance. */
-    cfg->buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE(link_id);
-    cfg->buffer_count        = RL_BUFFER_COUNT(link_id);
+    cfg->buffer_payload_size = RL_PLATFORM_BUFFER_PAYLOAD_SIZE_COMMON;
+    cfg->buffer_count        = RL_PLATFORM_BUFFER_COUNT_COMMON;
 
     switch (link_id)
     {

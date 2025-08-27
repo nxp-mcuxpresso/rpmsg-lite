@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -471,33 +471,6 @@ void env_delete_sync_lock(void *lock)
     if (lock != ((void *)0))
     {
         env_delete_mutex(lock);
-    }
-}
-
-/*!
- * env_acquire_sync_lock
- *
- * Tries to acquire the lock, if lock is not available then call to
- * this function waits for lock to become available.
- */
-void env_acquire_sync_lock(void *lock)
-{
-    if (lock != ((void *)0))
-    {
-        env_lock_mutex(lock);
-    }
-}
-
-/*!
- * env_release_sync_lock
- *
- * Releases the given lock.
- */
-void env_release_sync_lock(void *lock)
-{
-    if (lock != ((void *)0))
-    {
-        env_unlock_mutex(lock);
     }
 }
 

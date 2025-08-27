@@ -1,0 +1,94 @@
+/*
+** ###################################################################
+**     Processor:           KW47B42ZB7AFTA_cm33_core1
+**     Compiler:            IAR ANSI C/C++ Compiler for ARM
+**     Reference manual:    Rev. 6, 05/22/2022
+**     Version:             rev. 1.0, 2023-05-20
+**     Build:               b240814
+**
+**     Abstract:
+**         Linker file for the IAR ANSI C/C++ Compiler for ARM
+**
+**     Copyright 2016 Freescale Semiconductor, Inc.
+**     Copyright 2016-2024 NXP
+**     SPDX-License-Identifier: BSD-3-Clause
+**
+**     http:                 www.nxp.com
+**     mail:                 support@nxp.com
+**
+** ###################################################################
+*/
+
+if (isdefinedsymbol(__use_shmem__)) {
+  define exported symbol rpmsg_sh_mem_start    = 0xB0008800;
+  define exported symbol rpmsg_sh_mem_end      = 0xB000A000;
+}
+
+/* Stack and Heap Sizes */
+if (isdefinedsymbol(__stack_size__)) {
+  define symbol __size_cstack__        = __stack_size__;
+} else {
+  define symbol __size_cstack__        = 0x0400;
+}
+
+if (isdefinedsymbol(__heap_size__)) {
+  define symbol __size_heap__          = __heap_size__;
+} else {
+  define symbol __size_heap__          = 0x0800;
+}
+
+define symbol m_interrupts_start               = 0x00000000;
+define symbol m_interrupts_end                 = 0x000003FF;
+
+define symbol m_text_start                     = 0x00000400;
+define symbol m_text_end                       = 0x0007FFFF;
+
+define symbol m_data0_start                     = 0x00100000;
+define symbol m_data0_end                       = 0x001007FF;
+
+define symbol m_data1_start                     = 0x00140000;
+define symbol m_data1_end                       = 0x00153FFF - __size_cstack__;
+
+define symbol m_stack_start                    = 0x00154000 - __size_cstack__;
+define symbol m_stack_end                      = 0x00153FFF;
+
+define memory mem with size = 4G;
+
+define region TEXT_region             = mem:[from m_interrupts_start to m_interrupts_end]
+                                      | mem:[from m_text_start to m_text_end];
+define region DATA_region             = mem:[from m_data0_start to m_data0_end]
+                                      | mem:[from m_data1_start to m_data1_end];
+define region CSTACK_region           = mem:[from m_stack_start to m_stack_end];
+
+if (isdefinedsymbol(__use_shmem__)) {
+  define region rpmsg_sh_mem_region     = mem:[from rpmsg_sh_mem_start to rpmsg_sh_mem_end];
+}
+
+define block CSTACK    with alignment = 8, size = __size_cstack__   { };
+define block HEAP      with alignment = 8, size = __size_heap__     { };
+define block RW        { readwrite };
+define block ZI        { zi };
+
+initialize by copy { readwrite, section .textrw };
+
+if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
+{
+  /* Required in a multi-threaded application */
+  initialize by copy with packing = none { section __DLIB_PERTHREAD };
+}
+
+do not initialize  { section .noinit };
+
+if (isdefinedsymbol(__use_shmem__)) {
+  do not initialize  { section rpmsg_sh_mem_section };
+}
+
+place at address mem: m_interrupts_start    { readonly section .intvec };
+place in TEXT_region                        { readonly };
+place in DATA_region                        { block RW };
+place in DATA_region                        { block ZI };
+place in DATA_region                        { last block HEAP };
+place in CSTACK_region                      { block CSTACK };
+if (isdefinedsymbol(__use_shmem__)) {
+  place in rpmsg_sh_mem_region                { section rpmsg_sh_mem_section };
+}

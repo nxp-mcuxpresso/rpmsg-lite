@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -46,6 +46,16 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
  ******************************************************************************/
 uint32_t test_counter = 0;
 
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+extern volatile uint16_t McmgrAppEventData;
+void McmgrAppEventHandler(mcmgr_core_t coreNum, uint16_t eventData, void *context)
+{
+    uint16_t *data = (uint16_t *)context;
+    TEST_ASSERT_MESSAGE(kMCMGR_Core0 == coreNum, "checking coreNum in McmgrAppEventHandler failed");
+    *data = eventData;
+}
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
+
 void tc_1_rpmsg_init()
 {
     struct rpmsg_lite_instance *my_rpmsg;
@@ -71,11 +81,11 @@ void tc_1_rpmsg_init()
         TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
         TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
         
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
         /* Calling rpmsg_lite_deinit() twice should fail, tested when RL_ASSERT is off in Coco tests */
         result = rpmsg_lite_deinit(my_rpmsg);
         TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "repeated deinit function call failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
         TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_is_link_up(my_rpmsg), "link should be down");
 
@@ -83,10 +93,10 @@ void tc_1_rpmsg_init()
         //env_sleep_msec(1000);
     }
     
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     /* When RL_ASSERT is off in Coco tests */
     TEST_ASSERT_MESSAGE(-1 == env_deinit(), "env_deinit being called repeatedly failed");
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     /* Test bad args */
     TEST_ASSERT_MESSAGE(0 == rpmsg_lite_is_link_up(RL_NULL), "rpmsg_lite_is_link_up function with bad rpmsg_lite_dev param failed");
@@ -172,7 +182,9 @@ void tc_2_env_testing()
     env_disable_cache();
     TEST_ASSERT_MESSAGE(0 < env_get_timestamp(), "env_get_timestamp function failed");
     void *q = RL_NULL;
-    //force env_create_queue() call to fail - request to allocate too much memory
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, -1, 1), "env_create_queue function with bad params failed");
+    TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, 1, -1), "env_create_queue function with bad params failed");
+    // force env_create_queue() call to fail - request to allocate too much memory
     TEST_ASSERT_MESSAGE(-1 == env_create_queue(&q, 0xfffe, 0x20), "env_create_queue function with bad params failed");
     TEST_ASSERT_MESSAGE(0 == env_create_queue(&q, 1, sizeof(uint32_t)), "env_create_queue function failed");
     //TEST_ASSERT_MESSAGE(0 == env_put_queue(RL_NULL, &temp2, 0), "env_put_queue function with bad params failed");
@@ -186,12 +198,32 @@ void tc_2_env_testing()
     TEST_ASSERT_MESSAGE(0 == env_get_current_queue_size((void *)q), "env_get_current_queue_size function failed");
     env_delete_queue(q);
     platform_time_delay(1);
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
+    // Re-initialize the rpmsg instance to enable MCMGR-related IRQs (MU/IMU) and to allow McmgrAppEventHandler callback processing
+    struct rpmsg_lite_instance *my_rpmsg;
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
+        my_rpmsg = rpmsg_lite_remote_init(rpmsg_lite_base+(2*test_counter), RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#else
+#if (defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET)
+        my_rpmsg = rpmsg_lite_remote_init((void *)MEMORY_ConvertMemoryMapAddress((uint32_t)RPMSG_LITE_SHMEM_BASE, kMEMORY_DMA2Local), RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#else
+        my_rpmsg = rpmsg_lite_remote_init((void *)(RPMSG_LITE_SHMEM_BASE+(2*test_counter)), RPMSG_LITE_LINK_ID, RL_NO_FLAGS);
+#endif
+#endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
+
+    // wait untill McmgrAppEventHandler callback is processed
+    while (McmgrAppEventData != 1U)
+    {
+    };
+    platform_time_delay(1);
+    // Trigger the mcmgr app. event and the McmgrAppEventHandler callback processing on the primary side 
+    (void)MCMGR_TriggerEvent(kMCMGR_Core0, kMCMGR_RemoteApplicationEvent, 1U);
+
     //Test incorrect access to the isr_table when RL_ASSERT is off in Coco tests 
     env_register_isr(0xffffffff, RL_NULL);
     env_unregister_isr(0xffffffff);
     env_isr(0xffffffff);
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 }
 
 void run_tests()

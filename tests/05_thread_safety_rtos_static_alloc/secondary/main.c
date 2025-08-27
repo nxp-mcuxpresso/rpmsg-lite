@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -39,7 +39,7 @@
 #if defined (CPU_LPC54102J512BD64_cm0plus)
 #define TEST_THREAD_SAFETY_TASK_STACK_SIZE (192) /* Verified for Niobe1/2 boards */
 #else
-#define TEST_THREAD_SAFETY_TASK_STACK_SIZE (300)
+#define TEST_THREAD_SAFETY_TASK_STACK_SIZE (350)
 #endif
 
 #define TC_LOCAL_EPT_ADDR (30)

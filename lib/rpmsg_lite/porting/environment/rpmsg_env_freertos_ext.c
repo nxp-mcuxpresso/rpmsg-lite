@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,47 +52,6 @@
 #include "event_groups.h"
 
 extern EventGroupHandle_t event_group;
-
-/*!
- * env_acquire_sync_lock
- *
- * Tries to acquire the lock, if lock is not available then call to
- * this function waits for lock to become available.
- */
-void env_acquire_sync_lock(void *lock)
-{
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (platform_in_isr() != 0)
-    {
-        (void)xSemaphoreTakeFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
-    }
-}
-
-/*!
- * env_release_sync_lock
- *
- * Releases the given lock.
- */
-void env_release_sync_lock(void *lock)
-{
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (platform_in_isr() != 0)
-    {
-        (void)xSemaphoreGiveFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreGive(xSemaphore);
-    }
-}
 
 /*!
  * env_tx_callback

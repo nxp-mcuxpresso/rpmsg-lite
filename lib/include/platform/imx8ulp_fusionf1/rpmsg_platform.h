@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -101,6 +101,9 @@ uintptr_t platform_vatopa(void *addr);
 void *platform_patova(uintptr_t addr);
 
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+#define RL_PLATFORM_BUFFER_PAYLOAD_SIZE_COMMON    (496U)
+#define RL_PLATFORM_BUFFER_COUNT_COMMON           (2U)
+
 #define RL_VRING_SIZE_M33_FUSION_DSP_COM (0x400UL)
 
 #define RL_VRING_ALIGN_M33_FUSION_DSP_COM (0x10U)

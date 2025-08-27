@@ -14,8 +14,7 @@ test_03_send_receive_rtos_primary_core:
       name: test_03_send_receive_rtos_primary_core
       category: multicore_tests
       brief: 03_send_receive_rtos test suite
-        - baremetal project, static allocation used (#define RL_USE_STATIC_API (1) in rpmsg_config.h)
-
+        - FreeRTOS/ThreadX/XOS-based project, covering dynamic allocation
         - check multiple rpmsg initialization and de-initialization
         - check created default channel and state
         - check callbacks

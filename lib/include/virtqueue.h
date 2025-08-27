@@ -4,7 +4,7 @@
 /*-
  * Copyright (c) 2011, Bryan Venteicher <bryanv@FreeBSD.org>
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2025 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,9 @@
 #define ERROR_VQUEUE_INVLD_PARAM (VQ_ERROR_BASE - 8)
 
 #define VQUEUE_SUCCESS (0)
+#ifndef VQUEUE_DEBUG
 #define VQUEUE_DEBUG   (false)
+#endif
 
 /* This is temporary macro to replace C NULL support.
  * At the moment all the RTL specific functions are present in env.
@@ -188,14 +190,14 @@ typedef void vq_notify(struct virtqueue *vq);
         status_var = status_err;                        \
     }
 
-#define VQUEUE_BUSY(vq, dir)                                         \
-    if ((vq)->dir == false)                                          \
-    {                                                                \
-        (vq)->dir = true;                                            \
-    }                                                                \
-    else                                                             \
-    {                                                                \
-        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use") \
+#define VQUEUE_BUSY(vq, dir)                                          \
+    if ((vq)->dir == false)                                           \
+    {                                                                 \
+        (vq)->dir = true;                                             \
+    }                                                                 \
+    else                                                              \
+    {                                                                 \
+        VQASSERT(vq, (vq)->dir == false, "VirtQueue already in use"); \
     }
 
 #define VQUEUE_IDLE(vq, dir) ((vq)->dir = false)

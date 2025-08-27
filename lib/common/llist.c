@@ -56,10 +56,19 @@
  */
 void add_to_list(struct llist **head, struct llist *node)
 {
-    if (node == LIST_NULL)
+    /*
+    * $Branch Coverage Justification$
+    * add_to_list() is called from rpmsg_lite_create_ept() only
+    * and the node parameter not being null check is done before passing the parameter.
+    */
+    if (node == LIST_NULL) /* GCOVR_EXCL_BR_LINE */
     {
-        return; /* coco validated: line never reached, add_to_list() is called from rpmsg_lite_create_ept() only and the
-                   node parameter not being null check is done before passing the parameter */
+        /*
+        * $Line Coverage Justification$
+        * Line never reached, add_to_list() is called from rpmsg_lite_create_ept() only
+        * and the node parameter not being null check is done before passing the parameter.
+        */
+        return; /* GCOVR_EXCL_LINE */
     }
 
     if (*head != LIST_NULL)
@@ -90,10 +99,19 @@ void add_to_list(struct llist **head, struct llist *node)
  */
 void remove_from_list(struct llist **head, struct llist *node)
 {
-    if ((*head == LIST_NULL) || (node == LIST_NULL))
+    /*
+    * $Branch Coverage Justification$
+    * remove_from_list() is called from rpmsg_lite_destroy_ept() only,
+    * the head and node parameters not being null check is done before passing these parameters.
+    */
+    if ((*head == LIST_NULL) || (node == LIST_NULL)) /* GCOVR_EXCL_BR_LINE */
     {
-        return; /* coco validated: line never reached, remove_from_list() is called from rpmsg_lite_destroy_ept() only,
-                   the head and node parameters not being null check is done before passing these parameters */
+        /*
+        * $Line Coverage Justification$
+        * Line never reached, remove_from_list() is called from rpmsg_lite_destroy_ept() only,
+        * the head and node parameters not being null check is done before passing these parameters.
+        */
+        return; /* GCOVR_EXCL_LINE */
     }
 
     if (node == *head)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -52,7 +52,7 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
 /* rpmsg_std_hdr contains a reserved field,
  * this implementation of RPMSG uses this reserved
  * field to hold the idx and totlen of the buffer
@@ -90,7 +90,7 @@ struct my_rpmsg_std_msg
     struct my_rpmsg_std_hdr hdr; /*!< RPMsg message header */
     uint8_t data[1];          /*!< bytes of message payload data */
 } RL_PACKED_END;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
 struct rpmsg_lite_endpoint *volatile my_ept = NULL;
 struct rpmsg_lite_ept_static_context my_ept_ctxt;
@@ -203,17 +203,18 @@ int32_t pattern_cmp(char *buffer, char pattern, int32_t len)
  *****************************************************************************/
 void tc_1_receive_send(void)
 {
-    int32_t result = 0;
+    volatile int32_t result = 0;
     char data[DATA_LEN] = {0};
     void *data_addr = NULL;
     uint32_t src;
     uint32_t len;
-#ifdef __COVERAGESCANNER__
+    volatile uint32_t i = 0;
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     uint16_t my_rpmsg_hdr_idx = 0;
     struct my_rpmsg_std_msg *msg;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv(my_rpmsg, my_queue, &src, data, DATA_LEN, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -221,21 +222,21 @@ void tc_1_receive_send(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv_nocopy(my_rpmsg, my_queue, &src, (char **)&data_addr, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
         result = pattern_cmp(data_addr, i, DATA_LEN);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
         /* Force ERROR_VRING_NO_BUFF error in virtqueue_add_consumed_buffer() when RL_ASSERT is off in Coco tests */
         msg = (struct my_rpmsg_std_msg *)(void *)((char *)(data_addr)-offsetof(struct my_rpmsg_std_msg, data));
         my_rpmsg_hdr_idx = msg->hdr.reserved.idx;
-        msg->hdr.reserved.idx = 2*RL_BUFFER_COUNT;
+        msg->hdr.reserved.idx = 0xFFFF;
         result = rpmsg_queue_nocopy_free(my_rpmsg, data_addr);
         msg->hdr.reserved.idx = my_rpmsg_hdr_idx;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
         result = rpmsg_queue_nocopy_free(my_rpmsg, data_addr);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -245,14 +246,14 @@ void tc_1_receive_send(void)
     result = rpmsg_lite_send(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, DATA_LEN, RL_BLOCK);
     TEST_ASSERT_MESSAGE(0 == result, "negative number");
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         env_memset(data, i, DATA_LEN);
         result = rpmsg_lite_send(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, DATA_LEN, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         env_memset(data, i, DATA_LEN);
         result = rpmsg_lite_send(my_rpmsg, my_ept, TC_REMOTE_EPT_ADDR, data, DATA_LEN, RL_BLOCK);
@@ -312,14 +313,15 @@ void tc_1_receive_send(void)
  *****************************************************************************/
 void tc_2_receive_send(void)
 {
-    int32_t result = 0;
+    volatile int32_t result = 0;
     char data[DATA_LEN] = {0};
     void *data_addr = NULL;
     uint32_t buf_size = 0;
     uint32_t src;
     uint32_t len;
+    volatile uint32_t i = 0;
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv(my_rpmsg, my_queue, &src, data, DATA_LEN, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -327,7 +329,7 @@ void tc_2_receive_send(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         result = rpmsg_queue_recv_nocopy(my_rpmsg, my_queue, &src, (char **)&data_addr, &len, RL_BLOCK);
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
@@ -337,7 +339,7 @@ void tc_2_receive_send(void)
         TEST_ASSERT_MESSAGE(0 == result, "negative number");
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, RL_BLOCK);
         TEST_ASSERT_MESSAGE(NULL != data_addr, "negative number");
@@ -348,7 +350,7 @@ void tc_2_receive_send(void)
         data_addr = NULL;
     }
 
-    for (int32_t i = 0; i < TC_TRANSFER_COUNT; i++)
+    for (i = 0; i < TC_TRANSFER_COUNT; i++)
     {
         data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, RL_BLOCK);
         TEST_ASSERT_MESSAGE(NULL != data_addr, "negative number");
@@ -377,7 +379,7 @@ void tc_2_receive_send(void)
     result = pattern_cmp(data, 0, DATA_LEN);
     TEST_ASSERT_MESSAGE(0 == result, "negative number");
     // send RL_BUFFER_COUNT messages to made the message queue on the primary side full
-    for (int32_t i = 0; i < RL_BUFFER_COUNT; i++)
+    for (i = 0; i < RL_BUFFER_COUNT; i++)
     {
         data_addr = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buf_size, RL_BLOCK);
         TEST_ASSERT_MESSAGE(NULL != data_addr, "negative number");

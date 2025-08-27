@@ -160,7 +160,11 @@ void env_tx_callback(uint32_t link_id)
     if (env_in_isr() != 0)
     {
         (void)xEventGroupSetBitsFromISR(event_group, (EventBits_t)(1UL << link_id), &xHigherPriorityTaskWoken);
-        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+        /*
+         * $Branch Coverage Justification$
+         * portEND_SWITCHING_ISR false condition not met
+         */
+        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken); /* GCOVR_EXCL_BR_LINE */
     }
     else
     {
@@ -181,12 +185,20 @@ int32_t env_init(void)
     vTaskSuspendAll(); /* stop scheduler */
     /* verify 'env_init_counter' */
     RL_ASSERT(env_init_counter >= 0);
-    if (env_init_counter < 0)
+    /*
+     * $Branch Coverage Justification$
+     * (env_init_counter < 0) condition will never met unless RAM is corrupted.
+     */
+    if (env_init_counter < 0) /* GCOVR_EXCL_BR_LINE */
     {
-        /* coco begin validated: (env_init_counter < 0) condition will never met unless RAM is corrupted */
+        /*
+         * $Line Coverage Justification$
+         * (env_init_counter < 0) condition will never met unless RAM is corrupted.
+         */
+        /* GCOVR_EXCL_START */
         (void)xTaskResumeAll(); /* re-enable scheduler */
         return -1;
-        /* coco end */
+        /* GCOVR_EXCL_STOP */
     }
     env_init_counter++;
     /* multiple call of 'env_init' - return ok */
@@ -511,49 +523,6 @@ void env_delete_sync_lock(void *lock)
         env_delete_mutex(lock);
     }
 }
-
-#ifndef __COVERAGESCANNER__
-/*!
- * env_acquire_sync_lock
- *
- * Tries to acquire the lock, if lock is not available then call to
- * this function waits for lock to become available.
- */
-void env_acquire_sync_lock(void *lock)
-{
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (env_in_isr() != 0)
-    {
-        (void)xSemaphoreTakeFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreTake(xSemaphore, portMAX_DELAY);
-    }
-}
-
-/*!
- * env_release_sync_lock
- *
- * Releases the given lock.
- */
-void env_release_sync_lock(void *lock)
-{
-    BaseType_t xTaskWokenByReceive = pdFALSE;
-    SemaphoreHandle_t xSemaphore   = (SemaphoreHandle_t)lock;
-    if (env_in_isr() != 0)
-    {
-        (void)xSemaphoreGiveFromISR(xSemaphore, &xTaskWokenByReceive);
-        portEND_SWITCHING_ISR(xTaskWokenByReceive);
-    }
-    else
-    {
-        (void)xSemaphoreGive(xSemaphore);
-    }
-}
-#endif /* __COVERAGESCANNER__ */
 
 /*!
  * env_sleep_msec

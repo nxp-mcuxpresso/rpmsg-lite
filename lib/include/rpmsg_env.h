@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -334,24 +334,6 @@ int32_t env_create_sync_lock(void **lock, int32_t state);
  */
 
 void env_delete_sync_lock(void *lock);
-
-/*!
- * env_acquire_sync_lock
- *
- * Tries to acquire the sync lock.
- *
- * @param lock  - sync lock to acquire.
- */
-void env_acquire_sync_lock(void *lock);
-
-/*!
- * env_release_sync_lock
- *
- * Releases synchronization lock.
- *
- * @param lock  - sync lock to release.
- */
-void env_release_sync_lock(void *lock);
 
 /*!
  * env_sleep_msec

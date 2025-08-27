@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -25,8 +25,8 @@
 #define TC_REMOTE_EPT_ADDR (40)
 #define RPMSG_LITE_NS_ANNOUNCE_STRING "rpmsg-test-channel"
 
-#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #define SH_MEM_TOTAL_SIZE (6144)
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #if defined(__ICCARM__) /* IAR Workbench */
 #pragma location = "rpmsg_sh_mem_section"
 char rpmsg_lite_base[SH_MEM_TOTAL_SIZE];
@@ -39,6 +39,12 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 #endif
 #endif /*SH_MEM_NOT_TAKEN_FROM_LINKER */
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+#if defined(__ICCARM__) /* IAR Workbench */
+__weak char rpmsg_sh_mem_start[SH_MEM_TOTAL_SIZE]@RPMSG_LITE_SHMEM_BASE;
+#endif
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -46,7 +52,7 @@ char rpmsg_lite_base[SH_MEM_TOTAL_SIZE] __attribute__((section(".noinit.$rpmsg_s
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
 /* rpmsg_std_hdr contains a reserved field,
  * this implementation of RPMSG uses this reserved
  * field to hold the idx and totlen of the buffer
@@ -84,7 +90,7 @@ struct my_rpmsg_std_msg
     struct my_rpmsg_std_hdr hdr; /*!< RPMsg message header */
     uint8_t data[1];          /*!< bytes of message payload data */
 } RL_PACKED_END;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
 volatile int32_t test_no = 0, rx_data_len = 0;
 void *rx_buffer = NULL;
@@ -163,7 +169,11 @@ int32_t ts_init_rpmsg(void)
 #endif
 #endif /* SH_MEM_NOT_TAKEN_FROM_LINKER */
     TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "init function failed");
-    rpmsg_lite_wait_for_link_up(my_rpmsg, RL_BLOCK);
+
+    // allow env_wait_for_link_up() timeout mechanism
+    while(0 == rpmsg_lite_wait_for_link_up(my_rpmsg, 2*RL_MS_PER_INTERVAL))
+    {
+    };
     
     /* wait for a while to allow the primary side to bind_ns and register the NS callback */
     env_sleep_msec(200);
@@ -217,10 +227,10 @@ int32_t ts_destroy_epts(struct rpmsg_lite_endpoint *volatile epts[], int32_t cou
 void tc_1_receive(void)
 {
     int32_t result = 0;
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     uint16_t my_rpmsg_hdr_idx = 0;
     struct my_rpmsg_std_msg *msg;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     // wait for incoming interrupts
     while (test_no != 3)
@@ -235,14 +245,14 @@ void tc_1_receive(void)
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_release_rx_buffer(RL_NULL, rx_buffer), "'rpmsg_lite_release_rx_buffer' with bad rpmsg_lite_dev param failed");
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_release_rx_buffer(my_rpmsg, RL_NULL), "'rpmsg_lite_release_rx_buffer' with bad rxbuf param failed");
 
-#ifdef __COVERAGESCANNER__
+#if defined(GCOV_DO_COVERAGE) && defined(__GNUC__)
     /* Force ERROR_VRING_NO_BUFF error in virtqueue_add_consumed_buffer() when RL_ASSERT is off in Coco tests */
     msg = (struct my_rpmsg_std_msg *)(void *)((char *)(rx_buffer)-offsetof(struct my_rpmsg_std_msg, data));
     my_rpmsg_hdr_idx = msg->hdr.reserved.idx;
-    msg->hdr.reserved.idx = 2*RL_BUFFER_COUNT;
+    msg->hdr.reserved.idx = 0xFFFF;
     result = rpmsg_lite_release_rx_buffer(my_rpmsg, rx_buffer);
     msg->hdr.reserved.idx = my_rpmsg_hdr_idx;
-#endif /*__COVERAGESCANNER__*/
+#endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
     /* Release the buffer now */
     result = rpmsg_lite_release_rx_buffer(my_rpmsg, rx_buffer);
