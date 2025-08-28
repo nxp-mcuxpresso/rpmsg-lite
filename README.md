@@ -8,6 +8,8 @@ Overall details can be reviewed here: [MCUXpresso SDK Online Documentation](http
 
 Visit [RPMSG-Lite - Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/middleware/multicore/rpmsg-lite/README.html) to review details on the contents in this sub-repo.
 
+For Further API documentation, please look at [doxygen documentation](https://nxp-mcuxpresso.github.io/rpmsg-lite/)
+
 ## Setup
 Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest [Getting Started with SDK - Detailed Installation Instructions](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/installation.html#installation)
 
@@ -27,8 +29,6 @@ This documentation describes the RPMsg-Lite component, which is a lightweight im
 Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (OpenAMP) framework (https://github.com/OpenAMP/open-amp), the RPMsg-Lite offers a code size reduction, API simplification, and improved modularity. On smaller Cortex-M0+ based systems, it is recommended to use RPMsg-Lite.
 
 The RPMsg-Lite is an open-source component developed by NXP Semiconductors and released under the BSD-compatible license.
-
-For Further documentation, please look at doxygen documentation at: https://nxp-mcuxpresso.github.io/rpmsg-lite/
 
 For overview please read [RPMSG-Lite VirtIO Overview](doxygen/rpmsg_lite_overview.md).
 

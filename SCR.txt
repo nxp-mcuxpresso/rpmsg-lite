@@ -1,5 +1,5 @@
 Name: mcux-sdk-rpmsg-lite
-Version: v5.2.0
+Version: v5.2.1
 Outgoing License: BSD-3-Clause
 License File: LICENSE
 Format: source code
