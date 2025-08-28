@@ -74,6 +74,11 @@ int32_t virtqueue_create_static(uint16_t id,
     VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1U), status, ERROR_VRING_ALIGN);
     VQ_PARAM_CHK(ring->align > INT32_MAX, status, ERROR_VQUEUE_INVLD_PARAM);
 
+    if ((status == VQUEUE_SUCCESS) && (ring->align > (uint32_t)INT32_MAX))
+    {
+        status = ERROR_VQUEUE_INVLD_PARAM;
+    }
+
     if (status == VQUEUE_SUCCESS)
     {
         vq_size = sizeof(struct virtqueue);
@@ -133,6 +138,11 @@ int32_t virtqueue_create(uint16_t id,
     VQ_PARAM_CHK(ring->num_descs == 0U, status, ERROR_VQUEUE_INVLD_PARAM);
     VQ_PARAM_CHK(ring->num_descs & (ring->num_descs - 1U), status, ERROR_VRING_ALIGN);
     VQ_PARAM_CHK(ring->align > INT32_MAX, status, ERROR_VQUEUE_INVLD_PARAM);
+
+    if ((status == VQUEUE_SUCCESS) && (ring->align > (uint32_t)INT32_MAX))
+    {
+        status = ERROR_VQUEUE_INVLD_PARAM;
+    }
 
     if (status == VQUEUE_SUCCESS)
     {
@@ -617,7 +627,7 @@ static uint16_t vq_ring_add_buffer(
     /* Flush desc after write */
     VQUEUE_FLUSH(&desc[head_idx], sizeof(desc[head_idx]));
 
-    return (head_idx + 1U);
+    return ++head_idx;
 }
 
 /*!

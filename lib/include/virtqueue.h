@@ -173,7 +173,7 @@ typedef void vq_notify(struct virtqueue *vq);
     {                                                               \
         if (!(_exp))                                                \
         {                                                           \
-            env_print("%s: %s - "(_msg), __func__, (_vq)->vq_name); \
+            env_print("%s: %s - "_msg, __func__, (_vq)->vq_name);   \
             while (1)                                               \
             {                                                       \
             };                                                      \
