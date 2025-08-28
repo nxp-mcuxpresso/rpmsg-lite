@@ -14,6 +14,7 @@
  * Definitions
  ******************************************************************************/
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
+#define TEST_BUFFER_COUNT  (RL_BUFFER_COUNT)
 #define SH_MEM_TOTAL_SIZE (6144)
 #if defined(__ICCARM__) /* IAR Workbench */
 #pragma location = "rpmsg_sh_mem_section"
@@ -200,6 +201,53 @@ void tc_2_env_testing()
 #endif /*__COVERAGESCANNER__*/
 }
 
+// Test case: TX buffer allocation test
+// This Test allocates multiple TX buffers to exercise vq_ring_add_buffer functionality
+void tc_3_buffer_descriptor_test(void)
+{
+    int32_t result = 0;
+    void *tx_buffers[TEST_BUFFER_COUNT];
+    uint32_t buffer_size;
+    struct rpmsg_lite_instance *volatile my_rpmsg = NULL;
+    struct rpmsg_lite_instance rpmsg_ctxt;
+
+#ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
+    my_rpmsg = rpmsg_lite_master_init(rpmsg_lite_base, SH_MEM_TOTAL_SIZE, RPMSG_LITE_LINK_ID, RL_NO_FLAGS, &rpmsg_ctxt);
+#else
+    my_rpmsg = rpmsg_lite_master_init((void *)RPMSG_LITE_SHMEM_BASE, RPMSG_LITE_SHMEM_SIZE, RPMSG_LITE_LINK_ID,
+                                      RL_NO_FLAGS, &rpmsg_ctxt);
+#endif
+    TEST_ASSERT_MESSAGE(NULL != my_rpmsg, "rpmsg init failed");
+
+    // Allocate multiple TX buffers - this will exercise vq_ring_add_buffer
+    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
+    {
+        tx_buffers[i] = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_BLOCK);
+        TEST_ASSERT_MESSAGE(tx_buffers[i] != NULL, "Failed to allocate TX buffer");
+        TEST_ASSERT_MESSAGE(buffer_size > 0, "Buffer size should be greater than 0");
+    }
+
+    // Check that all allocated buffers have different addresses
+    // This verifies that the descriptor chain is working correctly
+    for (int i = 0; i < TEST_BUFFER_COUNT; i++)
+    {
+        for (int j = i + 1; j < TEST_BUFFER_COUNT; j++)
+        {
+            TEST_ASSERT_MESSAGE(tx_buffers[i] != tx_buffers[j],
+                               "Allocated buffers have same address - descriptor chain corrupted");
+        }
+    }
+
+    void *extra_buffer = rpmsg_lite_alloc_tx_buffer(my_rpmsg, &buffer_size, RL_DONT_BLOCK);
+    TEST_ASSERT_MESSAGE(extra_buffer == NULL,
+                       "Should not be able to allocate more buffers than available");
+
+
+    result = rpmsg_lite_deinit(my_rpmsg);
+    TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "deinit function failed");
+    TEST_ASSERT_MESSAGE(RL_SUCCESS != my_rpmsg, "deinit function failed");
+}
+
 void run_tests()
 {
 #ifdef __COVERAGESCANNER__
@@ -208,4 +256,5 @@ void run_tests()
 #endif /*__COVERAGESCANNER__*/
     RUN_EXAMPLE(tc_1_rpmsg_init, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
     RUN_EXAMPLE(tc_2_env_testing, MAKE_UNITY_NUM(k_unity_rpmsg, 1));
+    RUN_EXAMPLE(tc_3_buffer_descriptor_test, MAKE_UNITY_NUM(k_unity_rpmsg, 2));
 }
