@@ -71,7 +71,7 @@ static struct k_sem env_sema    = {0};
 static struct k_event env_event = {0};
 
 /* Max supported ISR counts */
-#define ISR_COUNT (32U)
+#define ISR_COUNT (64U)
 /*!
  * Structure to keep track of registered ISR's.
  */

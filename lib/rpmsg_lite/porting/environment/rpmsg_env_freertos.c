@@ -77,7 +77,7 @@ StaticEventGroup_t event_group_static_context;
 #define RL_ENV_MAX_MUTEX_COUNT (10)
 
 /* Max supported ISR counts */
-#define ISR_COUNT (32U)
+#define ISR_COUNT (64U)
 /*!
  * Structure to keep track of registered ISR's.
  */

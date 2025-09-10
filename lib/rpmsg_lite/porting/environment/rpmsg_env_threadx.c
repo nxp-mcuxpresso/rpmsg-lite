@@ -46,7 +46,7 @@ static TX_EVENT_FLAGS_GROUP event_group = {0};
 #endif
 
 /* Max supported ISR counts */
-#define ISR_COUNT (32U)
+#define ISR_COUNT (64U)
 /*!
  * Structure to keep track of registered ISR's.
  */

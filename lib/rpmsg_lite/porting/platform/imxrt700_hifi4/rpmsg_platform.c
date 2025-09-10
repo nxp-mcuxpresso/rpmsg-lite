@@ -20,6 +20,7 @@
 
 #include "fsl_device_registers.h"
 #include "fsl_mu.h"
+#include "fsl_inputmux.h"
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 #include "mcmgr.h"
@@ -29,7 +30,8 @@
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-static int32_t isr_counter     = 0;
+static int32_t isr_counter0 = 0; /* RL_PLATFORM_IMXRT700_M33_0_HIFI4_LINK_ID isr counter */
+static int32_t isr_counter1 = 0; /* RL_PLATFORM_IMXRT700_M33_1_HIFI4_LINK_ID isr counter */
 static int32_t disable_counter = 0;
 static void *platform_lock;
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -43,6 +45,21 @@ static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *
 }
 
 #else
+void MU2_A_IRQHandler(void *arg)
+{
+    uint32_t flags;
+    flags = MU_GetStatusFlags(MU2_MUA);
+    if (((uint32_t)kMU_GenInt0Flag & flags) != 0UL)
+    {
+        MU_ClearStatusFlags(MU2_MUA, (uint32_t)kMU_GenInt0Flag);
+        env_isr(RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID << 3U);
+    }
+    if (((uint32_t)kMU_GenInt1Flag & flags) != 0UL)
+    {
+        MU_ClearStatusFlags(MU2_MUA, (uint32_t)kMU_GenInt1Flag);
+        env_isr((uint32_t)(0x01U | (RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID << 3U)));
+    }
+}
 void MU4_B_IRQHandler(void *arg)
 {
     uint32_t flags;
@@ -69,12 +86,28 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
 
         env_lock_mutex(platform_lock);
 
-        RL_ASSERT(0 <= isr_counter);
-        if (isr_counter < 2)
+        switch (RL_GET_COM_ID(vector_id))
         {
-            MU_EnableInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+            case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
+                RL_ASSERT(0 <= isr_counter0);
+                if (isr_counter0 < 2)
+                {
+                    MU_EnableInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+                }
+                isr_counter0++;
+                break;
+            case RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID:
+                RL_ASSERT(0 <= isr_counter1);
+                if (isr_counter1 < 2)
+                {
+                    MU_EnableInterrupts(MU2_MUA, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+                }
+                isr_counter1++;
+                break;
+            default:
+                /* All the cases have been listed above, the default clause should not be reached. */
+                break;
         }
-        isr_counter++;
 
         env_unlock_mutex(platform_lock);
         return 0;
@@ -91,11 +124,27 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
     {
         env_lock_mutex(platform_lock);
 
-        RL_ASSERT(0 < isr_counter);
-        isr_counter--;
-        if (isr_counter < 2)
+        switch (RL_GET_COM_ID(vector_id))
         {
-            MU_DisableInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+            case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
+                RL_ASSERT(0 < isr_counter0);
+                isr_counter0--;
+                if (isr_counter0 < 2)
+                {
+                    MU_DisableInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+                }
+                break;
+            case RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID:
+                RL_ASSERT(0 < isr_counter1);
+                isr_counter1--;
+                if (isr_counter1 < 2)
+                {
+                    MU_DisableInterrupts(MU2_MUA, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+                }
+                break;
+            default:
+                /* All the cases have been listed above, the default clause should not be reached. */
+                break;
         }
 
         /* Unregister ISR from environment layer */
@@ -115,9 +164,31 @@ void platform_notify(uint32_t vector_id)
 {
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
-    (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
+    switch (RL_GET_COM_ID(vector_id))
+    {
+        case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
+            break;
+        case RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID:
+            (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)(vector_id & 0xFFFFU));
+            break;
+        default:
+            /* All the cases have been listed above, the default clause should not be reached. */
+            break;
+    }
 #else
-    (void)MU_TriggerInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+    switch (RL_GET_COM_ID(vector_id))
+    {
+        case RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID:
+            (void)MU_TriggerInterrupts(MU4_MUB, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+            break;
+        case RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID:
+            (void)MU_TriggerInterrupts(MU2_MUA, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
+            break;
+        default:
+            /* All the cases have been listed above, the default clause should not be reached. */
+            break;
+    }
 #endif
     env_unlock_mutex(platform_lock);
 }
@@ -175,8 +246,10 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
 #ifdef SDK_OS_BAREMETAL
     _xtos_interrupt_enable(DSP_INT0_SEL1_IRQn);
+    _xtos_interrupt_enable(DSP_INT0_SEL2_IRQn);
 #else
     xos_interrupt_enable(DSP_INT0_SEL1_IRQn);
+    xos_interrupt_enable(DSP_INT0_SEL2_IRQn);
 #endif
     disable_counter--;
     return 0;
@@ -198,8 +271,10 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
 
 #ifdef SDK_OS_BAREMETAL
     _xtos_interrupt_disable(DSP_INT0_SEL1_IRQn);
+    _xtos_interrupt_disable(DSP_INT0_SEL2_IRQn);
 #else
     xos_interrupt_disable(DSP_INT0_SEL1_IRQn);
+    xos_interrupt_disable(DSP_INT0_SEL2_IRQn);
 #endif
     disable_counter++;
     return 0;
@@ -304,12 +379,18 @@ int32_t platform_init(void)
         return -1;
     }
     #else
+    MU_Init(MU2_MUA);
     MU_Init(MU4_MUB);
     /* Register interrupt handler for MU_B on HiFi4 */
+    INPUTMUX_Init(INPUTMUX0);
+    INPUTMUX_AttachSignal(INPUTMUX0, 1U, kINPUTMUX_Mu4BToDspInterrupt);
+    INPUTMUX_AttachSignal(INPUTMUX0, 2U, kINPUTMUX_Mu2AToDspInterrupt);
 #ifdef SDK_OS_BAREMETAL
     _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, MU4_B_IRQHandler);
+    _xtos_set_interrupt_handler(DSP_INT0_SEL2_IRQn, MU2_A_IRQHandler);
 #else
     xos_register_interrupt_handler(DSP_INT0_SEL1_IRQn, MU4_B_IRQHandler, ((void *)0));
+    xos_register_interrupt_handler(DSP_INT0_SEL2_IRQn, MU2_A_IRQHandler, ((void *)0));
 #endif
 #endif
     return 0;
@@ -325,8 +406,10 @@ int32_t platform_deinit(void)
     MU_Deinit(MU4_MUB);
 #ifdef SDK_OS_BAREMETAL
     _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, ((void *)0));
+    _xtos_set_interrupt_handler(DSP_INT0_SEL2_IRQn, ((void *)0));
 #else
     xos_register_interrupt_handler(DSP_INT0_SEL1_IRQn, ((void *)0), ((void *)0));
+    xos_register_interrupt_handler(DSP_INT0_SEL2_IRQn, ((void *)0), ((void *)0));
 #endif
 
     /* Delete lock used in multi-instanced RPMsg */

@@ -34,7 +34,7 @@
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
 /* VQ_ID in imxrt700 is defined as follows:
- *   com_id:   [4:3] communication ID, used to identify the MU instance.
+ *   com_id:   [5:3] communication ID, used to identify the MU instance.
  *   vring_id: [2:1] vring ID, used to identify the vring.
  *   q_id:     [0:0] queue ID, used to identify the tvq or rvq.
  *   com_id + vring_id = link_id
@@ -52,8 +52,10 @@
 #define RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID (1U)
 #define RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID (2U)
 #define RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID  (3U)
+#define RL_PLATFORM_IMXRT700_M33_0_HIFI1_COM_ID (4U)
+#define RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID (5U)
 
-#define RL_PLATFORM_HIGHEST_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID, 0U)
+#define RL_PLATFORM_HIGHEST_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID, 0U)
 
 #define RL_PLATFORM_IMXRT700_M33_0_M33_1_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID, 0U)
 
@@ -62,6 +64,10 @@
 #define RL_PLATFORM_IMXRT700_M33_1_HIFI1_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID, 0U)
 
 #define RL_PLATFORM_IMXRT700_M33_0_EZHV_LINK_ID  RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID, 0U)
+
+#define RL_PLATFORM_IMXRT700_M33_0_HIFI1_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_HIFI1_COM_ID, 0U)
+
+#define RL_PLATFORM_IMXRT700_M33_1_HIFI4_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID, 0U)
 
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);
