@@ -54,6 +54,12 @@ typedef struct rpmsg_platform_shmem_config
  *   q_id:     [0:0] queue ID, used to identify the tvq or rvq.
  *   com_id + vring_id = link_id
  */
+
+ /* Maximum Number of ISR Count. It is determined by the VQ_ID bit field size. */
+#ifndef RL_PLATFORM_MAX_ISR_COUNT
+#define RL_PLATFORM_MAX_ISR_COUNT (32U)
+#endif
+
 #define RL_GET_VQ_ID(link_id, queue_id) (((queue_id)&0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))
 #define RL_GET_LINK_ID(vq_id)           (((vq_id)&0xFFFFFFFEU) >> 1U)
 #define RL_GET_Q_ID(vq_id)              ((vq_id)&0x1U)

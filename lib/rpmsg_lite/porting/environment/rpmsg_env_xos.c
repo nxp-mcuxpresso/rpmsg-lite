@@ -65,7 +65,7 @@ static struct XosEvent env_event = {0};
 #define RL_ENV_MAX_MUTEX_COUNT (10)
 
 /* Max supported ISR counts */
-#define ISR_COUNT (64U)
+#define ISR_COUNT RL_PLATFORM_MAX_ISR_COUNT
 /*!
  * Structure to keep track of registered ISR's.
  */

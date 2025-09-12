@@ -30,6 +30,11 @@ typedef struct rpmsg_platform_init_data
 /* define shared memory space for VRINGS per one channel */
 #define RL_VRING_OVERHEAD (2UL * VRING_SIZE)
 
+/* Maximum Number of ISR Count. It is determined by the VQ_ID bit field size. */
+#ifndef RL_PLATFORM_MAX_ISR_COUNT
+#define RL_PLATFORM_MAX_ISR_COUNT (32U)
+#endif
+
 /* platform interrupt related functions */
 int32_t platform_interrupt_enable(uint32_t vector_id);
 int32_t platform_interrupt_disable(uint32_t vector_id);

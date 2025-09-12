@@ -54,7 +54,7 @@
 static int32_t env_init_counter = 0;
 
 /* Max supported ISR counts */
-#define ISR_COUNT (64U)
+#define ISR_COUNT RL_PLATFORM_MAX_ISR_COUNT
 /*!
  * Structure to keep track of registered ISR's.
  */

@@ -62,7 +62,7 @@
 #include <sys/imx_rpmsg_lite.h>
 
 /* Max supported ISR counts */
-#define ISR_COUNT (64U)
+#define ISR_COUNT RL_PLATFORM_MAX_ISR_COUNT
 
 #if (!defined(RL_USE_ENVIRONMENT_CONTEXT)) || (RL_USE_ENVIRONMENT_CONTEXT != 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 1"

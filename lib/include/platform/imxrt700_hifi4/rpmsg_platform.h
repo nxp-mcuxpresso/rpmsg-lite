@@ -40,13 +40,18 @@
  *   com_id + vring_id = link_id
  */
 
-#define RL_GET_VQ_ID(link_id, queue_id) (((queue_id)&0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))
+/* Maximum Number of ISR Count. It is determined by the VQ_ID bit field size. */
+#ifndef RL_PLATFORM_MAX_ISR_COUNT
+#define RL_PLATFORM_MAX_ISR_COUNT (64U)
+#endif
+
+#define RL_GET_VQ_ID(link_id, queue_id) (((queue_id) & 0x1U) | (((link_id) << 1U) & 0xFFFFFFFEU))
 #define RL_GET_LINK_ID(vq_id)           ((vq_id) >> 1U)
 #define RL_GET_COM_ID(vq_id)            ((vq_id) >> 3U)
-#define RL_GET_Q_ID(vq_id)              ((vq_id)&0x1U)
+#define RL_GET_Q_ID(vq_id)              ((vq_id) & 0x1U)
 
 #define RL_GEN_LINK_ID(com_id, vring_id) (((com_id) << 2U) | (vring_id))
-#define RL_GEN_MU_MSG(vq_id)             (uint32_t)(((vq_id)&0x7U) << 16U) /* com_id is discarded in msg */
+#define RL_GEN_MU_MSG(vq_id)             (uint32_t)(((vq_id) & 0x7U) << 16U) /* com_id is discarded in msg */
 
 #define RL_PLATFORM_IMXRT700_M33_0_M33_1_COM_ID (0U)
 #define RL_PLATFORM_IMXRT700_M33_0_HIFI4_COM_ID (1U)
@@ -63,7 +68,7 @@
 
 #define RL_PLATFORM_IMXRT700_M33_1_HIFI1_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_1_HIFI1_COM_ID, 0U)
 
-#define RL_PLATFORM_IMXRT700_M33_0_EZHV_LINK_ID  RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID, 0U)
+#define RL_PLATFORM_IMXRT700_M33_0_EZHV_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID, 0U)
 
 #define RL_PLATFORM_IMXRT700_M33_0_HIFI1_LINK_ID RL_GEN_LINK_ID(RL_PLATFORM_IMXRT700_M33_0_HIFI1_COM_ID, 0U)
 
