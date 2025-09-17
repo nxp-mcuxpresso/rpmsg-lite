@@ -53,6 +53,8 @@ if(CONFIG_RPMSGLITE)
         else()
             message(FATAL_ERROR "Unsupported MIMXRT798S core: ${MCUX_DEVICE_CORE}")
         endif()
+    elseif("${CONFIG_CPU_CORTEX_A}" STREQUAL "y")
+        set(RPMSG_LITE_PLATFORM_PATH "aarch64")
     else()
         message(FATAL_ERROR "RPMSG-Lite Selected for unsupported platform: ${MCUX_DEVICE}")
     endif()
@@ -84,9 +86,15 @@ if(CONFIG_RPMSGLITE)
         )
     else(CONFIG_IPC_SERVICE_BACKEND_RPMSG_LITE)
         # This usualy means using RPMSG Lite lib as directly part of Zephyr Application
+        if (RPMSG_LITE_PLATFORM_PATH STREQUAL "aarch64")
+        list(APPEND _SOURCES
+            ${RPMSGLITE_DIR}/rpmsg_lite/porting/platform/${RPMSG_LITE_PLATFORM_PATH}/rpmsg_platform.c
+        )
+        else()
         list(APPEND _SOURCES
             ${RPMSGLITE_DIR}/rpmsg_lite/porting/platform/${RPMSG_LITE_PLATFORM_PATH}/rpmsg_platform_zephyr_ipm.c
         )
+        endif()
         list(APPEND _INCLUDES
             ${RPMSGLITE_DIR}/include/platform/${RPMSG_LITE_PLATFORM_PATH}
         )
