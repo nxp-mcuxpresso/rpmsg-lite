@@ -26,7 +26,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign">
-   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.2.0</span>
+   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.2.1</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -101,6 +101,7 @@ Overview</h1>
 Documentation</h1>
 <p>Overall details can be reviewed here: <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/introduction/README.html">MCUXpresso SDK Online Documentation</a></p>
 <p>Visit <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/middleware/multicore/rpmsg-lite/README.html">RPMSG-Lite - Documentation</a> to review details on the contents in this sub-repo.</p>
+<p>For Further API documentation, please look at <a href="https://nxp-mcuxpresso.github.io/rpmsg-lite/">doxygen documentation</a></p>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Setup</h1>
 <p>Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/installation.html#installation">Getting Started with SDK - Detailed Installation Instructions</a></p>
@@ -114,7 +115,8 @@ RPMSG-Lite</h1>
 <p>This documentation describes the RPMsg-Lite component, which is a lightweight implementation of the Remote Processor Messaging (RPMsg) protocol. The RPMsg protocol defines a standardized binary interface used to communicate between multiple cores in a heterogeneous multicore system.</p>
 <p>Compared to the RPMsg implementation of the Open Asymmetric Multi Processing (OpenAMP) framework (<a href="https://github.com/OpenAMP/open-amp">https://github.com/OpenAMP/open-amp</a>), the RPMsg-Lite offers a code size reduction, API simplification, and improved modularity. On smaller Cortex-M0+ based systems, it is recommended to use RPMsg-Lite.</p>
 <p>The RPMsg-Lite is an open-source component developed by NXP Semiconductors and released under the BSD-compatible license.</p>
-<p>For Further documentation, please look at doxygen documentation at: <a href="https://nxp-mcuxpresso.github.io/rpmsg-lite/">https://nxp-mcuxpresso.github.io/rpmsg-lite/</a></p>
+<p>For overview please read RPMSG-Lite VirtIO Overview.</p>
+<p>For RPMSG-Lite Design Considerations please read RPMSG-Lite Design Considerations.</p>
 <h2><a class="anchor" id="autotoc_md7"></a>
 Motivation to create RPMsg-Lite</h2>
 <p>There are multiple reasons why RPMsg-Lite was developed. One reason is the need for the small footprint of the RPMsg protocol-compatible communication component, another reason is the simplification of extensive API of OpenAMP RPMsg implementation.</p>
