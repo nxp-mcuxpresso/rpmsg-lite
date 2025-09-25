@@ -34,7 +34,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "rpmsg_default_config.h"
-typedef uint8_t boolean;
 
 #include "virtio_ring.h"
 #include "llist.h"
@@ -135,10 +134,10 @@ struct virtqueue
     uint16_t vq_available_idx;
     /* } 16bit aligned */
 
-    boolean avail_read;  /* 8bit wide */
-    boolean avail_write; /* 8bit wide */
-    boolean used_read;   /* 8bit wide */
-    boolean used_write;  /* 8bit wide */
+    bool avail_read;  /* 8bit wide */
+    bool avail_write; /* 8bit wide */
+    bool used_read;   /* 8bit wide */
+    bool used_write;  /* 8bit wide */
 
     uint16_t padd;       /* aligned to 32bits after this: */
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- virtio.h removed `typedef uint8_t boolean` and in its place use standard C99 `bool` type to avoid potential type conflicts.
+
 ### Added
 
 - RT700 porting layer added support to send rpmsg messages between CM33_0 <-> Hifi1 and CM33_1 <-> Hifi4 cores.
