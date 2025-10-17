@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -72,14 +72,23 @@ void platform_time_delay(uint32_t num_msec);
 void platform_map_mem_region(uint32_t vrt_addr, uint32_t phy_addr, uint32_t size, uint32_t flags);
 void platform_cache_all_flush_invalidate(void);
 void platform_cache_disable(void);
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
 void platform_cache_invalidate(void *data, uint32_t len);
 void platform_cache_flush(void *data, uint32_t len);
+#endif /* defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1) */
 uintptr_t platform_vatopa(void *addr);
 void *platform_patova(uintptr_t addr);
 
 /* platform init/deinit */
 int32_t platform_init(void);
 int32_t platform_deinit(void);
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+
+#define RL_PLATFORM_BUFFER_PAYLOAD_SIZE_M33_M33_COM (496U)
+#define RL_PLATFORM_BUFFER_COUNT_M33_M33_COM        (4U)
+#define RL_PLATFORM_VRING_SIZE_M33_M33_COM          (0x80U)
+#define RL_PLATFORM_VRING_ALIGN_M33_M33_COM         (0x10U)
 
 /*!
  * \brief Set static shared memory configuration from application core in SMU2 to be accessible from cm33_core1 later.
@@ -98,5 +107,6 @@ void platform_set_static_shmem_config(void);
  * \return int 0 if success, other if error.
  */
 uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config);
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
 #endif /* RPMSG_PLATFORM_H_ */
