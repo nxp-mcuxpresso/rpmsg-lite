@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "rpmsg_platform.h"
 #include "rpmsg_lite.h"
 
 #include "rpmsg_env.h"

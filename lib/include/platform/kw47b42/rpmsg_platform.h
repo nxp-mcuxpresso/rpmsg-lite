@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include "virtio_ring.h"
+#include "rpmsg_default_config.h"
 
 /*
  * No need to align the VRING as defined in Linux because KW47B42 is not intended

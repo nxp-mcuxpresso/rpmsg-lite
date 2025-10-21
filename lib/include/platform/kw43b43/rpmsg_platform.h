@@ -7,6 +7,7 @@
 #define RPMSG_PLATFORM_H_
 
 #include <stdint.h>
+#include "rpmsg_default_config.h"
 
 /*
  * No need to align the VRING as defined in Linux because kw43b43 is not intended

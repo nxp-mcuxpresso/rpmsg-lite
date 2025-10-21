@@ -7,6 +7,7 @@
 #define RPMSG_PLATFORM_H_
 
 #include <stdint.h>
+#include "rpmsg_default_config.h"
 
 typedef struct rpmsg_platform_shmem_config
 {
