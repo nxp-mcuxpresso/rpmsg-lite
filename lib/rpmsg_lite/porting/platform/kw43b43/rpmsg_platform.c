@@ -34,6 +34,8 @@ static void *platform_lock;
 static LOCK_STATIC_CONTEXT platform_lock_static_ctxt;
 #endif
 
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
+
 /* This structure is used to validate that shmem config that is stored in SMU2 is valid */
 typedef struct rpmsg_platform_shmem_config_protected
 {
@@ -44,11 +46,12 @@ typedef struct rpmsg_platform_shmem_config_protected
 
 static const uint8_t ShmemConfigIdentifier[RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH] = {"SMEM_CONFIG:"};
 
-/* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by cm33_core1 */
+/* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protected_structure);
 
 static uint32_t first_time                        = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 static void mcmgr_event_handler(mcmgr_core_t coreNum, uint16_t vring_idx, void *context)
@@ -309,6 +312,7 @@ void platform_cache_disable(void)
 {
 }
 
+#if defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1)
 /**
  * platform_cache_flush
  *
@@ -328,6 +332,7 @@ void platform_cache_flush(void *data, uint32_t len)
 void platform_cache_invalidate(void *data, uint32_t len)
 {
 }
+#endif /* defined(RL_USE_DCACHE) && (RL_USE_DCACHE == 1) */
 
 /**
  * platform_vatopa
@@ -397,19 +402,21 @@ int32_t platform_deinit(void)
     return 0;
 }
 
+
+#if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
 void platform_set_static_shmem_config(void)
 {
     extern uint32_t rpmsg_sh_mem_start[];
     rpmsg_platform_shmem_config_protected_t protec_shmem_struct;
 
-    /* Identifier at the beginning of the structure that will be used to verify on cm33_core1 side validity of the structure */
+    /* Identifier at the beginning of the structure that will be used to verify on nbu side validity of the structure */
     memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
 
     /* Fill shared memory structure with setting from the app core */
-    protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
-    protec_shmem_struct.config.buffer_count        = RL_BUFFER_COUNT;
-    protec_shmem_struct.config.vring_size          = VRING_SIZE;
-    protec_shmem_struct.config.vring_align         = VRING_ALIGN;
+    protec_shmem_struct.config.buffer_payload_size = RL_PLATFORM_BUFFER_PAYLOAD_SIZE_M33_NBU_COM;
+    protec_shmem_struct.config.buffer_count        = RL_PLATFORM_BUFFER_COUNT_M33_NBU_COM;
+    protec_shmem_struct.config.vring_size          = RL_PLATFORM_VRING_SIZE_M33_NBU_COM;
+    protec_shmem_struct.config.vring_align         = RL_PLATFORM_VRING_ALIGN_M33_NBU_COM;
 
     /* Calculate and set CRC of the strucuture */
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
@@ -494,3 +501,4 @@ static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_conf
     }
     return computedCRC;
 }
+#endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
