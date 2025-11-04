@@ -1180,7 +1180,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
         (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + 2U * shmem_config.vring_size);
     rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
                                                                            2U * shmem_config.vring_size,
-                                                                           (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+                                                                           (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL));
 #else
     rpmsg_lite_dev->sh_mem_base = (char *)RL_WORD_ALIGN_UP((uintptr_t)(char *)shmem_addr + (uint32_t)RL_VRING_OVERHEAD);
     rpmsg_lite_dev->sh_mem_remaining = RL_CALCULATE_BUFFER_COUNT_DOWN_SAFE(shmem_length,
@@ -1291,7 +1291,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             buffer = (rpmsg_lite_dev->sh_mem_remaining > 0U) ?
                          (rpmsg_lite_dev->sh_mem_base +
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-                          (uint32_t)(shmem_config.buffer_payload_size + 16UL) *
+                          (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL) *
                               (rpmsg_lite_dev->sh_mem_total - rpmsg_lite_dev->sh_mem_remaining--)) :
 #else
                           (uint32_t)RL_BUFFER_SIZE *
@@ -1302,7 +1302,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             RL_ASSERT(buffer != RL_NULL);
             uint32_t buff_size = 0;
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
-            buff_size = (uint32_t)(shmem_config.buffer_payload_size + 16UL);
+            buff_size = (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL);
             env_memset(buffer, 0x00, buff_size);
             env_cache_flush(buffer, buff_size);
 #else
@@ -1314,7 +1314,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             {
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
                 status =
-                    virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+                    virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL));
 #else
                 status = virtqueue_fill_avail_buffers(vqs[j], buffer, (uint32_t)RL_BUFFER_SIZE);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
@@ -1327,7 +1327,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             {
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
                 status =
-                    virtqueue_fill_used_buffers(vqs[j], buffer, (uint32_t)(shmem_config.buffer_payload_size + 16UL));
+                    virtqueue_fill_used_buffers(vqs[j], buffer, (uint32_t)RL_WORD_ALIGN_UP(shmem_config.buffer_payload_size + 16UL));
 #else
                 status = virtqueue_fill_used_buffers(vqs[j], buffer, (uint32_t)RL_BUFFER_SIZE);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
