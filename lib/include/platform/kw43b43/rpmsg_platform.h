@@ -85,11 +85,6 @@ int32_t platform_deinit(void);
 
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
 
-#define RL_PLATFORM_BUFFER_PAYLOAD_SIZE_M33_NBU_COM (496U)
-#define RL_PLATFORM_BUFFER_COUNT_M33_NBU_COM        (4U)
-#define RL_PLATFORM_VRING_SIZE_M33_NBU_COM          (0x80U)
-#define RL_PLATFORM_VRING_ALIGN_M33_NBU_COM         (0x10U)
-
 /*!
  * \brief Set static shared memory configuration from application core in SMU2 to be accessible from nbu later.
  *

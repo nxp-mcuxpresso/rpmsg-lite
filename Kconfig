@@ -64,7 +64,6 @@ if MCUX_COMPONENT_middleware.multicore.rpmsg-lite
         config RL_BUFFER_PAYLOAD_SIZE
             int "RL_BUFFER_PAYLOAD_SIZE_VALUE"
             default 496
-            depends on !RL_ALLOW_CUSTOM_SHMEM_CONFIG
             help
                 No prefix in generated macro
                 Size of the buffer payload, it must be more then 0.
@@ -77,7 +76,6 @@ if MCUX_COMPONENT_middleware.multicore.rpmsg-lite
         config RL_BUFFER_COUNT
             int "RL_BUFFER_COUNT_VALUE"
             default 2
-            depends on !RL_ALLOW_CUSTOM_SHMEM_CONFIG
             help
                 No prefix in generated macro
                 Number of the buffers, it must be power of two (2, 4, ...).

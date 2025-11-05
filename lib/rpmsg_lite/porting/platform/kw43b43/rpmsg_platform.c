@@ -413,10 +413,10 @@ void platform_set_static_shmem_config(void)
     memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
 
     /* Fill shared memory structure with setting from the app core */
-    protec_shmem_struct.config.buffer_payload_size = RL_PLATFORM_BUFFER_PAYLOAD_SIZE_M33_NBU_COM;
-    protec_shmem_struct.config.buffer_count        = RL_PLATFORM_BUFFER_COUNT_M33_NBU_COM;
-    protec_shmem_struct.config.vring_size          = RL_PLATFORM_VRING_SIZE_M33_NBU_COM;
-    protec_shmem_struct.config.vring_align         = RL_PLATFORM_VRING_ALIGN_M33_NBU_COM;
+    protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
+    protec_shmem_struct.config.buffer_count        = RL_BUFFER_COUNT;
+    protec_shmem_struct.config.vring_size          = VRING_SIZE;
+    protec_shmem_struct.config.vring_align         = VRING_ALIGN;
 
     /* Calculate and set CRC of the strucuture */
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
