@@ -277,7 +277,10 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw47b42
     bool
     default y
     select MCUX_COMPONENT_driver.imu
-    depends on MCUX_HW_DEVICE_KW47B42ZB7 || MCUX_HW_DEVICE_KW47B42Z97 || MCUX_HW_DEVICE_KW47B42Z83
+    depends on  MCUX_HW_DEVICE_KW47B42ZB7 || MCUX_HW_DEVICE_KW47B42ZB6 ||\
+                MCUX_HW_DEVICE_KW47B42ZB3 || MCUX_HW_DEVICE_KW47B42ZB2 ||\
+                MCUX_HW_DEVICE_KW47B42Z83 || MCUX_HW_DEVICE_KW47B42Z96 ||\
+                MCUX_HW_DEVICE_KW47B42Z97
     help
         "RPMSG-Lite Porting Layer for KW47B42 EVK"
 
