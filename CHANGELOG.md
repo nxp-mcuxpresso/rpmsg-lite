@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - virtio.h removed `typedef uint8_t boolean` and in its place use standard C99 `bool` type to avoid potential type conflicts.
 - env_acquire_sync_lock() and env_release_sync_lock() synchronization primitives removed
 - Kconfig consolidation, when RL_ALLOW_CUSTOM_SHMEM_CONFIG enabled the platform_get_custom_shmem_config() function needs to be implemented in platform layer to provide custom shared memory configuration for RPMsg-Lite instance.
+- Fixed CERT EXP34-C by adding `__attribute__((noreturn))` to `RL_HANG(void)` function.
 
 ## [v5.2.1]
 

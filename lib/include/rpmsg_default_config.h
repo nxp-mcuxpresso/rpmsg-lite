@@ -182,7 +182,7 @@
  * RL_HANG not reachable in unit tests when own RL_ASSERT implementation used.
  */
 /* GCOVR_EXCL_START */
-static inline void RL_HANG(void)
+__attribute__((noreturn)) static inline void RL_HANG(void)
 {
     for (;;)
     {
