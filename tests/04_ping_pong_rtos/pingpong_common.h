@@ -42,7 +42,7 @@
 
 #define EP_SIGNATURE (('H' << 24) | ('D' << 16) | ('O' << 8) | ('D' << 0))
 
-#define RPMSG_LITE_NS_ANNOUNCE_STRING "rpmsg-test-channel"
+#define TEST_RL_NS_ANNOUNCE_STRING "rpmsg-test-channel"
 
 typedef struct control_message
 {

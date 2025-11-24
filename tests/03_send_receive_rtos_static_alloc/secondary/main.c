@@ -29,7 +29,7 @@
 #define DATA_LEN 45
 #define TC_LOCAL_EPT_ADDR (30)
 #define TC_REMOTE_EPT_ADDR (40)
-#define RPMSG_LITE_NS_ANNOUNCE_STRING "rpmsg-test-channel"
+#define TEST_RL_NS_ANNOUNCE_STRING "rpmsg-test-channel"
 
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
 #define SH_MEM_TOTAL_SIZE (6144)
@@ -410,7 +410,7 @@ void run_tests(void *unused)
     TEST_ASSERT_MESSAGE(0 == result, "negative number");
     result = ts_create_epts(&my_queue, &my_rpmsg_queue_storage[0], &my_queue_ctxt, &my_ept, &my_ept_ctxt, 1, TC_LOCAL_EPT_ADDR);
     TEST_ASSERT_MESSAGE(0 == result, "negative number");
-    TEST_ASSERT_MESSAGE(RL_SUCCESS == rpmsg_ns_announce(my_rpmsg, my_ept, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE), "'rpmsg_ns_announce' failed");
+    TEST_ASSERT_MESSAGE(RL_SUCCESS == rpmsg_ns_announce(my_rpmsg, my_ept, TEST_RL_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE), "'rpmsg_ns_announce' failed");
 
     if (!result)
     {

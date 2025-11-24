@@ -23,7 +23,7 @@
 #define TRYSEND_COUNT 12
 #define TC_LOCAL_EPT_ADDR (30)
 #define TC_REMOTE_EPT_ADDR (40)
-#define RPMSG_LITE_NS_ANNOUNCE_STRING "rpmsg-test-channel"
+#define TEST_RL_NS_ANNOUNCE_STRING "rpmsg-test-channel"
 
 #define SH_MEM_TOTAL_SIZE (6144)
 #ifndef SH_MEM_NOT_TAKEN_FROM_LINKER
@@ -349,7 +349,7 @@ void run_tests(void *unused)
     // create auxiliary endpoint that does not consume messages
     aux_ept = rpmsg_lite_create_ept(my_rpmsg, TC_LOCAL_EPT_ADDR+2, aux_ept_cb, NULL, &aux_ept_ctxt);
 
-    TEST_ASSERT_MESSAGE(RL_SUCCESS == rpmsg_ns_announce(my_rpmsg, my_ept, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE), "'rpmsg_ns_announce' failed");
+    TEST_ASSERT_MESSAGE(RL_SUCCESS == rpmsg_ns_announce(my_rpmsg, my_ept, TEST_RL_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE), "'rpmsg_ns_announce' failed");
 
     if (!result)
     {

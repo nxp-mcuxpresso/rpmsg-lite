@@ -169,7 +169,7 @@ void tc_1_create_delete_ep_cmd_responder(void)
     // invalid params for rpmsg_ns_announce
     result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, RL_NULL, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_ns_announce' with bad ept_name param failed");
-    result = rpmsg_ns_announce(my_rpmsg, RL_NULL, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
+    result = rpmsg_ns_announce(my_rpmsg, RL_NULL, TEST_RL_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == result, "'rpmsg_ns_announce' with bad new_ept param failed");
 
     // send invalid NS message to the RL_NS_EPT_ADDR - wrong paylod_len identified in the ns cb and the message is dropped (condition coverage increase)
@@ -178,7 +178,7 @@ void tc_1_create_delete_ep_cmd_responder(void)
     /* wait for a while to allow the primary side to bind_ns and register the NS callback */
     env_sleep_msec(200);
     // send correct NS message
-    result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
+    result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, TEST_RL_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "'rpmsg_ns_announce' failed");
 
     result = env_create_mutex(&mutex, 1, NULL);
@@ -317,7 +317,7 @@ void tc_2_send_cmd_responder(void)
         goto end;
 
     // send NS message
-    result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, RPMSG_LITE_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
+    result = rpmsg_ns_announce(my_rpmsg, ctrl_ept, TEST_RL_NS_ANNOUNCE_STRING, (uint32_t)RL_NS_CREATE);
     TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "'rpmsg_ns_announce' failed");
 
     data_send_param = env_allocate_memory(sizeof(struct control_message_data_send_param));
