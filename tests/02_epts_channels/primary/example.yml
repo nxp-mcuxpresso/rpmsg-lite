@@ -8,7 +8,6 @@ test_02_epts_channels_primary_core:
   use_sysbuild: true
   section-type: 'application'
   contents:
-    meta_path: middleware/multicore/rpmsg-lite/tests/02_epts_channels/primary
     project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/02_epts_channels/${multicore_foldername}
     document:
       name: test_02_epts_channels_primary_core

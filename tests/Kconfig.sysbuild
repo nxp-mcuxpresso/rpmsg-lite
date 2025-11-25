@@ -1,7 +1,15 @@
 #
-# Copyright 2024 NXP
+# Copyright 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
+
+config dsp_board
+    string
+    default "$(board)"
+
+config dsp_toolchain
+    string
+    default "xtensa"
 
 config secondary_board
     string

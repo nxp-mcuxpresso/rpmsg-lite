@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+test_04_ping_pong_dsp_fusionf1:
+  skip_build: true
+  section-type: 'application'
+  contents:
+    project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/04_ping_pong_dsp/${multicore_foldername}/
+    document:
+      name: test_04_ping_pong_dsp_fusionf1
+      category: multicore_tests
+      brief: 04_ping_pong_dsp test suite
+        - baremetal project, static allocation used (#define RL_USE_STATIC_API (1) in rpmsg_config.h)
+        - test ping pong functionality
+        - test name service announcement functionality
+  boards:
+    evkmimxrt595@fusionf1:
+    - +xtensa@debug
+    - +xtensa@release

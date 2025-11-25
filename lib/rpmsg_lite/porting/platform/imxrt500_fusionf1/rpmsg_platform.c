@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -158,9 +158,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     RL_ASSERT(0 < disable_counter);
 
 #ifdef SDK_OS_BAREMETAL
-    _xtos_interrupt_enable(6);
+    _xtos_interrupt_enable(DSP_INT0_SEL1_IRQn);
 #else
-    xos_interrupt_enable(6);
+    xos_interrupt_enable(DSP_INT0_SEL1_IRQn);
 #endif
     disable_counter--;
     return 0;
@@ -181,9 +181,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     RL_ASSERT(0 <= disable_counter);
 
 #ifdef SDK_OS_BAREMETAL
-    _xtos_interrupt_disable(6);
+    _xtos_interrupt_disable(DSP_INT0_SEL1_IRQn);
 #else
-    xos_interrupt_disable(6);
+    xos_interrupt_disable(DSP_INT0_SEL1_IRQn);
 #endif
     disable_counter++;
     return 0;
@@ -227,6 +227,7 @@ void platform_cache_disable(void)
  */
 void platform_cache_flush(void *data, uint32_t len)
 {
+    xthal_dcache_region_writeback(data, len);
 }
 
 /**
@@ -237,6 +238,7 @@ void platform_cache_flush(void *data, uint32_t len)
  */
 void platform_cache_invalidate(void *data, uint32_t len)
 {
+    xthal_dcache_region_invalidate(data, len);
 }
 
 /**
@@ -280,9 +282,9 @@ int32_t platform_init(void)
 
     /* Register interrupt handler for MU_B on HiFi4 */
 #ifdef SDK_OS_BAREMETAL
-    _xtos_set_interrupt_handler(6, MU_B_IRQHandler);
+    _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, MU_B_IRQHandler);
 #else
-    xos_register_interrupt_handler(6, MU_B_IRQHandler, ((void *)0));
+    xos_register_interrupt_handler(DSP_INT0_SEL1_IRQn, MU_B_IRQHandler, ((void *)0));
 #endif
 
     return 0;
@@ -296,9 +298,9 @@ int32_t platform_init(void)
 int32_t platform_deinit(void)
 {
 #ifdef SDK_OS_BAREMETAL
-    _xtos_set_interrupt_handler(6, ((void *)0));
+    _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, ((void *)0));
 #else
-    xos_register_interrupt_handler(6, ((void *)0), ((void *)0));
+    xos_register_interrupt_handler(DSP_INT0_SEL1_IRQn, ((void *)0), ((void *)0));
 #endif
 
     /* Delete lock used in multi-instanced RPMsg */

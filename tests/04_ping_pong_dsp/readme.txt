@@ -1,0 +1,7 @@
+04_ping_pong_dsp test suite
+
+ - baremetal project, static allocation used (#define RL_USE_STATIC_API (1) in rpmsg_config.h)
+
+ - test ping pong functionality
+
+- test name service announcement functionality

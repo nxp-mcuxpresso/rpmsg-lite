@@ -8,7 +8,6 @@ test_04_ping_pong_secondary_core:
   skip_build: true
   section-type: 'application'
   contents:
-    meta_path: middleware/multicore/rpmsg-lite/tests/04_ping_pong/secondary
     project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/04_ping_pong/${multicore_foldername}/
     document:
       name: test_04_ping_pong_secondary_core

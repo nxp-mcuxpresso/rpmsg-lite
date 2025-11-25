@@ -15,7 +15,11 @@
 #include "app.h"
 #if defined(FSL_FEATURE_MU_SIDE_A) || defined(FSL_FEATURE_MAILBOX_SIDE_A) || \
     (defined(IMU_CPU_INDEX) && (IMU_CPU_INDEX == 1U))
+#if defined(CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER) && ( CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER == 1 )
 #include "mcmgr.h"
+#else
+#include "fsl_mu.h"
+#endif
 #include "fsl_debug_console.h"
 #endif
 
@@ -96,9 +100,11 @@ void setUp(void)
 void tearDown(void)
 {
 }
+#if defined(CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER) && ( CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER == 1 )
 __attribute__ ((weak)) void McmgrAppEventHandler(mcmgr_core_t coreNum, uint16_t eventData, void *context)
 {
 }
+#endif
 
 /* This function is used for the Corn test automation framework
    to breakpoint/stop the execution and to capture results
@@ -141,6 +147,7 @@ void run_test_suite(void *unused)
     invalidate_cache_for_core1_image_memory(CORE1_BOOT_ADDRESS, core1_image_size);
 #endif /* APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY */
 
+#if defined(CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER) && ( CONFIG_RL_USE_MCMGR_IPC_ISR_HANDLER == 1 )
     /* Initialize MCMGR before calling its API */
     MCMGR_Init();
 
@@ -158,8 +165,27 @@ void run_test_suite(void *unused)
     /* Wait for remote side to come up. This delay is arbitrary and may
     * need adjustment for different configuration of remote systems */
     env_sleep_msec(1000);
-#endif
 
+#endif
+#else
+#if defined(MUA)
+
+    /* MUA init - must be called before BOARD_DSP_Init() otherwise the MUB on the DSP core is not enabled 
+     and the MU interrupt is not registerred correctly when the DSP core runs (writing to MUB registers
+     is not possible when the MUA is not initialized before). */
+    MU_Init(MUA);
+
+    PRINTF("Starting Secondary core.\r\n");
+
+    /* Start dsp firmware */
+    BOARD_DSP_Init();
+
+    /* Wait for remote side to come up. This delay is arbitrary and may
+    * need adjustment for different configuration of remote systems */
+    env_sleep_msec(1000);
+
+#endif
+#endif
     UnityBegin();
     run_tests(NULL);
     UnityEnd();
@@ -239,6 +265,14 @@ int main(void)
 
     /* Enter the ThreadX kernel.  */
     tx_kernel_enter();
+    return 0;
+}
+#elif defined(FSL_RTOS_XOS)
+int main(void)
+{
+    BOARD_InitHardware();
+    xos_start_main("main", 7, 0);
+    run_test_suite(NULL);
     return 0;
 }
 #else
