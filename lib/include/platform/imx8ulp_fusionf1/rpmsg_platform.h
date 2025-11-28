@@ -103,7 +103,7 @@ void *platform_patova(uintptr_t addr);
 
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
 #define RL_PLATFORM_BUFFER_PAYLOAD_SIZE_COMMON    (496U)
-#define RL_PLATFORM_BUFFER_COUNT_COMMON           (2U)
+#define RL_PLATFORM_BUFFER_COUNT_COMMON(link_id)  ((((link_id) == 0U) || ((link_id) == 1U)) ? 256U : 2U)
 
 #define RL_VRING_SIZE_M33_FUSION_DSP_COM (0x400UL)
 
