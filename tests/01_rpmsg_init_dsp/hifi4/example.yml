@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+test_01_rpmsg_init_dsp_hifi4:
+  skip_build: true
+  section-type: 'application'
+  contents:
+    project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/01_rpmsg_init_dsp/${multicore_foldername}/
+    document:
+      name: test_01_rpmsg_init_dsp_hifi4
+      category: multicore_tests
+      brief: 01_rpmsg_init test suite
+        - baremetal project, static allocation used (#define RL_USE_STATIC_API (1) in rpmsg_config.h)
+
+        - check multiple rpmsg initialization and de-initialization
+        - check created default channel and state
+        - check callbacks
+  boards:
+    evkmimxrt685@hifi4:
+    - +xtensa@debug
+    - +xtensa@release

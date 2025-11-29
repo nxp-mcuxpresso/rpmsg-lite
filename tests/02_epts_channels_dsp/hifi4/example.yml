@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+test_02_epts_channels_dsp_hifi4:
+  skip_build: true
+  section-type: 'application'
+  contents:
+    project-root-path: boards/${board}/middleware/multicore/rpmsg-lite/tests/02_epts_channels_dsp/${multicore_foldername}/
+    document:
+      name: test_02_epts_channels_dsp_hifi4
+      category: multicore_tests
+      brief: 02_epts_channels_dsp test suite
+        - baremetal project, static allocation used (#define RL_USE_STATIC_API (1) in rpmsg_config.h)
+
+        - send user data through default channel
+        - create several custom epts and send data through them
+  boards:
+    evkmimxrt685@hifi4:
+    - +xtensa@debug
+    - +xtensa@release
