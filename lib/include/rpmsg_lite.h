@@ -59,11 +59,11 @@ extern "C" {
 #define RL_WORD_SIZE (sizeof(uint32_t))
 /*! @brief Align a value up to the next multiple of the word size */
 #define RL_WORD_ALIGN_UP(a)                                                                                  \
-    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
-                                                        ((uintptr_t)(a)))
+    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? ((((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) + 4U) : \
+                                                        ((uint32_t)(a)))
 /*! @brief Align a value down to a multiple of the word size */
 #define RL_WORD_ALIGN_DOWN(a) \
-    (((((uintptr_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uintptr_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uintptr_t)(a)))
+    (((((uint32_t)(a)) & (RL_WORD_SIZE - 1U)) != 0U) ? (((uint32_t)(a)) & (~(RL_WORD_SIZE - 1U))) : ((uint32_t)(a)))
 
 /* Definitions for device types , null pointer, etc.*/
 /*! @brief Success status code */
@@ -87,7 +87,7 @@ extern "C" {
 /*! @brief Don't block and return immediately */
 #define RL_DONT_BLOCK (0)
 /*! @brief Block until the operation is complete */
-#define RL_BLOCK      (~0UL)
+#define RL_BLOCK      (0xFFFFFFFFU)
 
 /* Error macros. */
 /*! @brief Base value for all RPMsg-Lite error codes */
@@ -113,43 +113,6 @@ extern "C" {
 /*! @brief No initialization flags */
 #define RL_NO_FLAGS (0U)
 
-/*!
- * @brief Reserved field structure used in rpmsg_std_hdr
- *
- * This structure holds the idx and totlen of a buffer that is not immediately
- * returned to the vring in the receive callback function. This allows the no-copy API
- * to use this field to return the buffer later.
- */
- struct rpmsg_hdr_reserved
-{
-    uint16_t rfu; /* reserved for future usage */
-    uint16_t idx;
-};
-
-RL_PACKED_BEGIN
-/*!
- * Common header for all rpmsg messages.
- * Every message sent/received on the rpmsg bus begins with this header.
- */
-struct rpmsg_std_hdr
-{
-    uint32_t src;                       /*!< source endpoint address */
-    uint32_t dst;                       /*!< destination endpoint address */
-    struct rpmsg_hdr_reserved reserved; /*!< reserved for future use */
-    uint16_t len;                       /*!< length of payload (in bytes) */
-    uint16_t flags;                     /*!< message flags */
-} /*! @brief End of packed structure */ RL_PACKED_END;
-
-RL_PACKED_BEGIN
-/*!
- * Common message structure.
- * Contains the header and the payload.
- */
-struct rpmsg_std_msg
-{
-    struct rpmsg_std_hdr hdr; /*!< RPMsg message header */
-    uint8_t data[1];          /*!< bytes of message payload data */
-} RL_PACKED_END;
 
 /*! \typedef rl_ept_rx_cb_t
     \brief Receive callback function type.
@@ -352,7 +315,7 @@ int32_t rpmsg_lite_send(struct rpmsg_lite_instance *rpmsg_lite_dev,
                         uint32_t dst,
                         char *data,
                         uint32_t size,
-                        uintptr_t timeout);
+                        uint32_t timeout);
 
 /*!
  * @brief Function to get the link state
@@ -406,7 +369,7 @@ int32_t rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev,
  *
  * @see rpmsg_lite_send_nocopy
  */
-void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uintptr_t timeout);
+void *rpmsg_lite_alloc_tx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t *size, uint32_t timeout);
 
 /*!
  * @brief Sends a message in tx buffer allocated by rpmsg_lite_alloc_tx_buffer()

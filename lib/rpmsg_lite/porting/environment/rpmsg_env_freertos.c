@@ -91,15 +91,6 @@ static struct isr_info isr_table[ISR_COUNT];
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 0"
 #endif
 
-#if defined(AARCH64)
-extern uint64_t ullPortInterruptNesting;
-
-static int32_t os_in_isr(void)
-{
-    return (ullPortInterruptNesting > 0);
-}
-#endif
-
 /*!
  * env_in_isr
  *
@@ -108,11 +99,7 @@ static int32_t os_in_isr(void)
  */
 static int32_t env_in_isr(void)
 {
-#if defined(AARCH64)
-    return os_in_isr();
-#else
     return platform_in_isr();
-#endif
 }
 
 #ifndef __COVERAGESCANNER__
@@ -776,7 +763,7 @@ void env_delete_queue(void *queue)
  * @return - status of function execution
  */
 
-int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
+int32_t env_put_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr() != 0)
@@ -810,7 +797,7 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
  * @return - status of function execution
  */
 
-int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
+int32_t env_get_queue(void *queue, void *msg, uint32_t timeout_ms)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (env_in_isr() != 0)

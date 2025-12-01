@@ -110,7 +110,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
                          char *data,
                          uint32_t maxlen,
                          uint32_t *len,
-                         uintptr_t timeout)
+                         uint32_t timeout)
 {
     rpmsg_queue_rx_cb_data_t msg = {0};
     int32_t retval               = RL_SUCCESS;
@@ -163,7 +163,7 @@ int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
                                 uint32_t *src,
                                 char **data,
                                 uint32_t *len,
-                                uintptr_t timeout)
+                                uint32_t timeout)
 {
     rpmsg_queue_rx_cb_data_t msg = {0};
 
