@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.22.0)
 include(${SdkRootDirPath}/cmake/extension/mcux.cmake)
 
 project(test_02_epts_channels_dsp_primary_core LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH examples/_boards/${board}/multicore_examples/rpmsg_lite_pingpong 
-        CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board} middleware/multicore/rpmsg-lite/tests/_boards/${board}/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/02_epts_channels_dsp)
+        CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/02_epts_channels_dsp)
 
 include(${SdkRootDirPath}/CMakeLists.txt)
 
@@ -17,7 +17,8 @@ include(${SdkRootDirPath}/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/../../config.cmake)
 include(${SdkRootDirPath}/examples/_boards/${board}/multicore_examples/rpmsg_lite_pingpong/${core_id}/reconfig.cmake OPTIONAL)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/02_epts_channels_dsp/reconfig.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/dsp/02_epts_channels_dsp/reconfig.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/dsp/${core_id}/reconfig.cmake OPTIONAL)
 
 mcux_add_source(
     SOURCES main.c
@@ -46,8 +47,3 @@ mcux_add_linker_symbol(
 )
 endif()
 
-mcux_add_include(
-        TOOLCHAINS armgcc
-        BASE_PATH ${APPLICATION_BINARY_DIR}
-        INCLUDES ../test_02_epts_channels_dsp_fusionf1/
-)

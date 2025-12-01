@@ -8,13 +8,14 @@ cmake_minimum_required(VERSION 3.22.0)
 include(${SdkRootDirPath}/cmake/extension/mcux.cmake)
 
 project(test_01_rpmsg_init_dsp_fusionf1 LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH examples/_boards/${board}/multicore_examples/rpmsg_lite_pingpong 
-        CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board} middleware/multicore/rpmsg-lite/tests/_boards/${board}/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/01_rpmsg_init_dsp)
+        CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/01_rpmsg_init_dsp)
 
 include(${SdkRootDirPath}/CMakeLists.txt)
 
 # This will point to: ${SdkRootDirPath}/examples/_boards/${board}/multicore_examples/reconfig.cmake
 # where common board multicore properties are set.
 include(${CMAKE_CURRENT_LIST_DIR}/../../config.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/dsp/${core_id}/reconfig.cmake OPTIONAL)
 
 mcux_add_source(
     SOURCES main.c

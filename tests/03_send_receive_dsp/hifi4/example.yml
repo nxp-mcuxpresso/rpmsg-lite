@@ -19,3 +19,6 @@ test_03_send_receive_dsp_hifi4:
     evkmimxrt685@hifi4:
     - +xtensa@debug
     - +xtensa@release
+    mimxrt700evk@hifi4:
+    - +xtensa@debug
+    - +xtensa@release
