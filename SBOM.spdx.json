@@ -2,20 +2,20 @@
   "SPDXID": "SPDXRef-DOCUMENT",
   "spdxVersion": "SPDX-2.3",
   "creationInfo": {
-    "created": "2025-09-02T10:00:49Z",
+    "created": "2025-12-03T03:23:36Z",
     "creators": [
       "Organization: NXP"
     ],
-    "licenseListVersion": "3.20"
+    "licenseListVersion": "3.26"
   },
-  "name": "rpmsg-lite-v5.2.1",
+  "name": "rpmsg-lite-v5.3.0",
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "https://nxp.com/spdx/264d781c-2325-40cf-9251-65df9d1204a0",
+  "documentNamespace": "https://nxp.com/spdx/b2c943d1-4498-40e2-aa59-ae3bb085d043",
   "packages": [
     {
-      "SPDXID": "SPDXRef-package-264d781c-2325-40cf-9251-65df9d1204a0",
+      "SPDXID": "SPDXRef-package-b2c943d1-4498-40e2-aa59-ae3bb085d043",
       "name": "rpmsg-lite",
-      "versionInfo": "v5.2.1",
+      "versionInfo": "v5.3.0",
       "licenseConcluded": "(BSD-3-Clause)",
       "licenseDeclared": "(BSD-3-Clause)",
       "downloadLocation": "https://github.com/nxp-mcuxpresso/rpmsg-lite",
@@ -29,7 +29,7 @@
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
       "relationshipType": "DESCRIBES",
-      "relatedSpdxElement": "SPDXRef-package-264d781c-2325-40cf-9251-65df9d1204a0"
+      "relatedSpdxElement": "SPDXRef-package-b2c943d1-4498-40e2-aa59-ae3bb085d043"
     }
   ]
 }

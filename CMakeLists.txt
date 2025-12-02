@@ -6,7 +6,7 @@
 
 # middleware.multicore.rpmsg-lite
 if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite)
-    mcux_component_version(5.2.1)
+    mcux_component_version(5.3.0)
     mcux_add_include(
         INCLUDES lib/include
     )
