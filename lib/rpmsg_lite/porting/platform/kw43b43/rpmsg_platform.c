@@ -410,7 +410,7 @@ void platform_set_static_shmem_config(void)
     rpmsg_platform_shmem_config_protected_t protec_shmem_struct;
 
     /* Identifier at the beginning of the structure that will be used to verify on nbu side validity of the structure */
-    memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
+    (void)memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
 
     /* Fill shared memory structure with setting from the app core */
     protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
@@ -422,7 +422,7 @@ void platform_set_static_shmem_config(void)
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
 
     /* Store in SMU2 the all structure */
-    memcpy(rpmsg_sh_mem_start, &protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
+    (void)memcpy(rpmsg_sh_mem_start, &protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
 }
 
 uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
@@ -441,7 +441,7 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
         first_time = RL_FALSE;
 
         /* Copy the full structure in local variable */
-        memcpy(&protec_shmem_struct, rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
+        (void)memcpy(&protec_shmem_struct, rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
 
         /* By default set the values of the MR3 connectivity release */
         shmem_config.buffer_payload_size = 496U;
@@ -460,11 +460,11 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
         }
         /* If the identifier and the CRC are correct we can copy the shared memory config stored in SMU2 in local
          * variable */
-        memcpy(&shmem_config, &(protec_shmem_struct.config), sizeof(rpmsg_platform_shmem_config_t));
+        (void)memcpy(&shmem_config, &(protec_shmem_struct.config), sizeof(rpmsg_platform_shmem_config_t));
 
     } while (false);
 
-    memcpy(config, &shmem_config, sizeof(rpmsg_platform_shmem_config_t));
+    (void)memcpy(config, &shmem_config, sizeof(rpmsg_platform_shmem_config_t));
 
     (void)link_id;
 

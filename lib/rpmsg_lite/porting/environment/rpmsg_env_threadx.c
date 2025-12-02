@@ -115,7 +115,7 @@ uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, u
  */
 void env_tx_callback(uint32_t link_id)
 {
-    tx_event_flags_set(&event_group, (1UL << link_id), TX_OR);
+    (void)tx_event_flags_set(&event_group, (1UL << link_id), TX_OR);
 }
 
 /*!
@@ -150,7 +150,7 @@ int32_t env_init(void)
         (void)memset(isr_table, 0, sizeof(isr_table));
         EnableGlobalIRQ(regPrimask);
         retval = platform_init();
-        tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
+        (void)tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
 
         return retval;
     }
@@ -164,7 +164,7 @@ int32_t env_init(void)
          * This is in ENV layer as this is ENV specific.*/
         if (TX_SUCCESS == tx_semaphore_get((TX_SEMAPHORE *)&env_sema, TX_WAIT_FOREVER))
         {
-            tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
+            (void)tx_semaphore_put((TX_SEMAPHORE *)&env_sema);
         }
         return 0;
     }
@@ -231,7 +231,7 @@ void env_free_memory(void *ptr)
 {
     if (ptr != ((void *)0))
     {
-        MEM_BufferFree(ptr);
+        (void)MEM_BufferFree(ptr);
     }
 }
 
@@ -682,7 +682,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 
 void env_delete_queue(void *queue)
 {
-    tx_queue_delete((TX_QUEUE *)(queue));
+    (void)tx_queue_delete((TX_QUEUE *)(queue));
 #if !(defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1))
     env_free_memory(((TX_QUEUE *)(queue))->tx_queue_start);
     env_free_memory(queue);
