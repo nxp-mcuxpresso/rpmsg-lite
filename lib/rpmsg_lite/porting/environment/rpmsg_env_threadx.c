@@ -94,7 +94,7 @@ uint32_t env_wait_for_link_up(volatile uint32_t *link_state, uint32_t link_id, u
         else
         {
             if (TX_SUCCESS == tx_event_flags_get(&event_group, (1UL << link_id), TX_AND, &actual_events,
-                                                 ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+                                                 ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000UL)))
             {
                 return 1U;
             }
@@ -471,9 +471,9 @@ void env_delete_sync_lock(void *lock)
  */
 void env_sleep_msec(uint32_t num_msec)
 {
-    // (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000);
-    (void)tx_thread_sleep((num_msec / 1000) * TX_TIMER_TICKS_PER_SECOND +
-                          ((num_msec % 1000) * TX_TIMER_TICKS_PER_SECOND) / 1000);
+    // (void)tx_thread_sleep((num_msec * TX_TIMER_TICKS_PER_SECOND) / 1000UL);
+    (void)tx_thread_sleep((num_msec / 1000UL) * TX_TIMER_TICKS_PER_SECOND +
+                          ((num_msec % 1000UL) * TX_TIMER_TICKS_PER_SECOND) / 1000UL);
 }
 
 /*!
@@ -712,7 +712,7 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
     }
     else
     {
-        if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+        if (TX_SUCCESS == tx_queue_send((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000UL)))
         {
             return 1;
         }
@@ -743,7 +743,7 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
     }
     else
     {
-        if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000)))
+        if (TX_SUCCESS == tx_queue_receive((TX_QUEUE *)(queue), msg, ((timeout_ms * TX_TIMER_TICKS_PER_SECOND) / 1000UL)))
         {
             return 1;
         }
