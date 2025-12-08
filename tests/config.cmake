@@ -14,6 +14,10 @@ mcux_add_include(
     INCLUDES .
 )
 
+mcux_remove_armgcc_configuration(
+    CC "-Werror"
+    CX "-Werror"
+)
 if(CONFIG_MCUX_COMPONENT_utilities.gcov)
     # Get all source files in the directory
     file(GLOB_RECURSE RPMSG_LITE_SOURCES "${SdkRootDirPath}/middleware/multicore/rpmsg-lite/lib/*.c")

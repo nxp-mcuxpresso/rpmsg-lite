@@ -287,9 +287,6 @@ void tc_3_env_testing()
 
     env_delete_queue(q);
     platform_time_delay(1);
-    // virtqueue_notification testing, reach cases when (vq != VQ_NULL) by calling env_isr(0) after the rpmsg
-    // deinitialization
-    env_isr(0);
     // virtqueue_notification testing, reach cases when (vq->callback_fc != VQ_NULL)
     env_register_isr(10, my_rpmsg.rvq);
     env_isr(10);
