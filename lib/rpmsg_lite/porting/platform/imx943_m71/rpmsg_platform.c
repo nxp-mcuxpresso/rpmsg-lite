@@ -160,6 +160,14 @@ int32_t MU_E1_A_IRQHandler(void)
         env_isr((uint32_t)((channel >> 16) | (RL_PLATFORM_IMX943_M71_M33S_COM_ID << 3)));
     }
 
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
+    __DSB();
+#endif
     return 0;
 }
 
@@ -173,6 +181,14 @@ int32_t MU18_A_IRQHandler(void)
         env_isr((uint32_t)((channel >> 16) | (RL_PLATFORM_IMX943_M71_M70_COM_ID << 3)));
     }
 
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
+    __DSB();
+#endif
     return 0;
 }
 
@@ -186,6 +202,14 @@ int32_t MU13_A_IRQHandler(void)
         env_isr((uint32_t)((channel >> 16) | (RL_PLATFORM_IMX943_M71_A55_COM_ID << 3)));
     }
 
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
+    __DSB();
+#endif
     return 0;
 }
 

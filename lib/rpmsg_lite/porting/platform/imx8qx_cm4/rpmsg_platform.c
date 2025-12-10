@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 NXP
+ * Copyright 2017-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -115,6 +115,14 @@ int32_t LSIO_MU5_INT_B_IRQHandler(void)
         env_isr((uint32_t)(channel >> 16));
     }
 
+    /* ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+     * exception return operation might vector to incorrect interrupt.
+     * For Cortex-M7, if core speed much faster than peripheral register write speed,
+     * the peripheral interrupt flags may be still set after exiting ISR, this results to
+     * the same error similar with errata 83869 */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
+    __DSB();
+#endif
     return 0;
 }
 
