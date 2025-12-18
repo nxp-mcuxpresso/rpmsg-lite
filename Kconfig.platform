@@ -348,6 +348,8 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxl20
     bool
     default y
     select MCUX_COMPONENT_driver.mu1
-    depends on MCUX_HW_DEVICE_MCXL255
+    depends on MCUX_HW_DEVICE_MCXL255 || MCUX_HW_DEVICE_MCXL254 || \
+               MCUX_HW_DEVICE_MCXL253 || MCUX_HW_DEVICE_MCXL144 || \
+               MCUX_HW_DEVICE_MCXL143 || MCUX_HW_DEVICE_MCXL142
     help
         "RPMSG-Lite Porting Layer for MCX L20"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 NXP
+ * Copyright 2025-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -310,7 +310,9 @@ void platform_cache_invalidate(void *data, uint32_t len)
 {
 }
 
-#if (defined(MCXL255_cm33_SERIES))
+#if (defined(MCXL255_cm33_SERIES) || defined(MCXL254_cm33_SERIES) || \
+     defined(MCXL253_cm33_SERIES) || defined(MCXL144_cm33_SERIES) || \
+     defined(MCXL143_cm33_SERIES) || defined(MCXL142_cm33_SERIES))
 
 /**
  * platform_vatopa
@@ -334,7 +336,9 @@ void *platform_patova(uintptr_t addr)
     return ((void *)(char *)addr);
 }
 
-#elif (defined(MCXL255_cm0plus_SERIES))
+#elif (defined(MCXL255_cm0plus_SERIES) || defined(MCXL254_cm0plus_SERIES) || \
+       defined(MCXL253_cm0plus_SERIES) || defined(MCXL144_cm0plus_SERIES) || \
+       defined(MCXL143_cm0plus_SERIES) || defined(MCXL142_cm0plus_SERIES))
 /**
  * platform_vatopa
  *
