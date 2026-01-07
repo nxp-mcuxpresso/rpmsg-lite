@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated unit tests code to allow correct GCOV code coverage measurement.
 - Added missing dsb instructions into all ISRs for cm4/cm7 based platform layers.
 - Fixed CERT EXP34-C by adding `__attribute__((noreturn))` to `RL_HANG(void)` function.
+- **MISRA C-2012 Rule 14.3 compliance**: Simplified `RL_WORD_ALIGN_UP` and `RL_WORD_ALIGN_DOWN` macros to eliminate invariant controlling expression violations (CID 5011148)
+  - Replaced ternary operator implementations with standard bitwise alignment idioms
+  - Fixed hardcoded `4U` constant in `RL_WORD_ALIGN_UP` to use `RL_WORD_SIZE` for better portability
 
 ## [v5.3.0]
 
