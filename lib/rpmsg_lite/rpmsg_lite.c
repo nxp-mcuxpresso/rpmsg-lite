@@ -530,7 +530,7 @@ struct rpmsg_lite_endpoint *rpmsg_lite_create_ept(struct rpmsg_lite_instance *rp
             }
             /*
             * $Branch Coverage Justification$
-            * Not able to reach the true condition, 
+            * Not able to reach the true condition,
             * not possible to use all 2^32 endpoints/addresses.
             */
             if (addr == RL_ADDR_ANY) /* GCOVR_EXCL_BR_LINE */
@@ -1045,7 +1045,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1063,7 +1063,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         shmem_config.vring_align = RL_MAX_VRING_ALIGN; /* GCOVR_EXCL_LINE */
@@ -1081,7 +1081,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1098,7 +1098,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1117,7 +1117,7 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1284,8 +1284,8 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
             /* Initialize TX virtqueue buffers for remote device */
             /*
              * $Branch Coverage Justification$
-             * Condition when (rpmsg_lite_dev->sh_mem_remaining > 0U) is not true can�t be reached, 
-             * otherwise the input parameters checking is not implemented correctly at the beginning 
+             * Condition when (rpmsg_lite_dev->sh_mem_remaining > 0U) is not true can't be reached,
+             * otherwise the input parameters checking is not implemented correctly at the beginning
              * of the initialization function and the assert is reached.
              */
             buffer = (rpmsg_lite_dev->sh_mem_remaining > 0U) ?
@@ -1439,7 +1439,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1456,7 +1456,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, uint32_t li
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, the default platform_get_custom_shmem_config() implementation 
+         * Line never reached, the default platform_get_custom_shmem_config() implementation
          * returns shmem_config struct. members in correct ranges.
          */
         return RL_NULL; /* GCOVR_EXCL_LINE */
@@ -1626,7 +1626,7 @@ int32_t rpmsg_lite_deinit(struct rpmsg_lite_instance *rpmsg_lite_dev)
     if (!((rpmsg_lite_dev->rvq != RL_NULL) && (rpmsg_lite_dev->tvq != RL_NULL) && (rpmsg_lite_dev->lock != RL_NULL)))
     {
         /* ERROR - trying to initialize uninitialized RPMSG? */
-        RL_ASSERT((rpmsg_lite_dev->rvq != RL_NULL) && (rpmsg_lite_dev->tvq != RL_NULL) &&
+        RL_ASSERT((rpmsg_lite_dev->rvq != RL_NULL) && (rpmsg_lite_dev->tvq != RL_NULL) && \
                   (rpmsg_lite_dev->lock != RL_NULL));
         return RL_ERR_PARAM;
     }
