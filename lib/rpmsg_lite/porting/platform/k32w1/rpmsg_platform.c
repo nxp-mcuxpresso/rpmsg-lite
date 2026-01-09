@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 NXP
+ * Copyright 2020-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -61,7 +61,7 @@ static const uint8_t ShmemConfigIdentifier[RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENG
 /* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protected_structure);
 
-static uint32_t first_time                        = RL_TRUE;
+static bool first_time                            = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
