@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 NXP
+ * Copyright 2020-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -486,11 +486,11 @@ void env_sleep_msec(uint32_t num_msec)
  */
 void env_register_isr(uint32_t vector_id, void *data)
 {
-    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = data;
     }
+    RL_ASSERT(vector_id < ISR_COUNT);
 }
 
 /*!
@@ -502,11 +502,11 @@ void env_register_isr(uint32_t vector_id, void *data)
  */
 void env_unregister_isr(uint32_t vector_id)
 {
-    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         isr_table[vector_id].data = ((void *)0);
     }
+    RL_ASSERT(vector_id < ISR_COUNT);
 }
 
 /*!
@@ -597,12 +597,12 @@ uint64_t env_get_timestamp(void)
 void env_isr(uint32_t vector)
 {
     struct isr_info *info;
-    RL_ASSERT(vector < ISR_COUNT);
     if (vector < ISR_COUNT)
     {
         info = &isr_table[vector];
         virtqueue_notification((struct virtqueue *)info->data);
     }
+    RL_ASSERT(vector < ISR_COUNT);
 }
 
 /*

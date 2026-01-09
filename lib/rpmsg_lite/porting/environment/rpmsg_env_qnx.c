@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -464,11 +464,11 @@ void env_register_isr(void *env, uint32_t vector_id, void *data)
 {
     env_context_t *ctx = env;
 
-    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         ctx->isr_table[vector_id].data = data;
     }
+    RL_ASSERT(vector_id < ISR_COUNT);
 }
 
 /*!
@@ -482,12 +482,12 @@ void env_unregister_isr(void *env, uint32_t vector_id)
 {
     env_context_t *ctx = env;
 
-    RL_ASSERT(vector_id < ISR_COUNT);
     if (vector_id < ISR_COUNT)
     {
         ctx->isr_table[vector_id].data    = ((void *)0);
         ctx->isr_table[vector_id].enabled = 0;
     }
+    RL_ASSERT(vector_id < ISR_COUNT);
 }
 
 /*!
@@ -595,7 +595,6 @@ void env_isr(void *env, uint32_t vector)
     struct isr_info *info;
     env_context_t *ctx = env;
 
-    RL_ASSERT(vector < ISR_COUNT);
     if (vector < ISR_COUNT)
     {
         info = &ctx->isr_table[vector];
@@ -604,6 +603,7 @@ void env_isr(void *env, uint32_t vector)
             virtqueue_notification((struct virtqueue *)info->data);
         }
     }
+    RL_ASSERT(vector < ISR_COUNT);
 }
 
 /**
