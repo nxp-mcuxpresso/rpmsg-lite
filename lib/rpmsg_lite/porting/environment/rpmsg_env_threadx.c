@@ -628,7 +628,7 @@ int32_t env_create_queue(void **queue,
 int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
 #endif
 {
-    struct TX_QUEUE *queue_ptr = ((void *)0);
+    TX_QUEUE *queue_ptr = ((void *)0);
     char *msgq_buffer_ptr      = ((void *)0);
 
     if (length < 0 || element_size < 0)
@@ -645,10 +645,10 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
     }
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-    queue_ptr       = (struct TX_QUEUE *)queue_static_context;
+    queue_ptr       = (TX_QUEUE *)queue_static_context;
     msgq_buffer_ptr = (char *)queue_static_storage;
 #else
-    queue_ptr       = (struct TX_QUEUE *)env_allocate_memory(sizeof(TX_QUEUE));
+    queue_ptr       = (TX_QUEUE *)env_allocate_memory(sizeof(TX_QUEUE));
     msgq_buffer_ptr = (char *)env_allocate_memory(length * element_size);
 #endif
     if ((queue_ptr == ((void *)0)) || (msgq_buffer_ptr == ((void *)0)))
