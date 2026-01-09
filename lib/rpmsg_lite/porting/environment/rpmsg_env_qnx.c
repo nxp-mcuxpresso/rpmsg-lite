@@ -592,15 +592,15 @@ uint64_t env_get_timestamp(void)
  */
 void env_isr(void *env, uint32_t vector)
 {
-    struct isr_info *info;
+    struct isr_info *isr_entry;
     env_context_t *ctx = env;
 
     if (vector < ISR_COUNT)
     {
-        info = &ctx->isr_table[vector];
-        if (info->enabled)
+        isr_entry = &ctx->isr_table[vector];
+        if (isr_entry->enabled)
         {
-            virtqueue_notification((struct virtqueue *)info->data);
+            virtqueue_notification((struct virtqueue *)isr_entry->data);
         }
     }
     RL_ASSERT(vector < ISR_COUNT);

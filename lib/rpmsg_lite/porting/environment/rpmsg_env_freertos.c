@@ -661,11 +661,11 @@ uint64_t env_get_timestamp(void)
 
 void env_isr(uint32_t vector)
 {
-    struct isr_info *info;
+    struct isr_info *isr_entry;
     if (vector < ISR_COUNT)
     {
-        info = &isr_table[vector];
-        virtqueue_notification((struct virtqueue *)info->data);
+        isr_entry = &isr_table[vector];
+        virtqueue_notification((struct virtqueue *)isr_entry->data);
     }
     RL_ASSERT(vector < ISR_COUNT);
 }
