@@ -763,15 +763,16 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
 
 int32_t env_get_current_queue_size(void *queue)
 {
-    int32_t enqueued;
+    ULONG enqueued;
     ULONG available_storage;
     TX_THREAD *first_suspended;
     ULONG suspended_count;
     TX_QUEUE *next_queue;
-    if (TX_SUCCESS == tx_queue_info_get((TX_QUEUE *)(queue), NULL, (ULONG *)&enqueued, &available_storage,
+    if (TX_SUCCESS == tx_queue_info_get((TX_QUEUE *)(queue), NULL, &enqueued, &available_storage,
                                         &first_suspended, &suspended_count, &next_queue))
     {
-        return enqueued;
+        /* Ensure value fits in int32_t range */
+        return (enqueued > (ULONG)INT32_MAX) ? INT32_MAX : (int32_t)enqueued;
     }
     else
     {
