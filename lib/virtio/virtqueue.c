@@ -1,8 +1,7 @@
 /*-
  * Copyright (c) 2011, Bryan Venteicher <bryanv@FreeBSD.org>
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
- * All rights reserved.
+ * Copyright 2016-2026 NXP
  *
  *
  * Redistribution and use in source and binary forms, with or without
@@ -199,8 +198,8 @@ int32_t virtqueue_add_buffer(struct virtqueue *vq, uint16_t head_idx)
 
     /*
      * $Branch Coverage Justification$
-     * Not able to reach the false condition because when VQUEUE_DEBUG 
-     * is not set status is not modified and when VQUEUE_DEBUG is set and 
+     * Not able to reach the false condition because when VQUEUE_DEBUG
+     * is not set status is not modified and when VQUEUE_DEBUG is set and
      * incorrect vq param is passed assert in VQUEUE_BUSY is reached.
      */
     if (status == VQUEUE_SUCCESS) /* GCOVR_EXCL_BR_LINE */
@@ -241,8 +240,8 @@ int32_t virtqueue_fill_avail_buffers(struct virtqueue *vq, void *buffer, uint32_
 
     /*
      * $Branch Coverage Justification$
-     * Not able to reach the false condition because when VQUEUE_DEBUG 
-     * is not set status is not modified and when VQUEUE_DEBUG is set and 
+     * Not able to reach the false condition because when VQUEUE_DEBUG
+     * is not set status is not modified and when VQUEUE_DEBUG is set and
      * incorrect vq param is passed assert in VQUEUE_BUSY is reached.
      */
     if (status == VQUEUE_SUCCESS) /* GCOVR_EXCL_BR_LINE */
@@ -303,8 +302,8 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
     desc_idx = (uint16_t)uep->id;
     /*
      * $Branch Coverage Justification$
-     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and 
-     * rpmsg_lite_send() API and in both cases the len pointer is checked and 
+     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and
+     * rpmsg_lite_send() API and in both cases the len pointer is checked and
      * can’t be passed as null pointers.
      */
     if (len != VQ_NULL) /* GCOVR_EXCL_BR_LINE */
@@ -314,8 +313,8 @@ void *virtqueue_get_buffer(struct virtqueue *vq, uint32_t *len, uint16_t *idx)
 
     /*
      * $Branch Coverage Justification$
-     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and 
-     * rpmsg_lite_send() API and in both cases the idx pointer is checked and 
+     * virtqueue_get_buffer is being called only from rpmsg_lite_alloc_tx_buffer() and
+     * rpmsg_lite_send() API and in both cases the idx pointer is checked and
      * can’t be passed as null pointers.
      */
     if (idx != VQ_NULL) /* GCOVR_EXCL_BR_LINE */
@@ -520,7 +519,7 @@ void virtqueue_disable_cb(struct virtqueue *vq)
 
     /*
      * $Branch Coverage Justification$
-     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX
      * is not being utilized in rpmsg_lite implementation.
      */
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL) /* GCOVR_EXCL_BR_LINE */
@@ -558,7 +557,7 @@ void virtqueue_kick(struct virtqueue *vq)
 
     /*
      * $Branch Coverage Justification$
-     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX
      * is not being utilized in rpmsg_lite implementation.
      */
     if (0 != vq_ring_must_notify_host(vq)) /* GCOVR_EXCL_BR_LINE */
@@ -662,14 +661,14 @@ static uint16_t vq_ring_add_buffer(
 
     /*
      * $Branch Coverage Justification$
-     * vq_ring_add_buffer() is called from rpmsg_lite_master_init() only and the buffer 
+     * vq_ring_add_buffer() is called from rpmsg_lite_master_init() only and the buffer
      * parameter not being null check is done before passing the parameter.
      */
     if (buffer == VQ_NULL) /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Line Coverage Justification$
-         * Line never reached, vq_ring_add_buffer() is called from rpmsg_lite_master_init() only 
+         * Line never reached, vq_ring_add_buffer() is called from rpmsg_lite_master_init() only
          * and the buffer parameter not being null check is done before passing the parameter.
          */
         return head_idx; /* GCOVR_EXCL_LINE */
@@ -689,7 +688,8 @@ static uint16_t vq_ring_add_buffer(
     /* Flush desc after write */
     VQUEUE_FLUSH(&desc[head_idx], sizeof(desc[head_idx]));
 
-    return ++head_idx;
+    uint16_t next_idx = head_idx + 1U;
+    return next_idx;
 }
 
 /*!
@@ -855,7 +855,7 @@ static int32_t vq_ring_must_notify_host(struct virtqueue *vq)
 
     /*
      * $Branch Coverage Justification$
-     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX 
+     * Not able to reach the true condition because VIRTQUEUE_FLAG_EVENT_IDX
      * is not being utilized in rpmsg_lite implementation.
      */
     if ((vq->vq_flags & VIRTQUEUE_FLAG_EVENT_IDX) != 0UL) /* GCOVR_EXCL_BR_LINE */
