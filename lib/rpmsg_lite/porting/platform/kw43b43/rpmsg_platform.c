@@ -47,7 +47,7 @@ typedef struct rpmsg_platform_shmem_config_protected
 static const uint8_t ShmemConfigIdentifier[RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH] = {"SMEM_CONFIG:"};
 
 /* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
-static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protected_structure);
+static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protec_shmem_struct);
 
 static bool first_time                            = RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
