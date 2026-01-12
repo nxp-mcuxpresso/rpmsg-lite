@@ -422,7 +422,7 @@ void platform_set_static_shmem_config(void)
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
 
     /* Store in SMU2 the all structure */
-    (void)memcpy(rpmsg_sh_mem_start, &protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
+    (void)memcpy((void *)rpmsg_sh_mem_start, (const void *)&protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
 }
 
 int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
@@ -441,7 +441,7 @@ int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_
         first_time = RL_FALSE;
 
         /* Copy the full structure in local variable */
-        (void)memcpy(&protec_shmem_struct, rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
+        (void)memcpy((void *)&protec_shmem_struct, (const void *)rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
 
         /* By default set the values of the MR3 connectivity release */
         shmem_config.buffer_payload_size = 496U;
