@@ -826,5 +826,5 @@ int32_t env_get_current_queue_size(void *queue)
         messages = uxQueueMessagesWaiting(queue);
     }
 
-    return (messages > INT32_MAX) ? INT32_MAX : (int32_t)messages;
+    return (messages > (UBaseType_t)INT32_MAX) ? INT32_MAX : (int32_t)messages;
 }
