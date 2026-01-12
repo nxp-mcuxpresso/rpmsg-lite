@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 NXP
+ * Copyright 2024-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -102,7 +102,7 @@ void platform_set_static_shmem_config(void);
  *
  * \return int 0 if success, other if error.
  */
-uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config);
+int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config);
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
 #endif /* RPMSG_PLATFORM_H_ */

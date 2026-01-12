@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added i.MX952 parts support
 - Added mcxl14x parts support
 
+### Changed
+
+- Port `platform_get_custom_shmem_config` change return value from uint32_t to int32_t for error handling consistency.
+
 ### Fixed
 
 - Updated unit tests code to allow correct GCOV code coverage measurement.

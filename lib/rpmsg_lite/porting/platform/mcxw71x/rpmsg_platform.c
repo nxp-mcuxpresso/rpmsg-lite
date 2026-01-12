@@ -387,7 +387,7 @@ void platform_set_static_shmem_config(void)
     (void)memcpy(rpmsg_sh_mem_start, &protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
 }
 
-uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
+int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
 {
     extern uint32_t rpmsg_sh_mem_start[];
     rpmsg_platform_shmem_config_protected_t protec_shmem_struct = {0U};
@@ -430,7 +430,7 @@ uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem
 
     (void)link_id;
 
-    return 0U;
+    return 0;
 }
 
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protec_shmem_struct)
