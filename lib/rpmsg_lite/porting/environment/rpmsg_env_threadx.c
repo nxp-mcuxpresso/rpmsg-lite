@@ -377,7 +377,7 @@ int32_t env_create_mutex(void **lock, int32_t count)
         return -1;
     }
 
-    if (TX_SUCCESS == tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, count))
+    if (TX_SUCCESS == tx_semaphore_create((TX_SEMAPHORE *)semaphore_ptr, NULL, (ULONG)count))
     {
         *lock = (void *)semaphore_ptr;
         return 0;
