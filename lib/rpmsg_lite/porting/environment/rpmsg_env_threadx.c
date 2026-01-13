@@ -658,7 +658,7 @@ int32_t env_create_queue(void **queue, int32_t length, int32_t element_size)
     }
 
     if (TX_SUCCESS == tx_queue_create((TX_QUEUE *)queue_ptr, NULL, ((uint32_t)element_size / RL_WORD_SIZE),
-                                      (VOID *)msgq_buffer_ptr, (length * element_size)))
+                                      (VOID *)msgq_buffer_ptr, (ULONG)((uint32_t)length * (uint32_t)element_size)))
     {
         *queue = (void *)queue_ptr;
         return 0;

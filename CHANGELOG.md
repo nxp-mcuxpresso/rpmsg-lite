@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **MISRA C-2012 Rule 14.3 compliance**: Simplified `RL_WORD_ALIGN_UP` and `RL_WORD_ALIGN_DOWN` macros to eliminate invariant controlling expression violations (CID 5011148)
   - Replaced ternary operator implementations with standard bitwise alignment idioms
   - Fixed hardcoded `4U` constant in `RL_WORD_ALIGN_UP` to use `RL_WORD_SIZE` for better portability
+- Fixed several MISRA compliance violations
 
 ## [v5.3.0]
 
