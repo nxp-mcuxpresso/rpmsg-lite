@@ -13,9 +13,14 @@
 #include "rpmsg_env.h"
 #include <pthread.h>
 #include <sys/neutrino.h>
-#include <hw/imx8_mu_drv.h>
 #include <unistd.h>
 #include "rpmsg_config.h"
+
+#ifdef RL_USE_IMX8_MU
+#include <imx8_mu_drv.h>
+#else
+#include <imx9_mu_drv.h>
+#endif
 
 #if (!defined(RL_USE_ENVIRONMENT_CONTEXT)) || (RL_USE_ENVIRONMENT_CONTEXT != 1)
 #error "This RPMsg-Lite port requires RL_USE_ENVIRONMENT_CONTEXT set to 1"
@@ -104,7 +109,7 @@ void platform_notify(void *platform_context, uint32_t vector_id)
 {
     platform_context_t *ctx = platform_context;
     /* As Linux suggests, use MU->Data Channel 1 as communication channel */
-    uint32_t msg = (RL_GET_Q_ID(vector_id)) << 16;
+    uint32_t msg = RL_GEN_MU_MSG(vector_id);
 
     if (ctx)
     {
