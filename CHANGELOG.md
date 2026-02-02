@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added i.MX93W parts support
 - Added i.MX952 parts support
 - Added mcxl14x parts support
+- Added mcxw70 parts support
 
 ### Changed
 
