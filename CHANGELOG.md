@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added i.MX952 parts support
 - Added mcxl14x parts support
 - Added mcxw70 parts support
+- Zephyr rpmsg-lite samples add support for RT600 and RT700 DSP cores
 
 ### Changed
 

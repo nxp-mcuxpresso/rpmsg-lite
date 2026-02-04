@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,6 +14,10 @@
 
 #include "common.h"
 #include "rpmsg_lite.h"
+
+#if defined(CONFIG_BOARD_MIMXRT685_EVK) || defined(CONFIG_BOARD_MIMXRT700_EVK)
+#include "dsp.h"
+#endif
 
 #define REMOTE_EPT_ADDR               (30U)
 #define LOCAL_EPT_ADDR                (40U)
@@ -101,6 +105,11 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
 
 int main(void)
 {
+#if defined(CONFIG_BOARD_MIMXRT685_EVK) || defined(CONFIG_BOARD_MIMXRT700_EVK)
+    dsp_start();
+    k_sleep(K_MSEC(500));
+#endif
+
     printk("Starting application thread on Main Core!\n");
     k_thread_create(&thread_data, thread_stack, APP_THREAD_STACK_SIZE, application_thread, NULL, NULL, NULL,
                     K_PRIO_COOP(7), 0, K_NO_WAIT);

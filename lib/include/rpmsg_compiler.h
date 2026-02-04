@@ -100,6 +100,8 @@
 #define MEM_BARRIER() __asm__ volatile("dsb sy" : : : "memory")
 #elif defined(__riscv)
 #define MEM_BARRIER() mb()
+#elif defined(__XTENSA__)
+#define MEM_BARRIER() __asm__ __volatile__("memw" : : : "memory")
 #else
 #define MEM_BARRIER() __asm__ volatile("dsb" : : : "memory")
 #endif

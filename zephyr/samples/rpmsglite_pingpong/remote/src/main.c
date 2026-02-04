@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,7 +22,7 @@
 #define SHM_MEM_ADDR DT_REG_ADDR(DT_CHOSEN(zephyr_ipc_shm))
 #define SHM_MEM_SIZE DT_REG_SIZE(DT_CHOSEN(zephyr_ipc_shm))
 
-#define APP_THREAD_STACK_SIZE (1024)
+#define APP_THREAD_STACK_SIZE (4096)
 K_THREAD_STACK_DEFINE(thread_stack, APP_THREAD_STACK_SIZE);
 static struct k_thread thread_data;
 
