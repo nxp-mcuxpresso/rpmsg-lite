@@ -8,14 +8,14 @@
     ],
     "licenseListVersion": "3.26"
   },
-  "name": "rpmsg-lite-v5.3.0",
+  "name": "rpmsg-lite-v5.4.0",
   "dataLicense": "CC0-1.0",
   "documentNamespace": "https://nxp.com/spdx/b2c943d1-4498-40e2-aa59-ae3bb085d043",
   "packages": [
     {
       "SPDXID": "SPDXRef-package-b2c943d1-4498-40e2-aa59-ae3bb085d043",
       "name": "rpmsg-lite",
-      "versionInfo": "v5.3.0",
+      "versionInfo": "v5.4.0",
       "licenseConcluded": "(BSD-3-Clause)",
       "licenseDeclared": "(BSD-3-Clause)",
       "downloadLocation": "https://github.com/nxp-mcuxpresso/rpmsg-lite",
