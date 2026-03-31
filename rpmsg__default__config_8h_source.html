@@ -26,7 +26,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign">
-   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.3.0</span>
+   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.4.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -192,7 +192,7 @@ $(document).ready(function(){initNavTree('rpmsg__default__config_8h_source.html'
 <div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span><span class="comment"> * RL_HANG not reachable in unit tests when own RL_ASSERT implementation used.</span></div>
 <div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="comment">/* GCOVR_EXCL_START */</span></div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> RL_HANG(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>__attribute__((noreturn)) <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> RL_HANG(<span class="keywordtype">void</span>)</div>
 <div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>{</div>
 <div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keywordflow">for</span> (;;)</div>
 <div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    {</div>
