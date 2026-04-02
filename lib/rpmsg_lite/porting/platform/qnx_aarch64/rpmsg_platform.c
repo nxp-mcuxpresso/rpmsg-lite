@@ -17,9 +17,9 @@
 #include "rpmsg_config.h"
 
 #ifdef RL_USE_IMX8_MU
-#include <imx8_mu_drv.h>
+#include <soc/nxp/imx8/common/imx8_mu_drv.h>
 #else
-#include <imx9_mu_drv.h>
+#include <soc/nxp/imx9/common/imx9_mu_drv.h>
 #endif
 
 #if (!defined(RL_USE_ENVIRONMENT_CONTEXT)) || (RL_USE_ENVIRONMENT_CONTEXT != 1)
