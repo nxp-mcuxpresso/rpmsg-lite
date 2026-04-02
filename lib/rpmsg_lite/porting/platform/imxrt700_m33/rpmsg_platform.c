@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 NXP
+ * Copyright 2024-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -322,7 +322,8 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                 }
                 break;
             case RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID:
-                RL_ASSERT(0 <= isr_counter3);
+                RL_ASSERT(0 < isr_counter3);
+                isr_counter3--;
                 if (isr_counter3 < 2)
                 {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
@@ -331,7 +332,6 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
                     EZHV_DisableEzhv2ArmIntChan(kEZHV_EzhvToArmIntChan1);
 #endif
                 }
-                isr_counter3++;
                 break;
             case RL_PLATFORM_IMXRT700_M33_0_HIFI1_COM_ID:
                 RL_ASSERT(0 < isr_counter4);
