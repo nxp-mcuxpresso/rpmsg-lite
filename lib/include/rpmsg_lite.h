@@ -373,6 +373,20 @@ uint32_t rpmsg_lite_is_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev);
  */
 uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev, uint32_t timeout);
 
+/*!
+ * @brief Function to check whether all outstanding TX buffers were consumed
+ * by the peer and returned to the local free buffer pool.
+ *
+ * This API can be called by both the master and remote side.
+ *
+ * @param rpmsg_lite_dev    RPMsg-Lite instance pointer
+ *
+ * @return RL_TRUE when all TX buffers are back in the local free pool,
+ *         RL_FALSE otherwise.
+ *
+ */
+uint32_t rpmsg_lite_are_all_buffers_consumed(struct rpmsg_lite_instance *rpmsg_lite_dev);
+
 #if defined(RL_API_HAS_ZEROCOPY) && (RL_API_HAS_ZEROCOPY == 1)
 
 /*!

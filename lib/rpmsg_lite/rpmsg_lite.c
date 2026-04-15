@@ -666,6 +666,41 @@ uint32_t rpmsg_lite_wait_for_link_up(struct rpmsg_lite_instance *rpmsg_lite_dev,
     return env_wait_for_link_up(&rpmsg_lite_dev->link_state, rpmsg_lite_dev->link_id, timeout);
 }
 
+uint32_t rpmsg_lite_are_all_buffers_consumed(struct rpmsg_lite_instance *rpmsg_lite_dev)
+{
+    uint16_t ring_idx;
+    uint16_t free_tx_buffers;
+
+    if ((rpmsg_lite_dev == RL_NULL) || (rpmsg_lite_dev->tvq == RL_NULL) || (rpmsg_lite_dev->lock == RL_NULL))
+    {
+        return RL_FALSE;
+    }
+
+    env_lock_mutex(rpmsg_lite_dev->lock);
+
+    if (rpmsg_lite_dev->vq_ops == &master_vq_ops)
+    {
+        VQUEUE_INVALIDATE(&rpmsg_lite_dev->tvq->vq_ring.used->idx, sizeof(rpmsg_lite_dev->tvq->vq_ring.used->idx));
+        ring_idx = rpmsg_lite_dev->tvq->vq_ring.used->idx;
+        free_tx_buffers = (uint16_t)(ring_idx - rpmsg_lite_dev->tvq->vq_used_cons_idx);
+    }
+    else if (rpmsg_lite_dev->vq_ops == &remote_vq_ops)
+    {
+        VQUEUE_INVALIDATE(&rpmsg_lite_dev->tvq->vq_ring.avail->idx, sizeof(rpmsg_lite_dev->tvq->vq_ring.avail->idx));
+        ring_idx = rpmsg_lite_dev->tvq->vq_ring.avail->idx;
+        free_tx_buffers = (uint16_t)(ring_idx - rpmsg_lite_dev->tvq->vq_available_idx);
+    }
+    else
+    {
+        env_unlock_mutex(rpmsg_lite_dev->lock);
+        return RL_FALSE;
+    }
+
+    env_unlock_mutex(rpmsg_lite_dev->lock);
+
+    return (free_tx_buffers == rpmsg_lite_dev->tvq->vq_nentries) ? RL_TRUE : RL_FALSE;
+}
+
 /*!
  * @brief
  * Internal function to format a RPMsg compatible

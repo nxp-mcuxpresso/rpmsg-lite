@@ -243,6 +243,10 @@ void tc_1_send(void)
     TEST_ASSERT_MESSAGE(0 == result, "send error");
     data_addr = NULL;
 
+    /* The last buffer is held by the peer until tc_1_receive() releases it. */
+    TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_are_all_buffers_consumed(my_rpmsg),
+                        "'rpmsg_lite_are_all_buffers_consumed' did not report outstanding TX buffer on master side");
+
     /* wait a while to process the last message on the opposite side */
     env_sleep_msec(200);
 }
@@ -269,6 +273,20 @@ void tc_2_receive(void)
     /* Release the buffer now */
     result = rpmsg_lite_release_rx_buffer(my_rpmsg, rx_buffer);
     TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "rpmsg_lite_release_rx_buffer error");
+}
+
+/******************************************************************************
+ * Test case 3
+ * - verify rpmsg_lite_are_all_buffers_consumed() behavior on the master side
+ *****************************************************************************/
+void tc_3_are_all_buffers_consumed(void)
+{
+    TEST_ASSERT_MESSAGE(RL_FALSE == rpmsg_lite_are_all_buffers_consumed(RL_NULL),
+                        "'rpmsg_lite_are_all_buffers_consumed' with bad rpmsg_lite_dev param failed");
+
+    /* By this point the peer already released the held buffer from tc_1_send(). */
+    TEST_ASSERT_MESSAGE(RL_TRUE == rpmsg_lite_are_all_buffers_consumed(my_rpmsg),
+                        "'rpmsg_lite_are_all_buffers_consumed' did not report all TX buffers returned on master side");
 }
 
 void run_tests(void *unused)
@@ -305,6 +323,7 @@ void run_tests(void *unused)
 #endif /*__COVERAGESCANNER__*/
         RUN_EXAMPLE(tc_1_send, MAKE_UNITY_NUM(k_unity_rpmsg, 0));
         RUN_EXAMPLE(tc_2_receive, MAKE_UNITY_NUM(k_unity_rpmsg, 1));
+        RUN_EXAMPLE(tc_3_are_all_buffers_consumed, MAKE_UNITY_NUM(k_unity_rpmsg, 2));
     }
 
     result = ts_destroy_epts(&my_ept, 1);
