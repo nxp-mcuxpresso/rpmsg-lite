@@ -104,5 +104,7 @@ test_01_rpmsg_init_rtos_secondary_core:
     frdmk32l3a6@cm0plus: []
     kw47loc@cm33_core1: []
     kw47evk@cm33_core1: []
+    kw43evk_nbu@cm33_core1: []
+    frdmkw43_nbu@cm33_core1: []
     frdmimxrt700@cm33_core1: []
     frdmmcxe32b@core1: []

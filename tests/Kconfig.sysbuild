@@ -1,5 +1,5 @@
 #
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,10 +13,15 @@ config dsp_toolchain
 
 config secondary_board
     string
+    default "$(board)_nbu" if ($(board) = "kw43evk" || $(board) = "frdmkw43")
     default "$(board)"
 
 config secondary_toolchain
     string
     default "$(toolchain)"
 
-source "${SdkRootDirPath}/examples/_boards/${board}/Kconfig.sysbuild"
+# This is for internal board support
+osource "${SdkRootDirPath}/${board_root}/${board}/Kconfig.sysbuild"
+
+# This is for external custom board support
+osource "${CUSTOM_BOARD_ROOT}/${board}/Kconfig.sysbuild"

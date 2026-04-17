@@ -116,6 +116,8 @@ test_01_rpmsg_init_rtos_static_alloc_primary_core:
     #frdmk32l3a6@cm4: []
     #kw47evk@cm33_core0: []
     kw47loc@cm33_core0: []
+    kw43evk@cm33_core0: []
+    frdmkw43@cm33_core0: [] 
     frdmimxrt700@cm33_core0:
     - -armgcc@debug
     - +armgcc@flash_debug

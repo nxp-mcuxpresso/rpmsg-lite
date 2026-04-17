@@ -116,6 +116,8 @@ test_04_ping_pong_primary_core:
     frdmk32l3a6@cm4: []
     kw47evk@cm33_core0: []
     kw47loc@cm33_core0: []
+    kw43evk@cm33_core0: []
+    frdmkw43@cm33_core0: [] 
     frdmmcxl255@cm33:
     - -armgcc@debug
     - +armgcc@release

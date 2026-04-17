@@ -1,5 +1,5 @@
 #
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -7,15 +7,15 @@ cmake_minimum_required(VERSION 3.22.0)
 
 include(${SdkRootDirPath}/cmake/extension/mcux.cmake)
 
-project(test_02_epts_channels_dsp_primary_core LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH examples/_boards/${board}/multicore_examples/rpmsg_lite_pingpong 
+project(test_02_epts_channels_dsp_primary_core LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH ${board_root}/${board}/multicore_examples/rpmsg_lite_pingpong 
         CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/dsp/02_epts_channels_dsp)
 
 include(${SdkRootDirPath}/CMakeLists.txt)
 
-# This will point to: ${SdkRootDirPath}/examples/_boards/${board}/multicore_examples/reconfig.cmake
+# This will point to: ${SdkRootDirPath}/${board_root}/${board}/multicore_examples/reconfig.cmake
 # where common board multicore properties are set.
 include(${CMAKE_CURRENT_LIST_DIR}/../../config.cmake)
-include(${SdkRootDirPath}/examples/_boards/${board}/multicore_examples/rpmsg_lite_pingpong/${core_id}/reconfig.cmake OPTIONAL)
+include(${SdkRootDirPath}/${board_root}/${board}/multicore_examples/rpmsg_lite_pingpong/${core_id}/reconfig.cmake OPTIONAL)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/dsp/02_epts_channels_dsp/reconfig.cmake OPTIONAL)
 include(${CMAKE_CURRENT_LIST_DIR}/../../_boards/${board}/dsp/${core_id}/reconfig.cmake OPTIONAL)
