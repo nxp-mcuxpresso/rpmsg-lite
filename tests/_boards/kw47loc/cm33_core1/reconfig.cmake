@@ -1,10 +1,16 @@
 #
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 mcux_add_configuration(
     CC "-DRPMSG_LITE_SHMEM_BASE=0xB0008800"
+)
+
+mcux_add_linker_symbol(
+    SYMBOLS "__RPMSG_SH_MEM_START__=0xB0008800 \
+             __RPMSG_SH_MEM_END__=0xB000A000 \
+            "
 )
 
 mcux_remove_armgcc_linker_script(

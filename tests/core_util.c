@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -147,6 +147,7 @@ void run_test_suite(void *unused)
     invalidate_cache_for_core1_image_memory(CORE1_BOOT_ADDRESS, core1_image_size);
 #endif /* APP_INVALIDATE_CACHE_FOR_SECONDARY_CORE_IMAGE_MEMORY */
 
+#if !(defined(CONFIG_SKIP_MCMGR_INIT) && (CONFIG_SKIP_MCMGR_INIT == 1))
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
     /* Initialize MCMGR before calling its API */
     MCMGR_Init();
@@ -171,7 +172,7 @@ void run_test_suite(void *unused)
 #if defined(MUA) || defined(MU1_MUA)
 
 #if defined(MUA)
-    /* MUA init - must be called before BOARD_DSP_Init() otherwise the MUB on the DSP core is not enabled 
+    /* MUA init - must be called before BOARD_DSP_Init() otherwise the MUB on the DSP core is not enabled
      and the MU interrupt is not registerred correctly when the DSP core runs (writing to MUB registers
      is not possible when the MUA is not initialized before). */
     MU_Init(MUA);
@@ -187,8 +188,10 @@ void run_test_suite(void *unused)
     * need adjustment for different configuration of remote systems */
     env_sleep_msec(1000);
 
-#endif
-#endif
+#endif /* #if defined(MUA) || defined(MU1_MUA) */
+#endif /* #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1) */
+#endif /* #if defined(CONFIG_SKIP_MCMGR_INIT) && (CONFIG_SKIP_MCMGR_INIT == 1) */
+
     UnityBegin();
     run_tests(NULL);
     UnityEnd();
