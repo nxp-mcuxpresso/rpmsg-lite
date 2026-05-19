@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 NXP
+ * Copyright 2022-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -223,9 +223,13 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU1_IRQn);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU1_IRQn);
+#endif
 #endif
     }
     platform_global_isr_enable();
@@ -252,10 +256,14 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU1_IRQn);
         NVIC_SetPriority(MU1_IRQn, 2);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU1_IRQn);
+#endif
 #endif
     }
 

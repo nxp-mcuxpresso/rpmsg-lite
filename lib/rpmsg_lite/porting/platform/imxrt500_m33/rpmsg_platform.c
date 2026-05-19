@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 NXP
+ * Copyright 2019-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -191,7 +191,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(APP_MU_IRQn);
+#endif
     }
     platform_global_isr_enable();
     return 0;
@@ -216,7 +218,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(APP_MU_IRQn);
+#endif
     }
     disable_counter++;
     platform_global_isr_enable();
@@ -335,7 +339,9 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
     MU_Deinit(APP_MU);
+#endif
 
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);

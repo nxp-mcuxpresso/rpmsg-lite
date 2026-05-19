@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025 NXP
+ * Copyright 2018-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -83,7 +83,9 @@ int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data)
         RL_ASSERT(0 <= isr_counter);
         if (isr_counter == 0)
         {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
             NVIC_SetPriority(MAILBOX_IRQn, 5);
+#endif
         }
         isr_counter++;
 
@@ -106,7 +108,12 @@ int32_t platform_deinit_interrupt(uint32_t vector_id)
         isr_counter--;
         if (isr_counter == 0)
         {
+/* When MCMGR owns the MAILBOX IRQ (RL_USE_MCMGR_IPC_ISR_HANDLER == 1),
+ * rpmsg-lite must not disable it — doing so would prevent secondary from
+ * receiving COREUP pings on reinit cycles. */
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
             NVIC_DisableIRQ(MAILBOX_IRQn);
+#endif
         }
 
         /* Unregister ISR from environment layer */
@@ -214,7 +221,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
 
     if (disable_counter == 0)
     {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MAILBOX_IRQn);
+#endif
     }
     platform_global_isr_enable();
     return 0;
@@ -239,7 +248,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
        if counter is set - the interrupts are disabled */
     if (disable_counter == 0)
     {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MAILBOX_IRQn);
+#endif
     }
     disable_counter++;
     platform_global_isr_enable();
@@ -356,8 +367,9 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
 /* Important for LPC5411x - do not deinit mailbox, if there
-   is a pending ISR on the other core! */
+is a pending ISR on the other core! */
 #if defined(FSL_FEATURE_MAILBOX_SIDE_A)
     while (0U != MAILBOX_GetValue(MAILBOX, kMAILBOX_CM33_Core1))
     {
@@ -368,7 +380,12 @@ int32_t platform_deinit(void)
     }
 #endif
 
+    /* Only deinit the IMU when rpmsg-lite owns the link directly.
+     * When MCMGR owns the IMU (RL_USE_MCMGR_IPC_ISR_HANDLER == 1),
+     * calling IMU_Deinit here would kill the transport that MCMGR
+     * relies on for subsequent init cycles (event delivery). */
     MAILBOX_Deinit(MAILBOX);
+#endif
 
     /* Delete lock used in multi-instanced RPMsg */
     env_delete_mutex(platform_lock);

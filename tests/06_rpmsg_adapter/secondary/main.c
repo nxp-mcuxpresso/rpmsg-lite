@@ -46,6 +46,14 @@
 #define TC2_PRIMARY_PAYLOAD    (0xDEADBEEFU)
 #define TC2_SECONDARY_PAYLOAD  (0xCAFEBABEU)
 
+/* Spin-wait retry count for wait_flag() calls.
+ * Default suits Cortex-M33/M7 at ≥100 MHz (≈200 ms at 3 cycles/iter).
+ * Override per-board via reconfig.cmake for slower cores (e.g. wireless
+ * NBU at ~64 MHz: -DTC_WAIT_RETRY_COUNT=50000000U). */
+#ifndef TC_WAIT_RETRY_COUNT
+#define TC_WAIT_RETRY_COUNT (10000000U)
+#endif
+
 /*******************************************************************************
  * Inter-test delay — mirrors primary (see primary/main.c for rationale).
  ******************************************************************************/
@@ -110,24 +118,21 @@ static hal_rpmsg_return_status_t data_rx_callback(void *param, uint8_t *data, ui
     return kStatus_HAL_RL_RELEASE;
 }
 
-/* Zero-copy channel: echo the received payload back */
-static volatile uint8_t s_nocopyRxOk = 0U;
+/* Zero-copy channel: store payload for deferred echo from main-thread context.
+ * Must NOT call HAL_RpmsgAllocTxBuffer / HAL_RpmsgNoCopySend here: on
+ * IMU/wireless platforms (kw47, mcxw72) the TX path spins waiting for a TX
+ * slot that cannot be serviced while the RX interrupt is still active,
+ * causing a deadlock.  Send is done from tc_3 body after wait_flag(). */
+static volatile uint8_t  s_nocopyRxOk      = 0U;
+static volatile uint32_t s_nocopyRxPayload = 0U;
 static hal_rpmsg_return_status_t nocopy_rx_callback(void *param, uint8_t *data, uint32_t len)
 {
-    hal_rpmsg_handle_t handle = (hal_rpmsg_handle_t)param;
-    uint32_t *buf;
-
-    s_nocopyRxOk = 1U;
-
-    if ((handle != NULL) && (len >= sizeof(uint32_t)))
+    (void)param;
+    if (len >= sizeof(uint32_t))
     {
-        buf = (uint32_t *)HAL_RpmsgAllocTxBuffer(handle, sizeof(uint32_t));
-        if (buf != NULL)
-        {
-            (void)memcpy(buf, data, sizeof(uint32_t));
-            (void)HAL_RpmsgNoCopySend(handle, (uint8_t *)buf, sizeof(uint32_t));
-        }
+        (void)memcpy((void *)&s_nocopyRxPayload, data, sizeof(uint32_t));
     }
+    s_nocopyRxOk = 1U;
     return kStatus_HAL_RL_RELEASE;
 }
 
@@ -236,7 +241,7 @@ void tc_2_adapter_send_receive(void)
      * the RX interrupt is still active).
      */
     s_rxReceived = 0U;
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for first send from primary (sec tc2)");
     TEST_ASSERT_EQUAL_HEX32_MESSAGE(TC2_PRIMARY_PAYLOAD, s_rxData,
                                     "Wrong payload received from primary (sec tc2, first)");
@@ -244,7 +249,7 @@ void tc_2_adapter_send_receive(void)
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgSend reply failed (sec tc2, first)");
 
     s_rxReceived = 0U;
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for second send from primary (sec tc2)");
     TEST_ASSERT_EQUAL_HEX32_MESSAGE(TC2_PRIMARY_PAYLOAD, s_rxData,
                                     "Wrong payload received from primary (sec tc2, second)");
@@ -271,15 +276,28 @@ void tc_3_adapter_nocopy_send(void)
     cfg.local_addr  = TC_NOCOPY_SEC_EPT_ADDR;
     cfg.remote_addr = TC_NOCOPY_EPT_ADDR;
     cfg.callback    = nocopy_rx_callback;
-    cfg.param       = (void *)s_nocopyHandle;
+    cfg.param       = NULL;
 
     ret = HAL_RpmsgInit((hal_rpmsg_handle_t)s_nocopyHandle, &cfg);
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgInit failed (sec tc3)");
 
-    /* nocopy_rx_callback handles the echo; just wait for it */
+    /* Wait for primary's nocopy message to arrive */
     s_nocopyRxOk = 0U;
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_nocopyRxOk, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_nocopyRxOk, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for nocopy message from primary (sec tc3)");
+
+    /* Echo payload back from main-thread context (NOT from the ISR callback —
+     * sending from ISR deadlocks on IMU/wireless platforms). */
+    {
+        uint32_t *buf = (uint32_t *)HAL_RpmsgAllocTxBuffer((hal_rpmsg_handle_t)s_nocopyHandle,
+                                                           sizeof(uint32_t));
+        TEST_ASSERT_MESSAGE(NULL != buf, "HAL_RpmsgAllocTxBuffer returned NULL (sec tc3 echo)");
+        *buf = (uint32_t)s_nocopyRxPayload;
+        ret  = HAL_RpmsgNoCopySend((hal_rpmsg_handle_t)s_nocopyHandle, (uint8_t *)buf,
+                                   sizeof(uint32_t));
+        TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret,
+                            "HAL_RpmsgNoCopySend echo failed (sec tc3)");
+    }
 
     ret = HAL_RpmsgDeinit((hal_rpmsg_handle_t)s_nocopyHandle);
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgDeinit failed (sec tc3)");
@@ -309,7 +327,7 @@ void tc_4_adapter_rx_callback(void)
 
     /* Wait for primary's message then reply from main-thread context */
     s_rxReceived = 0U;
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for message from primary (sec tc4)");
     ret = HAL_RpmsgSend((hal_rpmsg_handle_t)s_rpmsgHandle, (uint8_t *)&reply, sizeof(reply));
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgSend reply failed (sec tc4)");

@@ -114,3 +114,6 @@ test_06_rpmsg_adapter_primary_core:
     kw47evk@cm33_core0:
     - -mdk@debug
     - -mdk@release
+    kw47loc@cm33_core0:
+    - -mdk@debug
+    - -mdk@release

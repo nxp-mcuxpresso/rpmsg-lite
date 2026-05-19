@@ -442,20 +442,20 @@ void platform_notify(uint32_t vector_id)
             break;
         case RL_PLATFORM_IMXRT700_M33_0_HIFI1_COM_ID:
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
-        defined(MIMXRT798S_cm33_core0_SERIES))
+     defined(MIMXRT798S_cm33_core0_SERIES))
             (void)MU_TriggerInterrupts(APP_M33_0_HIFI1_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
             break;
         case RL_PLATFORM_IMXRT700_M33_1_HIFI4_COM_ID:
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
-        defined(MIMXRT798S_cm33_core1_SERIES))
+     defined(MIMXRT798S_cm33_core1_SERIES))
             (void)MU_TriggerInterrupts(APP_M33_1_HIFI4_MU, MU_GI_INTR(1UL << (RL_GET_Q_ID(vector_id))));
 #endif
             break;
         case RL_PLATFORM_IMXRT700_M33_0_EZHV_COM_ID:
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
-            if(RL_GET_Q_ID(vector_id))
+            if (RL_GET_Q_ID(vector_id))
             {
                 EZHV_EnableArm2EzhvInt(kEZHV_ARM2EZHV_MEI);
             }
@@ -533,10 +533,14 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_0_M33_1_MU_IRQn);
+#endif
 #elif (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
        defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_1_M33_0_MU_IRQn);
+#endif
 #endif
             }
             break;
@@ -547,7 +551,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_0_HIFI4_MU_IRQn);
+#endif
 #endif
             }
             break;
@@ -558,7 +564,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
      defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_1_HIFI1_MU_IRQn);
+#endif
 #endif
             }
             break;
@@ -569,7 +577,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_0_EZHV_IRQn);
+#endif
 #endif
             }
             break;
@@ -580,7 +590,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_0_HIFI1_MU_IRQn);
+#endif
 #endif
             }
             break;
@@ -591,7 +603,9 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
      defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_EnableIRQ(APP_M33_1_HIFI4_MU_IRQn);
+#endif
 #endif
             }
             break;
@@ -626,10 +640,14 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_0_M33_1_MU_IRQn);
+#endif
 #elif (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
        defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_1_M33_0_MU_IRQn);
+#endif
 #endif
             }
             disable_counter0++;
@@ -640,7 +658,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_0_HIFI4_MU_IRQn);
+#endif
 #endif
             }
             disable_counter1++;
@@ -651,7 +671,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
      defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_1_HIFI1_MU_IRQn);
+#endif
 #endif
             }
             disable_counter2++;
@@ -662,7 +684,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_0_EZHV_IRQn);
+#endif
 #endif
             }
             disable_counter3++;
@@ -673,7 +697,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core0_SERIES) || defined(MIMXRT758S_cm33_core0_SERIES) || \
      defined(MIMXRT798S_cm33_core0_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_0_HIFI1_MU_IRQn);
+#endif
 #endif
             }
             disable_counter4++;
@@ -684,7 +710,9 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
             {
 #if (defined(MIMXRT735S_cm33_core1_SERIES) || defined(MIMXRT758S_cm33_core1_SERIES) || \
      defined(MIMXRT798S_cm33_core1_SERIES))
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
                 NVIC_DisableIRQ(APP_M33_1_HIFI4_MU_IRQn);
+#endif
 #endif
             }
             disable_counter5++;

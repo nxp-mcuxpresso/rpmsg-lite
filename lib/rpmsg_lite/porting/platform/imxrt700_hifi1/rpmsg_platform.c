@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 NXP
+ * Copyright 2024-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -380,6 +380,7 @@ int32_t platform_init(void)
 #else
     MU_Init(MU0_MUB);
     MU_Init(MU3_MUB);
+
     /* Register interrupt handler for MU_B on HiFi1 */
     INPUTMUX_Init(INPUTMUX1);
     INPUTMUX_AttachSignal(INPUTMUX1, 2U, kINPUTMUX_Mu0BToDspInterrupt);
@@ -403,8 +404,10 @@ int32_t platform_init(void)
  */
 int32_t platform_deinit(void)
 {
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
     MU_Deinit(MU0_MUB);
     MU_Deinit(MU3_MUB);
+#endif
 #ifdef SDK_OS_BAREMETAL
     _xtos_set_interrupt_handler(DSP_INT0_SEL1_IRQn, ((void *)0));
     _xtos_set_interrupt_handler(DSP_INT0_SEL2_IRQn, ((void *)0));

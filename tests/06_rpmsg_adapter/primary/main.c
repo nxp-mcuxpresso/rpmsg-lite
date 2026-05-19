@@ -40,6 +40,14 @@
 #define TC2_PRIMARY_PAYLOAD    (0xDEADBEEFU)
 #define TC2_SECONDARY_PAYLOAD  (0xCAFEBABEU)
 
+/* Spin-wait retry count for wait_flag() calls.
+ * Default suits Cortex-M33/M7 at ≥100 MHz (≈200 ms at 3 cycles/iter).
+ * Override per-board via reconfig.cmake for slower cores (e.g. wireless
+ * NBU at ~64 MHz: -DTC_WAIT_RETRY_COUNT=50000000U). */
+#ifndef TC_WAIT_RETRY_COUNT
+#define TC_WAIT_RETRY_COUNT (10000000U)
+#endif
+
 /*******************************************************************************
  * Inter-test delay
  *
@@ -241,7 +249,7 @@ void tc_2_adapter_send_receive(void)
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgSend failed");
 
     /* --- Receive secondary->primary reply --- */
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for rx_callback from secondary");
     TEST_ASSERT_EQUAL_HEX32_MESSAGE(TC2_SECONDARY_PAYLOAD, s_rxData,
                                     "Received wrong payload from secondary");
@@ -251,7 +259,7 @@ void tc_2_adapter_send_receive(void)
     ret = HAL_RpmsgSendTimeout((hal_rpmsg_handle_t)s_rpmsgHandle, (uint8_t *)&payload,
                                sizeof(payload), RPMSG_WAITFOREVER);
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgSendTimeout failed");
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_rxReceived, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for second rx_callback from secondary");
 
     ret = HAL_RpmsgDeinit((hal_rpmsg_handle_t)s_rpmsgHandle);
@@ -294,7 +302,7 @@ void tc_3_adapter_nocopy_send(void)
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgNoCopySend failed");
 
     /* Secondary echoes back — wait for our nocopy rx callback */
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_nocopyRxOk, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_nocopyRxOk, 1U, TC_WAIT_RETRY_COUNT),
                         "Timeout waiting for nocopy rx echo from secondary");
     TEST_ASSERT_EQUAL_HEX32_MESSAGE(payload, s_nocopyRxData,
                                     "NoCopy echo payload mismatch");
@@ -338,7 +346,7 @@ void tc_4_adapter_rx_callback(void)
     ret = HAL_RpmsgSend((hal_rpmsg_handle_t)s_rpmsgHandle, (uint8_t *)&payload, sizeof(payload));
     TEST_ASSERT_MESSAGE(kStatus_HAL_RpmsgSuccess == ret, "HAL_RpmsgSend failed (tc4)");
 
-    TEST_ASSERT_MESSAGE(true == wait_flag(&s_replacedCbFired, 1U, 10000000U),
+    TEST_ASSERT_MESSAGE(true == wait_flag(&s_replacedCbFired, 1U, TC_WAIT_RETRY_COUNT),
                         "Replaced callback was not invoked");
 
     ret = HAL_RpmsgDeinit((hal_rpmsg_handle_t)s_rpmsgHandle);

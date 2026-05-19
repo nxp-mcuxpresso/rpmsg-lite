@@ -241,9 +241,13 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU0_IRQn);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU0_IRQn);
+#endif
 #endif
     }
     platform_global_isr_enable();
@@ -270,10 +274,14 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU0_IRQn);
         NVIC_SetPriority(MU0_IRQn, 2);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU0_IRQn);
+#endif
 #endif
     }
 
@@ -402,7 +410,6 @@ int32_t platform_deinit(void)
     return 0;
 }
 
-
 #if defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1)
 void platform_set_static_shmem_config(void)
 {
@@ -410,7 +417,8 @@ void platform_set_static_shmem_config(void)
     rpmsg_platform_shmem_config_protected_t protec_shmem_struct;
 
     /* Identifier at the beginning of the structure that will be used to verify on nbu side validity of the structure */
-    (void)memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
+    (void)memcpy(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier,
+                 RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH);
 
     /* Fill shared memory structure with setting from the app core */
     protec_shmem_struct.config.buffer_payload_size = RL_BUFFER_PAYLOAD_SIZE;
@@ -422,7 +430,8 @@ void platform_set_static_shmem_config(void)
     protec_shmem_struct.shmemConfigCrc = platform_compute_crc_over_shmem_struct(&protec_shmem_struct);
 
     /* Store in SMU2 the all structure */
-    (void)memcpy((void *)rpmsg_sh_mem_start, (const void *)&protec_shmem_struct, sizeof(rpmsg_platform_shmem_config_protected_t));
+    (void)memcpy((void *)rpmsg_sh_mem_start, (const void *)&protec_shmem_struct,
+                 sizeof(rpmsg_platform_shmem_config_protected_t));
 }
 
 int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config)
@@ -441,7 +450,8 @@ int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_
         first_time = (bool)RL_FALSE;
 
         /* Copy the full structure in local variable */
-        (void)memcpy((void *)&protec_shmem_struct, (const void *)rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
+        (void)memcpy((void *)&protec_shmem_struct, (const void *)rpmsg_sh_mem_start,
+                     sizeof(rpmsg_platform_shmem_config_protected_t));
 
         /* By default set the values of the MR3 connectivity release */
         shmem_config.buffer_payload_size = 496U;
@@ -449,8 +459,8 @@ int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_
         shmem_config.vring_size          = 0x80U;
         shmem_config.vring_align         = 0x10U;
 
-        if (memcmp(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier, RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH) !=
-            0)
+        if (memcmp(&(protec_shmem_struct.identificationWord), ShmemConfigIdentifier,
+                   RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENGTH) != 0)
         {
             break;
         }

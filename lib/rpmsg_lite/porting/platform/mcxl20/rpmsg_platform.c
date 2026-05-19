@@ -219,9 +219,13 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU_A_INT_IRQn);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MU_B_INT_IRQn);
+#endif
 #endif
     }
     platform_global_isr_enable();
@@ -248,10 +252,14 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU_A_INT_IRQn);
         NVIC_SetPriority(MU_A_INT_IRQn, 2);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MU_B_INT_IRQn);
+#endif
 #endif
     }
 
@@ -310,9 +318,8 @@ void platform_cache_invalidate(void *data, uint32_t len)
 {
 }
 
-#if (defined(MCXL255_cm33_SERIES) || defined(MCXL254_cm33_SERIES) || \
-     defined(MCXL253_cm33_SERIES) || defined(MCXL144_cm33_SERIES) || \
-     defined(MCXL143_cm33_SERIES) || defined(MCXL142_cm33_SERIES))
+#if (defined(MCXL255_cm33_SERIES) || defined(MCXL254_cm33_SERIES) || defined(MCXL253_cm33_SERIES) || \
+     defined(MCXL144_cm33_SERIES) || defined(MCXL143_cm33_SERIES) || defined(MCXL142_cm33_SERIES))
 
 /**
  * platform_vatopa
@@ -336,9 +343,8 @@ void *platform_patova(uintptr_t addr)
     return ((void *)(char *)addr);
 }
 
-#elif (defined(MCXL255_cm0plus_SERIES) || defined(MCXL254_cm0plus_SERIES) || \
-       defined(MCXL253_cm0plus_SERIES) || defined(MCXL144_cm0plus_SERIES) || \
-       defined(MCXL143_cm0plus_SERIES) || defined(MCXL142_cm0plus_SERIES))
+#elif (defined(MCXL255_cm0plus_SERIES) || defined(MCXL254_cm0plus_SERIES) || defined(MCXL253_cm0plus_SERIES) || \
+       defined(MCXL144_cm0plus_SERIES) || defined(MCXL143_cm0plus_SERIES) || defined(MCXL142_cm0plus_SERIES))
 /**
  * platform_vatopa
  *

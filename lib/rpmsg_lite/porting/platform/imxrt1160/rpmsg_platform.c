@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 NXP
+ * Copyright 2021-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -158,9 +158,9 @@ void platform_notify(uint32_t vector_id)
     env_lock_mutex(platform_lock);
 #if defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1)
 #if defined(FSL_FEATURE_MU_SIDE_A)
-(void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core1, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
 #elif defined(FSL_FEATURE_MU_SIDE_B)
-(void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
+    (void)MCMGR_TriggerEventForce(kMCMGR_Core0, kMCMGR_RemoteRPMsgEvent, (uint16_t)RL_GET_Q_ID(vector_id));
 #endif
 #else
 /* Write directly into the MU Control Register to trigger General Purpose Interrupt Request (GIR).
@@ -235,9 +235,13 @@ int32_t platform_interrupt_enable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MUA_IRQn);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_EnableIRQ(MUB_IRQn);
+#endif
 #endif
     }
     platform_global_isr_enable();
@@ -264,10 +268,14 @@ int32_t platform_interrupt_disable(uint32_t vector_id)
     if (disable_counter == 0)
     {
 #if defined(FSL_FEATURE_MU_SIDE_A)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MUA_IRQn);
         NVIC_SetPriority(MUA_IRQn, 2);
+#endif
 #elif defined(FSL_FEATURE_MU_SIDE_B)
+#if !(defined(RL_USE_MCMGR_IPC_ISR_HANDLER) && (RL_USE_MCMGR_IPC_ISR_HANDLER == 1))
         NVIC_DisableIRQ(MUB_IRQn);
+#endif
 #endif
     }
 
