@@ -61,7 +61,7 @@ static const uint8_t ShmemConfigIdentifier[RL_PLATFORM_SHMEM_CFG_IDENTIFIER_LENG
 /* Compute CRC to protect shared memory strcuture stored in RAM by application core and retrieve by NBU */
 static uint16_t platform_compute_crc_over_shmem_struct(rpmsg_platform_shmem_config_protected_t *protec_shmem_struct);
 
-static bool first_time                            = RL_TRUE;
+static bool first_time                            = (bool)RL_TRUE;
 static rpmsg_platform_shmem_config_t shmem_config = {0U};
 #endif /* defined(RL_ALLOW_CUSTOM_SHMEM_CONFIG) && (RL_ALLOW_CUSTOM_SHMEM_CONFIG == 1) */
 
@@ -416,13 +416,13 @@ int32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_
 
     do
     {
-        if (first_time == RL_FALSE)
+        if (first_time == (bool)RL_FALSE)
         {
             /* Variable shmem_config is already set if this is not the fisrt call */
             break;
         }
 
-        first_time = RL_FALSE;
+        first_time = (bool)RL_FALSE;
 
         /* Copy the full structure in local variable */
         (void)memcpy((void *)&protec_shmem_struct, (const void *)rpmsg_sh_mem_start, sizeof(rpmsg_platform_shmem_config_protected_t));
