@@ -103,3 +103,4 @@ test_05_thread_safety_rtos_static_alloc_secondary_core:
     #frdmk32l3a6@cm0plus: []
     #kw47loc@cm33_core1: []
     kw47evk@cm33_core1: []
+    frdmimxrt700@cm33_core1: []

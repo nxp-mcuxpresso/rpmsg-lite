@@ -110,3 +110,4 @@ test_04_ping_pong_secondary_core:
     - +iar@release
     - +mdk@debug
     - +mdk@release
+    frdmimxrt700@cm33_core1: []

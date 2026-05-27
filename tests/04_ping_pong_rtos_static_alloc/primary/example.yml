@@ -115,3 +115,16 @@ test_04_ping_pong_rtos_static_alloc_primary_core:
     #frdmk32l3a6@cm4: []
     #kw47evk@cm33_core0: []
     kw47loc@cm33_core0: []
+    frdmimxrt700@cm33_core0:
+    - -armgcc@debug
+    - +armgcc@flash_debug
+    - +armgcc@flash_release
+    - -armgcc@release
+    - -iar@debug
+    - +iar@flash_debug
+    - +iar@flash_release
+    - -iar@release
+    - -mdk@debug
+    - +mdk@flash_debug
+    - +mdk@flash_release
+    - -mdk@release

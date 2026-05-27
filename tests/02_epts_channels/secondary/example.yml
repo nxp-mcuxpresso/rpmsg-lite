@@ -111,3 +111,4 @@ test_02_epts_channels_secondary_core:
     - +iar@release
     - +mdk@debug
     - +mdk@release
+    frdmimxrt700@cm33_core1: []

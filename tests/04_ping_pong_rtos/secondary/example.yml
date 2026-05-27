@@ -103,3 +103,4 @@ test_04_ping_pong_rtos_secondary_core:
     frdmk32l3a6@cm0plus: []
     kw47loc@cm33_core1: []
     kw47evk@cm33_core1: []
+    frdmimxrt700@cm33_core1: []

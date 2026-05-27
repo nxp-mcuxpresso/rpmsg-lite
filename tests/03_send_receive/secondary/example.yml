@@ -109,3 +109,4 @@ test_03_send_receive_secondary_core:
     - +iar@release
     - +mdk@debug
     - +mdk@release
+    frdmimxrt700@cm33_core1: []

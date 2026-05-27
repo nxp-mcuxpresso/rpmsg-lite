@@ -113,3 +113,4 @@ test_01_rpmsg_init_secondary_core:
     - +iar@release
     - +mdk@debug
     - +mdk@release
+    frdmimxrt700@cm33_core1: []
