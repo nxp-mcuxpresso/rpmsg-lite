@@ -14,7 +14,7 @@
  * Linux requires the ALIGN to 0x1000(4KB) instead of 0x80
  */
 #ifndef VRING_ALIGN
-#define VRING_ALIGN (0x1000U)
+#define VRING_ALIGN (256U)
 #endif
 
 /* contains pool of descriptors and two circular buffers */
@@ -45,6 +45,16 @@
 
 #define RL_PLATFORM_HIGHEST_LINK_ID (32U)
 
+typedef struct rpmsg_platform_shmem_config
+{
+    uint32_t buffer_payload_size; /* custom buffer payload size setting that overwrites RL_BUFFER_PAYLOAD_SIZE global
+                                     config */
+    uint16_t buffer_count; /* custom buffer count setting that overwrites RL_BUFFER_COUNT global config, must be power
+                              of two (2, 4, ...) */
+    uint32_t vring_size;   /* custom vring size */
+    uint32_t vring_align;  /* custom vring alignment */
+} rpmsg_platform_shmem_config_t;
+
 /* platform interrupt related functions */
 int32_t platform_init_interrupt(uint32_t vector_id, void *isr_data);
 int32_t platform_deinit_interrupt(uint32_t vector_id);
@@ -66,5 +76,7 @@ void *platform_patova(uintptr_t addr);
 /* platform init/deinit */
 int32_t platform_init(void);
 int32_t platform_deinit(void);
+
+uint32_t platform_get_custom_shmem_config(uint32_t link_id, rpmsg_platform_shmem_config_t *config);
 
 #endif /* RPMSG_PLATFORM_H_ */
