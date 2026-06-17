@@ -254,6 +254,9 @@ void tc_1_receive(void)
     msg->hdr.reserved.idx = my_rpmsg_hdr_idx;
 #endif /* defined(GCOV_DO_COVERAGE) && defined(__GNUC__) */
 
+    /* wait a while before releasing the buffer to allow rpmsg_lite_are_all_buffers_consumed() API testing on the opposite side */
+    env_sleep_msec(20);
+
     /* Release the buffer now */
     result = rpmsg_lite_release_rx_buffer(my_rpmsg, rx_buffer);
     TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "rpmsg_lite_release_rx_buffer error");

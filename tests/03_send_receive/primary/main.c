@@ -270,6 +270,10 @@ void tc_2_receive(void)
     /* Before releasing the rx buffer try to call the rpmsg_lite_release_rx_buffer API with incorrect params */
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_release_rx_buffer(RL_NULL, rx_buffer), "'rpmsg_lite_release_rx_buffer' with bad rpmsg_lite_dev param failed");
     TEST_ASSERT_MESSAGE(RL_ERR_PARAM == rpmsg_lite_release_rx_buffer(my_rpmsg, RL_NULL), "'rpmsg_lite_release_rx_buffer' with bad rxbuf param failed");
+
+    /* wait a while before releasing the buffer to allow rpmsg_lite_are_all_buffers_consumed() API testing on the opposite side */
+    env_sleep_msec(20);
+
     /* Release the buffer now */
     result = rpmsg_lite_release_rx_buffer(my_rpmsg, rx_buffer);
     TEST_ASSERT_MESSAGE(RL_SUCCESS == result, "rpmsg_lite_release_rx_buffer error");
