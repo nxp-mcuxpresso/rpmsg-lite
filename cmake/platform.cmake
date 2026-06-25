@@ -568,3 +568,17 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxl20)
         SOURCES ../lib/rpmsg_lite/porting/platform/mcxl20/rpmsg_platform.c
     )
 endif()
+
+if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxe32b)
+    mcux_add_include(
+        INCLUDES ../lib/include/platform/mcxe32b/
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/include/platform/mcxe32b/rpmsg_platform.h
+    )
+
+    mcux_add_source(
+        SOURCES ../lib/rpmsg_lite/porting/platform/mcxe32b/rpmsg_platform.c
+    )
+endif()

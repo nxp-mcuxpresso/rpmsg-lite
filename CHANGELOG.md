@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added MCXE32B dual Cortex-M7 parts support.
 - Added `rpmsg_lite_are_all_buffers_consumed()` API to report when all locally allocated TX buffers were consumed by the peer and returned to the local free buffer pool, with test coverage in `tests/03_send_receive` for both sides.
 - Added i.MX937 parts support
 
