@@ -106,17 +106,6 @@ __attribute__ ((weak)) void McmgrAppEventHandler(mcmgr_core_t coreNum, uint16_t 
 }
 #endif
 
-/* This function is used for the Corn test automation framework
-   to breakpoint/stop the execution and to capture results
-   from the memory. It must be ensured that it will never be inlined
-   and optimized to allow proper address recognition and breakpoint
-   placement during the Corn execution. */
-__attribute__((noinline)) void CornBreakpointFunc(void)
-{
-    volatile int i=0;
-    i++;
-}
-
 #if defined(FSL_RTOS_THREADX)
 static VOID run_test_suite(ULONG arg)
 #else
@@ -216,7 +205,6 @@ void run_test_suite(void *unused)
 #endif /*__COVERAGESCANNER__*/
 #endif
 
-    CornBreakpointFunc();
     while (1)
         ;
 }
