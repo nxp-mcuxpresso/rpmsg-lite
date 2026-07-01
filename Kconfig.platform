@@ -270,14 +270,6 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32l3a6
     help
         "RPMSG-Lite Porting Layer for FRDM-K32L3A6"
 
-config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32w1
-    bool
-    default y
-    select MCUX_COMPONENT_driver.imu
-    depends on MCUX_HW_DEVICE_K32W1480
-    help
-        "RPMSG-Lite Porting Layer for K32W1"
-
 config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw45b41
     bool
     default y

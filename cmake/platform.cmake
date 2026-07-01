@@ -410,21 +410,6 @@ if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32l3a6)
     )
 endif()
 
-if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.k32w1)
-    mcux_add_include(
-        INCLUDES ../lib/include/platform/k32w1/
-    )
-
-    mcux_add_source(
-        SOURCES ../lib/include/platform/k32w1/rpmsg_platform.h
-    )
-
-    mcux_add_source(
-        SOURCES ../lib/rpmsg_lite/porting/platform/k32w1/rpmsg_platform.c
-            ../lib/rpmsg_lite/porting/platform/k32w1/rpmsg_platform_ext.c
-    )
-endif()
-
 if (CONFIG_MCUX_COMPONENT_middleware.multicore.rpmsg-lite.kw45b41)
     mcux_add_include(
         INCLUDES ../lib/include/platform/kw45b41/
