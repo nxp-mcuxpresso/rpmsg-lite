@@ -86,6 +86,7 @@ int32_t virtqueue_create_static(uint16_t id,
         env_memset(vq, 0x00, vq_size);
 
         env_strncpy(vq->vq_name, name, VIRTQUEUE_MAX_NAME_SZ);
+        vq->vq_name[VIRTQUEUE_MAX_NAME_SZ - 1] = '\0';
         vq->vq_queue_index = id;
         vq->vq_alignment   = (int32_t)(ring->align);
         vq->vq_nentries    = ring->num_descs;
@@ -156,6 +157,7 @@ int32_t virtqueue_create(uint16_t id,
         env_memset(vq, 0x00, vq_size);
 
         env_strncpy(vq->vq_name, name, VIRTQUEUE_MAX_NAME_SZ);
+        vq->vq_name[VIRTQUEUE_MAX_NAME_SZ - 1] = '\0';
         vq->vq_queue_index = id;
         vq->vq_alignment   = (int32_t)(ring->align);
         vq->vq_nentries    = ring->num_descs;
