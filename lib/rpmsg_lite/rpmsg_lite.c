@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -682,13 +682,17 @@ uint32_t rpmsg_lite_are_all_buffers_consumed(struct rpmsg_lite_instance *rpmsg_l
     {
         VQUEUE_INVALIDATE(&rpmsg_lite_dev->tvq->vq_ring.used->idx, sizeof(rpmsg_lite_dev->tvq->vq_ring.used->idx));
         ring_idx = rpmsg_lite_dev->tvq->vq_ring.used->idx;
-        free_tx_buffers = (uint16_t)(ring_idx - rpmsg_lite_dev->tvq->vq_used_cons_idx);
+        /* INT31-C: perform subtraction in unsigned 32-bit to avoid signed intermediate
+         * before narrowing back to uint16_t (intentional modular ring arithmetic). */
+        free_tx_buffers = (uint16_t)((uint32_t)ring_idx - (uint32_t)rpmsg_lite_dev->tvq->vq_used_cons_idx);
     }
     else if (rpmsg_lite_dev->vq_ops == &remote_vq_ops)
     {
         VQUEUE_INVALIDATE(&rpmsg_lite_dev->tvq->vq_ring.avail->idx, sizeof(rpmsg_lite_dev->tvq->vq_ring.avail->idx));
         ring_idx = rpmsg_lite_dev->tvq->vq_ring.avail->idx;
-        free_tx_buffers = (uint16_t)(ring_idx - rpmsg_lite_dev->tvq->vq_available_idx);
+        /* INT31-C: perform subtraction in unsigned 32-bit to avoid signed intermediate
+         * before narrowing back to uint16_t (intentional modular ring arithmetic). */
+        free_tx_buffers = (uint16_t)((uint32_t)ring_idx - (uint32_t)rpmsg_lite_dev->tvq->vq_available_idx);
     }
     else
     {
