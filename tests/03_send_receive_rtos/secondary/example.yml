@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
 #
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -105,3 +105,4 @@ test_03_send_receive_rtos_secondary_core:
     kw47loc@cm33_core1: []
     kw47evk@cm33_core1: []
     frdmimxrt700@cm33_core1: []
+    frdmmcxe32b@core1: []

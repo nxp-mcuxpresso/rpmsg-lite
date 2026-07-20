@@ -123,3 +123,4 @@ test_06_rpmsg_adapter_secondary_core:
     - -mdk@flash_debug
     - -mdk@flash_release
     - -mdk@release
+    frdmmcxe32b@core1: []

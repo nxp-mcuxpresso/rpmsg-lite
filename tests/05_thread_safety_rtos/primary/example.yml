@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../../../../../../scripts/data_schema/example_description_schema.json
 #
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -128,3 +128,4 @@ test_05_thread_safety_rtos_primary_core:
     - +mdk@flash_debug
     - +mdk@flash_release
     - -mdk@release
+    frdmmcxe32b@core0: []
