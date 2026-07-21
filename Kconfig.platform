@@ -347,7 +347,7 @@ config MCUX_COMPONENT_middleware.multicore.rpmsg-lite.mcxnx4x
     default y
     select MCUX_COMPONENT_driver.mailbox
     depends on MCUX_HW_DEVICE_MCXN546 || MCUX_HW_DEVICE_MCXN547 || \
-               MCUX_HW_DEVICE_MCXN947 || MCUX_HW_DEVICE_MCXN946
+               MCUX_HW_DEVICE_MCXN947 || MCUX_HW_DEVICE_MCXN947T || MCUX_HW_DEVICE_MCXN946
     help
         "RPMSG-Lite Porting Layer for MCX N94x and N54x"
 
