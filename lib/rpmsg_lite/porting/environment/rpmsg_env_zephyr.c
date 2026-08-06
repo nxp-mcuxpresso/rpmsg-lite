@@ -46,7 +46,7 @@
 #include "rpmsg_env.h"
 #include <zephyr/kernel.h>
 #include <zephyr/cache.h>
-#include <zephyr/sys_clock.h>
+#include <zephyr/sys/clock.h>
 #include "rpmsg_platform.h"
 #include "virtqueue.h"
 
