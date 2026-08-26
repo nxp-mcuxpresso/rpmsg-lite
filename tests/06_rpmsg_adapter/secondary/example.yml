@@ -99,6 +99,7 @@ test_06_rpmsg_adapter_secondary_core:
     - -mdk@debug
     - -mdk@release
     frdmmcxn947@cm33_core1:
+    frdmmcxn947t@cm33_core1:
     - -mdk@debug
     - -mdk@release
     frdmmcxw72@cm33_core1:

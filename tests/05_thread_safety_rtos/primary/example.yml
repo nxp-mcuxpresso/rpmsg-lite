@@ -111,6 +111,7 @@ test_05_thread_safety_rtos_primary_core:
     mcxn9xxevk@cm33_core0: []
     mcxw72evk@cm33_core0: []
     frdmmcxn947@cm33_core0: []
+    frdmmcxn947t@cm33_core0: []
     frdmmcxw72@cm33_core0: []
     frdmk32l3a6@cm4: []
     kw47evk@cm33_core0: []

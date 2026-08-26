@@ -99,6 +99,7 @@ test_04_ping_pong_secondary_core:
     mcxn9xxevk@cm33_core1: []
     mcxw72evk@cm33_core1: []
     frdmmcxn947@cm33_core1: []
+    frdmmcxn947t@cm33_core1: []
     frdmmcxw72@cm33_core1: []
     frdmk32l3a6@cm0plus: []
     kw47loc@cm33_core1: []
