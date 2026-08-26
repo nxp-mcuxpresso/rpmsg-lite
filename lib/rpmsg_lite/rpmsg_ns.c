@@ -2,8 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
+ * Copyright 2016-2019, 2026 NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +33,7 @@
 #include "rpmsg_ns.h"
 #include <stdint.h>
 
-#define RL_NS_NAME_SIZE (32)
+#define RL_NS_NAME_SIZE (32U)
 
 /*!
  * struct rpmsg_ns_msg - dynamic name service announcement message
@@ -180,7 +179,8 @@ int32_t rpmsg_ns_announce(struct rpmsg_lite_instance *rpmsg_lite_dev,
         return RL_ERR_PARAM;
     }
 
-    env_strncpy(ns_msg.name, ept_name, RL_NS_NAME_SIZE);
+    env_strncpy(ns_msg.name, ept_name, RL_NS_NAME_SIZE - 1U);
+    ns_msg.name[RL_NS_NAME_SIZE - 1U] = '\0';
     ns_msg.flags = flags;
     ns_msg.addr  = new_ept->addr;
 
