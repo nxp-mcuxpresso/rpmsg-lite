@@ -6,13 +6,14 @@
 cmake_minimum_required(VERSION 3.22.0)
 
 include(${SdkRootDirPath}/cmake/extension/mcux.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../mc_board_root.cmake)
 
-project(test_04_ping_pong_rtos_static_alloc_secondary_core LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH ${board_root}/${board}/multicore_examples/rpmsg_lite_pingpong_rtos 
+project(test_04_ping_pong_rtos_static_alloc_secondary_core LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH ${mc_board_root}/${board}/multicore_examples/rpmsg_lite_pingpong_rtos 
         CUSTOM_PRJ_CONF_PATH middleware/multicore/rpmsg-lite/tests/_boards/${board}/${core_id} middleware/multicore/rpmsg-lite/tests/_boards/${board}/04_ping_pong_rtos_static_alloc)
 
 include(${SdkRootDirPath}/CMakeLists.txt)
 
-# This will point to: ${SdkRootDirPath}/${board_root}/${board}/multicore_examples/reconfig.cmake
+# This will point to: ${SdkRootDirPath}/${mc_board_root}/${board}/multicore_examples/reconfig.cmake
 # where common board multicore properties are set.
 include(${CMAKE_CURRENT_LIST_DIR}/../../config.cmake)
 

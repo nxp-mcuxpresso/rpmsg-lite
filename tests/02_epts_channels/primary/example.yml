@@ -118,8 +118,8 @@ test_02_epts_channels_primary_core:
     frdmk32l3a6@cm4: []
     kw47evk@cm33_core0: []
     kw47loc@cm33_core0: []
-    kw43evk@cm33_core0: []
-    frdmkw43@cm33_core0: [] 
+    kw43evk: []
+    frdmkw43: []
     frdmmcxl255@cm33:
     - -armgcc@debug
     - +armgcc@release

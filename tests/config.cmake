@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-include(${SdkRootDirPath}/${board_root}/${board}/multicore_examples/reconfig.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/mc_board_root.cmake)
+include(${SdkRootDirPath}/${mc_board_root}/${board}/multicore_examples/reconfig.cmake OPTIONAL)
 include(${CMAKE_CURRENT_LIST_DIR}/_boards/${board}/${core_id}/reconfig.cmake OPTIONAL)
 
 mcux_add_source(
