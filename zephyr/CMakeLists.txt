@@ -1,4 +1,8 @@
-cmake_minimum_required (VERSION 3.5)
+# Copyright 2023-2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+cmake_minimum_required(VERSION 3.20.0)
 
 if(CONFIG_RPMSGLITE)
   set(ZEPHYR_BUILD 1)
