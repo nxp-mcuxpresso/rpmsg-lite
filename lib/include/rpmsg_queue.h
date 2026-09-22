@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2026 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -102,7 +102,7 @@ rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev
  * @return Status of function execution
  *
  */
-int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle q);
+int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle queue_handle);
 
 /*!
  * @brief
@@ -129,7 +129,7 @@ int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_qu
  * @see rpmsg_queue_recv_nocopy
  */
 int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                         rpmsg_queue_handle q,
+                         rpmsg_queue_handle queue_handle,
                          uint32_t *src,
                          char *data,
                          uint32_t maxlen,
@@ -162,7 +162,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
  * @see rpmsg_queue_recv
  */
 int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                                rpmsg_queue_handle q,
+                                rpmsg_queue_handle queue_handle,
                                 uint32_t *src,
                                 char **data,
                                 uint32_t *len,
@@ -191,7 +191,7 @@ int32_t rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void
  *
  * @return Number of pending messages in the queue.
  */
-int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle q);
+int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle queue_handle);
 
 //! @}
 

@@ -64,8 +64,8 @@ static EventGroupHandle_t event_group = ((void *)0);
 EventGroupHandle_t event_group = ((void *)0);
 #endif
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-LOCK_STATIC_CONTEXT env_sem_static_context;
-StaticEventGroup_t event_group_static_context;
+static LOCK_STATIC_CONTEXT env_sem_static_context;
+static StaticEventGroup_t event_group_static_context;
 #endif
 
 /* RL_ENV_MAX_MUTEX_COUNT is an arbitrary count greater than 'count'
@@ -164,7 +164,7 @@ void env_tx_callback(uint32_t link_id)
          * $Branch Coverage Justification$
          * portEND_SWITCHING_ISR false condition not met
          */
-        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken); /* GCOVR_EXCL_BR_LINE */
+        portEND_SWITCHING_ISR((xHigherPriorityTaskWoken != pdFALSE)); /* GCOVR_EXCL_BR_LINE */
     }
     else
     {
@@ -753,7 +753,7 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
     {
         if (xQueueSendFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+            portEND_SWITCHING_ISR((xHigherPriorityTaskWoken != pdFALSE));
             return 1;
         }
     }
@@ -787,7 +787,7 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
     {
         if (xQueueReceiveFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+            portEND_SWITCHING_ISR((xHigherPriorityTaskWoken != pdFALSE));
             return 1;
         }
     }

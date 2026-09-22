@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ void env_tx_callback(uint32_t link_id)
     if (platform_in_isr() != 0)
     {
         (void)xEventGroupSetBitsFromISR(event_group, (EventBits_t)(1UL << link_id), &xHigherPriorityTaskWoken);
-        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken != pdFALSE);
     }
     else
     {
@@ -122,7 +122,7 @@ int32_t env_put_queue(void *queue, void *msg, uintptr_t timeout_ms)
     {
         if (xQueueSendFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken != pdFALSE);
             return 1;
         }
     }
@@ -156,7 +156,7 @@ int32_t env_get_queue(void *queue, void *msg, uintptr_t timeout_ms)
     {
         if (xQueueReceiveFromISR(queue, msg, &xHigherPriorityTaskWoken) == pdPASS)
         {
-            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+            portEND_SWITCHING_ISR(xHigherPriorityTaskWoken != pdFALSE);
             return 1;
         }
     }

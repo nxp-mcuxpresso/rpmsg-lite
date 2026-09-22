@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
@@ -62,7 +62,7 @@ rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev
 #endif
 {
     int32_t status;
-    void *q = RL_NULL;
+    void *queue = RL_NULL;
 
     if (rpmsg_lite_dev == RL_NULL)
     {
@@ -75,37 +75,37 @@ rpmsg_queue_handle rpmsg_queue_create(struct rpmsg_lite_instance *rpmsg_lite_dev
     {
         return RL_NULL;
     }
-    status = env_create_queue(&q, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
+    status = env_create_queue(&queue, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
                               (int32_t)sizeof(rpmsg_queue_rx_cb_data_t), queue_storage, queue_ctxt);
 #else
-    status = env_create_queue(&q, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
+    status = env_create_queue(&queue, 2 * (int32_t)(rpmsg_lite_dev->rvq->vq_nentries),
                               (int32_t)sizeof(rpmsg_queue_rx_cb_data_t));
 #endif
-    if ((status != 0) || (q == RL_NULL))
+    if ((status != 0) || (queue == RL_NULL))
     {
         return RL_NULL;
     }
 
-    return ((rpmsg_queue_handle)q);
+    return ((rpmsg_queue_handle)queue);
 }
 
-int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle q)
+int32_t rpmsg_queue_destroy(struct rpmsg_lite_instance *rpmsg_lite_dev, rpmsg_queue_handle queue_handle)
 {
     if (rpmsg_lite_dev == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
 
-    if (q == RL_NULL)
+    if (queue_handle == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
-    env_delete_queue((void *)q);
+    env_delete_queue((void *)queue_handle);
     return RL_SUCCESS;
 }
 
 int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                         rpmsg_queue_handle q,
+                         rpmsg_queue_handle queue_handle,
                          uint32_t *src,
                          char *data,
                          uint32_t maxlen,
@@ -119,7 +119,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
     {
         return RL_ERR_PARAM;
     }
-    if (q == RL_NULL)
+    if (queue_handle == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
@@ -129,7 +129,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
     }
 
     /* Get an element out of the message queue for the selected endpoint */
-    if (0 != env_get_queue((void *)q, &msg, timeout))
+    if (0 != env_get_queue((void *)queue_handle, &msg, timeout))
     {
         if (src != RL_NULL)
         {
@@ -159,7 +159,7 @@ int32_t rpmsg_queue_recv(struct rpmsg_lite_instance *rpmsg_lite_dev,
 }
 
 int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
-                                rpmsg_queue_handle q,
+                                rpmsg_queue_handle queue_handle,
                                 uint32_t *src,
                                 char **data,
                                 uint32_t *len,
@@ -175,13 +175,13 @@ int32_t rpmsg_queue_recv_nocopy(struct rpmsg_lite_instance *rpmsg_lite_dev,
     {
         return RL_ERR_PARAM;
     }
-    if (q == RL_NULL)
+    if (queue_handle == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
 
     /* Get an element out of the message queue for the selected endpoint */
-    if (0 != env_get_queue((void *)q, &msg, timeout))
+    if (0 != env_get_queue((void *)queue_handle, &msg, timeout))
     {
         if (src != RL_NULL)
         {
@@ -220,13 +220,13 @@ int32_t rpmsg_queue_nocopy_free(struct rpmsg_lite_instance *rpmsg_lite_dev, void
     return ((RL_SUCCESS == rpmsg_lite_release_rx_buffer(rpmsg_lite_dev, data)) ? RL_SUCCESS : RL_ERR_PARAM); /* GCOVR_EXCL_BR_LINE */
 }
 
-int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle q)
+int32_t rpmsg_queue_get_current_size(rpmsg_queue_handle queue_handle)
 {
-    if (q == RL_NULL)
+    if (queue_handle == RL_NULL)
     {
         return RL_ERR_PARAM;
     }
 
     /* Return actual queue size. */
-    return env_get_current_queue_size((void *)q);
+    return env_get_current_queue_size((void *)queue_handle);
 }

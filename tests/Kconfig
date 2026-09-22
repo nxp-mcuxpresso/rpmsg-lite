@@ -27,7 +27,7 @@ config SKIP_MCMGR_INIT
 
 config RL_ASSERT(cond)
     string "Override RL_ASSERT for testing"
-    default "do { if (!(cond)) { } } while(0)"
+    default "do { if (!(cond)) { } } while(1 == 0)"
     help
         No prefix in generated macro
 
