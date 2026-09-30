@@ -2,7 +2,7 @@
  * Copyright (c) 2014, Mentor Graphics Corporation
  * Copyright (c) 2015 Xilinx, Inc.
  * Copyright (c) 2016 Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,7 +207,7 @@ __attribute__((noreturn)) static inline void RL_HANG(void)
             RL_HANG();    \
         }                 \
     } while (0 == 1);
-#define RL_ASSERT(x) RL_ASSERT_BOOL((int32_t)(x) != 0)
+#define RL_ASSERT(x) RL_ASSERT_BOOL(((x) != 0) ? true : false)
 
 #endif
 

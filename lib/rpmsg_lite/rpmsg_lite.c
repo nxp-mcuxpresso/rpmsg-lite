@@ -673,7 +673,7 @@ uint32_t rpmsg_lite_are_all_buffers_consumed(struct rpmsg_lite_instance *rpmsg_l
 
     if ((rpmsg_lite_dev == RL_NULL) || (rpmsg_lite_dev->tvq == RL_NULL) || (rpmsg_lite_dev->lock == RL_NULL))
     {
-        return RL_FALSE;
+        return (uint32_t)RL_FALSE;
     }
 
     env_lock_mutex(rpmsg_lite_dev->lock);
@@ -697,12 +697,12 @@ uint32_t rpmsg_lite_are_all_buffers_consumed(struct rpmsg_lite_instance *rpmsg_l
     else
     {
         env_unlock_mutex(rpmsg_lite_dev->lock);
-        return RL_FALSE;
+        return (uint32_t)RL_FALSE;
     }
 
     env_unlock_mutex(rpmsg_lite_dev->lock);
 
-    return (free_tx_buffers == rpmsg_lite_dev->tvq->vq_nentries) ? RL_TRUE : RL_FALSE;
+    return (uint32_t)((free_tx_buffers == rpmsg_lite_dev->tvq->vq_nentries) ? RL_TRUE : RL_FALSE);
 }
 
 /*!
