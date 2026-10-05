@@ -26,7 +26,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign">
-   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.4.1</span>
+   <div id="projectname">RPMsg-Lite User&#39;s Guide<span id="projectnumber">&#160;Rev. v5.5.0</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -261,6 +261,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gad692e103ca4220e224f65f2f18c77569"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#gad692e103ca4220e224f65f2f18c77569">rpmsg_lite_wait_for_link_up</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, uint32_t timeout)</td></tr>
 <tr class="memdesc:gad692e103ca4220e224f65f2f18c77569"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to wait until the link is up. Returns RL_TRUE once the link_state is set or RL_FALSE in case of timeout.  <br /></td></tr>
 <tr class="separator:gad692e103ca4220e224f65f2f18c77569"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4f942b6989ea2ac3b655344c4ff44053"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga4f942b6989ea2ac3b655344c4ff44053">rpmsg_lite_are_all_buffers_consumed</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev)</td></tr>
+<tr class="memdesc:ga4f942b6989ea2ac3b655344c4ff44053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to check whether all outstanding TX buffers were consumed by the peer and returned to the local free buffer pool.  <br /></td></tr>
+<tr class="separator:ga4f942b6989ea2ac3b655344c4ff44053"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2">rpmsg_lite_release_rx_buffer</a> (struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *rpmsg_lite_dev, void *rxbuf)</td></tr>
 <tr class="memdesc:ga847cb39c655a6068107ac9840cfd7bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases the rx buffer for future reuse in vring. This API can be called at process context when the message in rx buffer is processed.  <br /></td></tr>
 <tr class="separator:ga847cb39c655a6068107ac9840cfd7bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -919,6 +922,34 @@ link_id</td>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>RL_TRUE when link up, RL_FALSE when timeout. </dd></dl>
+
+</div>
+</div>
+<a id="ga4f942b6989ea2ac3b655344c4ff44053" name="ga4f942b6989ea2ac3b655344c4ff44053"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4f942b6989ea2ac3b655344c4ff44053">&#9670;&#160;</a></span>rpmsg_lite_are_all_buffers_consumed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t rpmsg_lite_are_all_buffers_consumed </td>
+          <td>(</td>
+          <td class="paramtype">struct <a class="el" href="group__rpmsg__lite.html#structrpmsg__lite__instance">rpmsg_lite_instance</a> *&#160;</td>
+          <td class="paramname"><em>rpmsg_lite_dev</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function to check whether all outstanding TX buffers were consumed by the peer and returned to the local free buffer pool. </p>
+<p>This API can be called by both the master and remote side.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rpmsg_lite_dev</td><td>RPMsg-Lite instance pointer</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>RL_TRUE when all TX buffers are back in the local free pool, RL_FALSE otherwise. </dd></dl>
 
 </div>
 </div>

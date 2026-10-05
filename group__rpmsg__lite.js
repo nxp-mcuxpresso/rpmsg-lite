@@ -68,6 +68,7 @@ var group__rpmsg__lite =
     [ "rpmsg_lite_send", "group__rpmsg__lite.html#ga64dd2dd9b0681e1551c83f325daf19fb", null ],
     [ "rpmsg_lite_is_link_up", "group__rpmsg__lite.html#gae67bcdddcfa5826d3dc328fd1237c91d", null ],
     [ "rpmsg_lite_wait_for_link_up", "group__rpmsg__lite.html#gad692e103ca4220e224f65f2f18c77569", null ],
+    [ "rpmsg_lite_are_all_buffers_consumed", "group__rpmsg__lite.html#ga4f942b6989ea2ac3b655344c4ff44053", null ],
     [ "rpmsg_lite_release_rx_buffer", "group__rpmsg__lite.html#ga847cb39c655a6068107ac9840cfd7bf2", null ],
     [ "rpmsg_lite_alloc_tx_buffer", "group__rpmsg__lite.html#ga5ef10752df7885f0ff1fcd34f322173a", null ],
     [ "rpmsg_lite_send_nocopy", "group__rpmsg__lite.html#ga90bcc1cb74c40a6966492288cd8a3d31", null ],
