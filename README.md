@@ -4,14 +4,14 @@
 This repository is for MCUXpresso SDK RPMSG-Lite middleware delivery and it contains RPMSG-Lite component officially provided in NXP MCUXpresso SDK. This repository is part of the MCUXpresso SDK overall delivery which is composed of several sub-repositories/projects. Navigate to the top/parent repository [mcuxsdk](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests/) for the complete delivery of MCUXpresso SDK to be able to build and run RPMSG-Lite examples that are based on mcux-sdk-middleware-rpmsg-lite component.
 
 ## Documentation
-Overall details can be reviewed here: [MCUXpresso SDK Online Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/introduction/README.html)
+Overall details can be reviewed here: [MCUXpresso SDK Online Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/introduction/README.html)
 
-Visit [RPMSG-Lite - Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/middleware/multicore/rpmsg-lite/README.html) to review details on the contents in this sub-repo.
+Visit [RPMSG-Lite - Documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/middleware/multicore/rpmsg-lite/README.html) to review details on the contents in this sub-repo.
 
 For Further API documentation, please look at [doxygen documentation](https://nxp-mcuxpresso.github.io/rpmsg-lite/)
 
 ## Setup
-Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest [Getting Started with SDK - Detailed Installation Instructions](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/installation.html#installation)
+Instructions on how to install the MCUXpresso SDK provided from GitHub via west manifest [Getting Started with SDK - Detailed Installation Instructions](https://mcuxpresso.nxp.com/mcuxsdk/latest/gsd/installation.html#installation)
 
 ## Contribution
 We welcome and encourage the community to submit patches directly to the rpmsg-lite project placed on github. Contributing can be managed via pull-requests. Before a pull-request is created the code should be tested and properly formatted.
@@ -153,4 +153,4 @@ This script executes the application named *clang-format.exe*. You need to have 
 [1] M. Novak, M. Cingel, Lockless Shared Memory Based Multicore Communication Protocol
 ---
 Copyright © 2016 Freescale Semiconductor, Inc.
-Copyright © 2016-2025 NXP
+Copyright © 2016-2026 NXP
