@@ -19,6 +19,10 @@
 #include "dsp.h"
 #endif
 
+#if defined(CONFIG_SOC_AN524)
+#include <soc.h>
+#endif
+
 #define REMOTE_EPT_ADDR               (30U)
 #define LOCAL_EPT_ADDR                (40U)
 #define APP_RPMSG_READY_EVENT_DATA    (1U)
@@ -76,6 +80,29 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
     gp_rpmsg_ept = rpmsg_lite_create_ept(gp_rpmsg_dev_inst, LOCAL_EPT_ADDR, rpmsg_ept_read_cb, (void *)&g_has_received,
                                          &g_ept_context);
 
+#if defined(CONFIG_SOC_AN524)
+    /* The remote image boots from QSPI XIP which is much slower than
+     * the primary core startup. Send the first message with retries
+     * until the remote replies (its reply means it is fully up).
+     * rpmsg_lite_is_link_up() cannot be used for this purpose
+     * because master_init() sets link_state=1 immediately. */
+    g_msg.DATA = 0U;
+    uint32_t retry_cnt = 0U;
+    do
+    {
+        if (retry_cnt == 0U)
+        {
+            (void)k_event_wait_all(&wait_event, 5, false, K_SECONDS(2));
+        }
+        (void)rpmsg_lite_send(gp_rpmsg_dev_inst, gp_rpmsg_ept, REMOTE_EPT_ADDR, (char *)&g_msg, sizeof(THE_MESSAGE),
+                              RL_DONT_BLOCK);
+        for (uint32_t i = 0U; (g_has_received == 0) && (i < 5U); i++)
+        {
+            k_sleep(K_MSEC(200));
+        }
+        retry_cnt++;
+    } while ((g_has_received == 0) && (retry_cnt < 50U));
+#else
     /* Temporary wait a bit here until remote core will process initialization and is ready to receive data */
     (void)k_event_wait_all(&wait_event, 5, false, K_MSEC(50));
 
@@ -83,6 +110,7 @@ static void application_thread(void *arg1, void *arg2, void *arg3)
     g_msg.DATA = 0U;
     (void)rpmsg_lite_send(gp_rpmsg_dev_inst, gp_rpmsg_ept, REMOTE_EPT_ADDR, (char *)&g_msg, sizeof(THE_MESSAGE),
                           RL_DONT_BLOCK);
+#endif
 
     while (g_msg.DATA <= 100U)
     {
@@ -113,6 +141,11 @@ int main(void)
     printk("Starting application thread on Main Core!\n");
     k_thread_create(&thread_data, thread_stack, APP_THREAD_STACK_SIZE, application_thread, NULL, NULL, NULL,
                     K_PRIO_COOP(7), 0, K_NO_WAIT);
+
+#if defined(CONFIG_SOC_AN524)
+    /* Release the secondary core held in reset on the SSE-200 */
+    wakeup_cpu1();
+#endif
 
     return 0;
 }

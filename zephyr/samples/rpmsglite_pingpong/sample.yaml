@@ -4,6 +4,7 @@ sample:
 tests:
   sample.ipc.rpmsglite_pingpong:
     platform_allow:
+      - mps3/an524/cpu0
       - mimxrt1170_evk@B/mimxrt1176/cm7
       - mimxrt1170_evk/mimxrt1176/cm7
       - mimxrt1160_evk/mimxrt1166/cm7
